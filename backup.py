@@ -1,7 +1,6 @@
 import os
 
 
-
 #Mirco: Methode um Metadaten der Datei zu erhalten
 def get_metadata(filepath:str):
     

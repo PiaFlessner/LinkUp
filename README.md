@@ -27,3 +27,9 @@ Alle Befehle werden in der Konsole im Projektverzeichnis eingegeben.
 2. source env/bin/activate
 3. pip install -r requirements.txt
 4. Zum beenden der virtualenv: deactivate
+
+### Schritt 4 - Dependencies installieren
+1. source env/bin/activate
+2. pip install [options] [package name]
+3. pip freeze > requirements.txt
+4. deactivate

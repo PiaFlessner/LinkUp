@@ -8,4 +8,5 @@ def get_metadata(filepath:str):
 
 if __name__ == "__main__":
     print("Hello World")
+    print ("bye")
     

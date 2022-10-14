@@ -230,20 +230,33 @@ class Datenbank:
                 conn.commit()
                 conn.close()
 
+     def addToDataBase(self, jewel, file):
+        jewel_id = self.addJewel(jewel)
+        file1_id = self.addFile(file)
+        self.addJewelFileAssignment(jewel_id,file1_id)
+        self.addBackUp(file)
+
      def addJewel(self,jewel):
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
-            sqlite_insert_with_param = """INSERT INTO 'Jewel'
+
+            command= "SELECT ID FROM Jewel WHERE JewelSource = ?"
+            data_tuple = (jewel.jewelSource,)
+            cur.execute(command, data_tuple)
+            id = cur.fetchone()
+
+            if id is not None:
+                return id[0]
+            else:
+                command = """INSERT INTO 'Jewel'
                               ('Comment', 'Monitoring_Startdate', 'JewelSource') 
                               VALUES (?, ?, ?);"""
-            data_tuple = (jewel.comment, jewel.monitoring_Startdate,jewel.jewelSource )
-            cur.execute(sqlite_insert_with_param, data_tuple)
-
-           
-            conn.commit()
-            conn.close()
-            return cur.lastrowid
+                data_tuple = (jewel.comment, jewel.monitoring_Startdate,jewel.jewelSource )
+                cur.execute(command, data_tuple)  
+                conn.commit()
+                return cur.lastrowid
+        conn.close()
 
      def addFile(self, file):
         conn = self.create_connection('datenbank.db')
@@ -278,32 +291,34 @@ class Datenbank:
      def addBackUp(self, file):
         conn = self.create_connection('datenbank.db')
         if conn != None:
-            cur = conn.cursor()
-
-   
+            cur = conn.cursor()    
+            #gibt es schon backups
             command = """SELECT * FROM BackUp WHERE
                                   ID_File = ?
                                   ORDER BY Number DESC;"""
-            data_tuple = (file.backups[0].iD_File)
-
+            data_tuple = (file.backups[0].iD_File, )
             cur.execute(command, data_tuple)
             last_backup = cur.fetchone();
             conn.commit()
 
-            #hole dir die letzte Nummer
+            ###nummer des letzten backups holen
+            #wenn das letzte backUp nicht leer ist, dann gucken ob es schon drin steht.
             if last_backup is not None:
                 last_backup_number =  last_backup[1]
                 backup = BackUp(last_backup[0], last_backup[1], last_backup[2], last_backup[3],last_backup[4],last_backup[5],last_backup[6],last_backup[7],last_backup[8],last_backup[9],last_backup[10])
+                
+                ##wenn das "neue" backUp schon in der Datenbank steht, dann nichts machen
                 if backup == (file.backups[0]):
                     pass
                 else:
+                    #Wenn nicht, dann bitte einfügen aber mit erhöhter Versionsnummer
                     command = """INSERT INTO Backup
                               (Number, Hash, Name, FileSize, CreationDate, Checksum, Birth, Change, Modify, ID_File) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
                     data_tuple = (last_backup_number+1, file.backups[0].hash, file.backups[0].name , file.backups[0].fileSize, file.backups[0].creationDate, file.backups[0].checksum,  file.backups[0].birth, file.backups[0].change, file.backups[0].modify, file.backups[0].iD_File )
                     cur.execute(command, data_tuple)
                     conn.commit()
-
+            #Ansonsten wurde die Datei das erste mal gebackuped, und muss auf alle Fälle eingefügt werden.
             else:
                 command = """INSERT INTO Backup
                               (Number, Hash, Name, FileSize, CreationDate, Checksum, Birth, Change, Modify, ID_File) 
@@ -322,9 +337,13 @@ class Datenbank:
                               ('ID_Jewel', 'ID_File') 
                               VALUES (?, ?);"""
             data_tuple = (id_jewel, id_file)
-            cur.execute(sqlite_insert_with_param, data_tuple)
-
-            conn.commit()
+            try:
+                cur.execute(sqlite_insert_with_param, data_tuple)
+                conn.commit()
+            except sqlite3.IntegrityError:
+                #sowohl jewel, als auch File existieren bereits in der Kombination in der Datenbank.
+                # -> User hat Jewel bereits angelegt, und auch die Datei hat zu dem Zeitpunkt schon existiert.
+                return False
             conn.close()
 
 

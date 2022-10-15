@@ -3,8 +3,6 @@ import os
 import hashlib
 import file as fi
 
-
-
 #Mirco: Methode um Metadaten der Datei zu erhalten
 def get_metadata(filepath:str):
     stats = os.stat(filepath)

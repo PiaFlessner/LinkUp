@@ -1,9 +1,3 @@
-from ctypes import sizeof
-from unicodedata import name
-
-from importlib_metadata import FileHash
-
-
 class File:
     def __init__(self, name, f_hash, f_size, creation_date, modify):
         self.name = name

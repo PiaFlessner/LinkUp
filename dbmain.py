@@ -1,4 +1,3 @@
-
 from array import array
 from datenbank import *
 from datetime import date

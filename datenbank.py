@@ -1,4 +1,3 @@
-
 from ast import And
 import sqlite3
 from os.path import exists as file_exists

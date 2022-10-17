@@ -1,7 +1,5 @@
 # Projektgruppe
 
-
-
 ## Projekt importieren
 ### Schritt 1 - Personal Access Token generieren 
 1. Auf euer Profilbild oben rechts gehen

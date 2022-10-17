@@ -80,14 +80,13 @@ class File:
 
 class BackUp:
 
-    def __init__(self,id, number, hash, name, fileSize, creationDate,checksum, birth, change, modify,  iD_File ):
+    def __init__(self,id, number, hash, name, fileSize, creationDate, birth, change, modify,  iD_File ):
         self.id = id
         self.number = number
         self.hash = hash
         self.name = name
         self.fileSize = fileSize
         self.creationDate = creationDate
-        self.checksum = checksum
         self.birth = birth
         self.change = change
         self.modify = modify
@@ -122,12 +121,6 @@ class BackUp:
 
     def set_creationDate(self, creationDate):
         self.creationDate = creationDate
-
-    def get_checksum(self):
-        return self.checksum
-
-    def set_checksum(self, checksum):
-        self.checksum = checksum
 
     def get_birth(self):
         self.birth
@@ -215,7 +208,6 @@ class Datenbank:
                                     Name TEXT NOT NULL,
                                     FileSize INTEGER NOT NULL,
                                     CreationDate NUMERIC,
-                                    Checksum TEXT NOT NULL,
                                     Birth NUMERIC NOT NULL,
                                     Change NUMERIC,
                                     Modify NUMERIC,
@@ -305,7 +297,7 @@ class Datenbank:
             #wenn das letzte backUp nicht leer ist, dann gucken ob es schon drin steht.
             if last_backup is not None:
                 last_backup_number =  last_backup[1]
-                backup = BackUp(last_backup[0], last_backup[1], last_backup[2], last_backup[3],last_backup[4],last_backup[5],last_backup[6],last_backup[7],last_backup[8],last_backup[9],last_backup[10])
+                backup = BackUp(last_backup[0], last_backup[1], last_backup[2], last_backup[3],last_backup[4],last_backup[5],last_backup[6],last_backup[7],last_backup[8],last_backup[9])
                 
                 ##wenn das "neue" backUp schon in der Datenbank steht, dann nichts machen
                 if backup == (file.backups[0]):
@@ -313,18 +305,18 @@ class Datenbank:
                 else:
                     #Wenn nicht, dann bitte einfügen aber mit erhöhter Versionsnummer
                     command = """INSERT INTO Backup
-                              (Number, Hash, Name, FileSize, CreationDate, Checksum, Birth, Change, Modify, ID_File) 
-                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
-                    data_tuple = (last_backup_number+1, file.backups[0].hash, file.backups[0].name , file.backups[0].fileSize, file.backups[0].creationDate, file.backups[0].checksum,  file.backups[0].birth, file.backups[0].change, file.backups[0].modify, file.backups[0].iD_File )
+                              (Number, Hash, Name, FileSize, CreationDate, Birth, Change, Modify, ID_File) 
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+                    data_tuple = (last_backup_number+1, file.backups[0].hash, file.backups[0].name , file.backups[0].fileSize, file.backups[0].creationDate,  file.backups[0].birth, file.backups[0].change, file.backups[0].modify, file.backups[0].iD_File )
                     cur.execute(command, data_tuple)
                     conn.commit()
             #Ansonsten wurde die Datei das erste mal gebackuped, und muss auf alle Fälle eingefügt werden.
             else:
                 command = """INSERT INTO Backup
-                              (Number, Hash, Name, FileSize, CreationDate, Checksum, Birth, Change, Modify, ID_File) 
-                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+                              (Number, Hash, Name, FileSize, CreationDate, Birth, Change, Modify, ID_File) 
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);"""
                     
-                data_tuple = (1, file.backups[0].hash, file.backups[0].name , file.backups[0].fileSize, file.backups[0].creationDate, file.backups[0].checksum,  file.backups[0].birth, file.backups[0].change, file.backups[0].modify, file.backups[0].iD_File )
+                data_tuple = (1, file.backups[0].hash, file.backups[0].name , file.backups[0].fileSize, file.backups[0].creationDate,  file.backups[0].birth, file.backups[0].change, file.backups[0].modify, file.backups[0].iD_File )
                 cur.execute(command, data_tuple)
                 conn.commit()
             conn.close()

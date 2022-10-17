@@ -7,9 +7,9 @@ jewel = Jewel(1, None, date.today(), "test")
 jewel2 = Jewel(1, None, date.today(), "hi")
 jewel3 = Jewel(1,"3. Jewel", date.today(), "3.")
 
-backup1 = BackUp(1, 1, "dhdhsd", "Hallo", 3433, date.today(),23422, date.today(), date.today(), date.today(), 1)
-backup1v2 = BackUp(1, 1, "dhdhdsd", "Hallo", 3433, date.today(),23422, date.today(), date.today(), date.today(), 1)
-backup2 = BackUp(1, 1, "asdasd", "Hallo", 3433, date.today(),23422, date.today(), date.today(), date.today(), 2)
+backup1 = BackUp(1, 1, "dhdhsd", "Hallo", 3433, date.today(), date.today(), date.today(), date.today(), 1)
+backup1v2 = BackUp(1, 1, "dhdhdsd", "Hallo", 3433, date.today(), date.today(), date.today(), date.today(), 1)
+backup2 = BackUp(1, 1, "asdasd", "Hallo", 3433, date.today(), date.today(), date.today(), date.today(), 2)
 
 backups_arr1 = [backup1]
 backups_arr2 = [backup2]

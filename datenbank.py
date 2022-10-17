@@ -38,9 +38,9 @@ class Jewel:
 
 class File:
 
-    def __init__(self,id, file_Destination, store_Destination, origin_Name, backups):
+    def __init__(self,id, file_source, store_Destination, origin_Name, backups):
         self.id = id
-        self.file_Destination = file_Destination
+        self.file_source = file_source
         self.store_Destination =  store_Destination
         self.origin_Name =  origin_Name
         self.backups = backups
@@ -52,11 +52,11 @@ class File:
     def set_id(self, id):
         self.id = id
 
-    def get_file_Destination(self):
+    def get_file_source(self):
         return self.file_Destination
 
-    def set_file_Destination(self, file_Destination):
-        self.file_Destination = file_Destination
+    def set_file_source(self, file_source):
+        self.file_source = file_Destination
     
     def get_store_Destination(self):
         return self.store_Destination
@@ -180,7 +180,7 @@ class Datenbank:
 
                 cur.execute("""CREATE TABLE File (
                                     ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                                    File_Destination text NOT NULL,
+                                    File_Source text NOT NULL,
                                     Store_Destination text NOT NULL,
                                     Origin_Name text NOT NULL
                                              );""") 
@@ -257,17 +257,17 @@ class Datenbank:
             
             #Insert File, if not Existed
             sqlite_insert_with_param = """INSERT INTO File
-                              (File_Destination, Store_Destination, Origin_Name) 
+                              (File_Source, Store_Destination, Origin_Name) 
                               SELECT ?, ?, ?
-                              WHERE NOT EXISTS(SELECT 1 FROM File WHERE File_Destination = ? AND Origin_Name = ?);
+                              WHERE NOT EXISTS(SELECT 1 FROM File WHERE File_Source = ? AND Origin_Name = ?);
                               """
-            data_tuple = (file.file_Destination,file.store_Destination, file.origin_Name, file.file_Destination, file.origin_Name)
+            data_tuple = (file.file_source,file.store_Destination, file.origin_Name, file.file_source, file.origin_Name)
                           
             cur.execute(sqlite_insert_with_param, data_tuple)
             conn.commit()
             ##get the ID of the inserted File. Extra Statement is Necessary, since "last inserted" does not work when inserts where ignored
-            command = "SELECT ID FROM File WHERE File_Destination = ? AND Origin_Name = ? AND Store_Destination = ?;"
-            data_tuple =(file.file_Destination, file.origin_Name, file.store_Destination )
+            command = "SELECT ID FROM File WHERE File_Source = ? AND Origin_Name = ? AND Store_Destination = ?;"
+            data_tuple =(file.file_source, file.origin_Name, file.store_Destination )
             cur.execute(command, data_tuple)
             conn.commit()
             id = cur.fetchone()
@@ -423,5 +423,13 @@ class Datenbank:
             conn.close()
         return file
 
+
+def getAllJewels(self,id):
+    sum_files_in_jewel = 0
+
+    conn = self.create_connection('datenbank.db')
+    if conn != None:
+        cur = conn.cursor()
+        command = "SELECT * FROM Jewel"
             
 

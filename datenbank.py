@@ -207,7 +207,7 @@ class Datenbank:
                                     Name TEXT NOT NULL,
                                     FileSize INTEGER NOT NULL,
                                     CreationDate NUMERIC,
-                                    Birth NUMERIC NOT NULL,
+                                    Birth NUMERIC,
                                     Change NUMERIC,
                                     Modify NUMERIC,
                                     ID_File INTEGER NOT NULL,
@@ -225,6 +225,10 @@ class Datenbank:
         jewel_id = self.addJewel(jewel)
         file1_id = self.addFile(file)
         self.addJewelFileAssignment(jewel_id,file1_id)
+
+        ##Trage die richtigen IDs in den backups ein
+        for backup in file.backups:
+            backup.iD_File = file1_id
         self.addBackUp(file)
 
      def addJewel(self,jewel):

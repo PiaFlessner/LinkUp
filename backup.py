@@ -3,6 +3,10 @@ import os
 import hashlib
 import pathlib
 import sys
+from datenbank import Datenbank
+from datenbank import Jewel
+from datenbank import File
+from datenbank import BackUp
 import file
 import argparse
 import datetime
@@ -49,7 +53,17 @@ if __name__ == "__main__":
             print(file_obj.get_creation_date())
             print(file_obj.get_modify())
 
+            
+
             subprocess.run('./backup.sh backup_dir', shell=True, cwd=pathlib.Path().absolute())
+
+            jewel = Jewel(1,"",datetime.datetime.now(),filepath)
+            backup = BackUp(1,1,file_obj.f_hash,file_obj.name,file_obj.f_size,file_obj.creation_date,None,None,file_obj.modify,0)
+            backups = [backup]
+            file = File(1, filepath, "",file_obj.name, backups)
+
+            datenbank = Datenbank()
+            datenbank.addToDataBase(jewel,file)
         else:
             print("No file")
     else:

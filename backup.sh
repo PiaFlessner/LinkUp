@@ -1,5 +1,5 @@
 #!/bin/bash
 
-destina="$PWD"
-mkdir $destina/$1
-rsync -av --progress  $destina/test.txt $destina/$1
+current_path="$PWD"
+mkdir $current_path/$1
+rsync -av --progress  $current_path/test.txt $current_path/$1

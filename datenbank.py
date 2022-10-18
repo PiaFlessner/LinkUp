@@ -53,10 +53,10 @@ class File:
         self.id = id
 
     def get_file_source(self):
-        return self.file_Destination
+        return self.file_source
 
     def set_file_source(self, file_source):
-        self.file_source = file_Destination
+        self.file_source = file_source
     
     def get_store_Destination(self):
         return self.store_Destination

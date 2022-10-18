@@ -6,6 +6,9 @@ class File:
         self.creation_date = creation_date
         self.modify = modify
 
+    def get_f_name(self):
+        return self.name
+
     def get_f_hash(self):
         return self.f_hash
 

@@ -184,6 +184,16 @@ class Datenbank:
                                     Store_Destination text NOT NULL,
                                     Origin_Name text NOT NULL
                                              );""") 
+
+                cur.execute("""CREATE TABLE File_Source (
+                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    Source text NOT NULL,
+                    ID_File INTEGER NOT NULL,
+                    constraint file_source_fk
+                    FOREIGN KEY (ID_File)
+                        REFERENCES File(ID)
+                );
+                """)
             
             
                 cur.execute("""CREATE TABLE Jewel_File_Assignment (

@@ -38,12 +38,12 @@ class Jewel:
 
 class File:
 
-    def __init__(self,id, file_source, store_Destination, origin_Name, backups):
+    def __init__(self,id, file_source, store_Destination, origin_Name, blobs):
         self.id = id
         self.file_source = file_source
         self.store_Destination =  store_Destination
         self.origin_Name =  origin_Name
-        self.backups = backups
+        self.blobs = blobs
 
     
     def get_id(self):
@@ -70,14 +70,14 @@ class File:
     def set_origin_Name (self,origin_Name):
         self.origin_Name = origin_Name
 
-    def get_backups(self):
+    def get_blobs(self):
         return self.backups
 
-    def set_backups (self,backups):
+    def set_blobs (self,backups):
         self.backups = backups
 
 
-class BackUp:
+class Blob:
 
     def __init__(self,id, number, hash, name, fileSize, creationDate, birth, change, modify,  iD_File ):
         self.id = id
@@ -200,19 +200,19 @@ class Datenbank:
                                                  );""")
 
 
-                cur.execute("""CREATE TABLE BackUp (
+                cur.execute("""CREATE TABLE Blob (
                                     ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                     Number INTEGER NOT NULL,
                                     Hash TEXT NOT NULL,
                                     Name TEXT NOT NULL,
                                     FileSize INTEGER NOT NULL,
                                     CreationDate NUMERIC,
-                                    Birth NUMERIC,
+                                    Birth NUMERIC NOT NULL,
                                     Change NUMERIC,
                                     Modify NUMERIC,
                                     ID_File INTEGER NOT NULL,
 
-                                    constraint file_backup_fk
+                                    constraint file_blob_fk
                                     FOREIGN KEY (ID_File)
                                         REFERENCES File(ID)
                                                    
@@ -225,11 +225,7 @@ class Datenbank:
         jewel_id = self.addJewel(jewel)
         file1_id = self.addFile(file)
         self.addJewelFileAssignment(jewel_id,file1_id)
-
-        ##Trage die richtigen IDs in den backups ein
-        for backup in file.backups:
-            backup.iD_File = file1_id
-        self.addBackUp(file)
+        self.addBlob(file)
 
      def addJewel(self,jewel):
         conn = self.create_connection('datenbank.db')
@@ -283,43 +279,43 @@ class Datenbank:
                 return 0
             
 
-     def addBackUp(self, file):
+     def addBlob(self, file):
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()    
             #gibt es schon backups
-            command = """SELECT * FROM BackUp WHERE
+            command = """SELECT * FROM Blob WHERE
                                   ID_File = ?
                                   ORDER BY Number DESC;"""
-            data_tuple = (file.backups[0].iD_File, )
+            data_tuple = (file.blobs[0].iD_File, )
             cur.execute(command, data_tuple)
-            last_backup = cur.fetchone();
+            last_blob = cur.fetchone();
             conn.commit()
 
             ###nummer des letzten backups holen
             #wenn das letzte backUp nicht leer ist, dann gucken ob es schon drin steht.
-            if last_backup is not None:
-                last_backup_number =  last_backup[1]
-                backup = BackUp(last_backup[0], last_backup[1], last_backup[2], last_backup[3],last_backup[4],last_backup[5],last_backup[6],last_backup[7],last_backup[8],last_backup[9])
+            if last_blob is not None:
+                last_blob_number =  last_blob[1]
+                blob = Blob(last_blob[0], last_blob[1], last_blob[2], last_blob[3],last_blob[4],last_blob[5],last_blob[6],last_blob[7],last_blob[8],last_blob[9])
                 
                 ##wenn das "neue" backUp schon in der Datenbank steht, dann nichts machen
-                if backup == (file.backups[0]):
+                if blob == (file.blobs[0]):
                     pass
                 else:
                     #Wenn nicht, dann bitte einfügen aber mit erhöhter Versionsnummer
-                    command = """INSERT INTO Backup
+                    command = """INSERT INTO Blob
                               (Number, Hash, Name, FileSize, CreationDate, Birth, Change, Modify, ID_File) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);"""
-                    data_tuple = (last_backup_number+1, file.backups[0].hash, file.backups[0].name , file.backups[0].fileSize, file.backups[0].creationDate,  file.backups[0].birth, file.backups[0].change, file.backups[0].modify, file.backups[0].iD_File )
+                    data_tuple = (last_blob_number+1, file.blobs[0].hash, file.blobs[0].name , file.blobs[0].fileSize, file.blobs[0].creationDate,  file.blobs[0].birth, file.blobs[0].change, file.blobs[0].modify, file.blobs[0].iD_File )
                     cur.execute(command, data_tuple)
                     conn.commit()
             #Ansonsten wurde die Datei das erste mal gebackuped, und muss auf alle Fälle eingefügt werden.
             else:
-                command = """INSERT INTO Backup
+                command = """INSERT INTO Blob
                               (Number, Hash, Name, FileSize, CreationDate, Birth, Change, Modify, ID_File) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);"""
                     
-                data_tuple = (1, file.backups[0].hash, file.backups[0].name , file.backups[0].fileSize, file.backups[0].creationDate,  file.backups[0].birth, file.backups[0].change, file.backups[0].modify, file.backups[0].iD_File )
+                data_tuple = (1, file.blobs[0].hash, file.blobs[0].name , file.blobs[0].fileSize, file.blobs[0].creationDate,  file.blobs[0].birth, file.blobs[0].change, file.blobs[0].modify, file.blobs[0].iD_File )
                 cur.execute(command, data_tuple)
                 conn.commit()
             conn.close()
@@ -340,66 +336,6 @@ class Datenbank:
                 # -> User hat Jewel bereits angelegt, und auch die Datei hat zu dem Zeitpunkt schon existiert.
                 return False
             conn.close()
-
-
-    
-     def updateJewel(self,jewel):
-        conn = self.create_connection('datenbank.db')
-        if conn != None:
-            cur = conn.cursor()
-            sqlite_insert_with_param = """UPDATE 'Jewel'
-                                        SET 'Comment' = ?,
-                                            'Monitoring_Startdate' = ?,
-                                            'JewelSource' = ?
-                                        WHERE ID = ?;"""
-            data_tuple = (jewel.comment, jewel.monitoring_Startdate,jewel.jewelSource, jewel.id)
-            cur.execute(sqlite_insert_with_param, data_tuple)
-
-           
-            conn.commit()
-            conn.close()
-
-     def updatefile(self,file):
-        conn = self.create_connection('datenbank.db')
-        if conn != None:
-            cur = conn.cursor()
-            sqlite_insert_with_param = """UPDATE 'File'
-                                        SET 'File_Destination' = ?,
-                                            'Store_Destination' = ?,
-                                            'Origin_Name' = ?
-                                        WHERE ID = ?;"""
-            data_tuple = (file.file_Destination,file.store_Destination, file.origin_Name, file.id)
-            cur.execute(sqlite_insert_with_param, data_tuple)
-
-           
-            conn.commit()
-            conn.close()
-
-     def updateBackUp(self,backup):
-        conn = self.create_connection('datenbank.db')
-        if conn != None:
-            cur = conn.cursor()
-            cur.execute("PRAGMA foreign_keys=OFF;")
-            sqlite_insert_with_param = """
-                                        UPDATE 'BackUp'
-                                        SET 'Number' = ?,
-                                            'Hash' = ?,
-                                            'Name' = ?,
-                                            'FileSize' = ?,
-                                            'CreationDate' = ?,
-                                            'Checksum' = ?,
-                                            'Birth' = ?,
-                                            'Change' = ?,
-                                            'Modify' = ?,
-                                            'ID_File' = ?
-                                        WHERE ID = ?;"""
-            data_tuple =  (backup.number, backup.hash, backup.name , backup.fileSize, backup.creationDate, backup.checksum,  backup.birth, backup.change, backup.modify, backup.iD_File, backup.id)
-            cur.execute(sqlite_insert_with_param, data_tuple)
-            cur.execute("PRAGMA foreign_keys=ON;")                               
-           
-            conn.commit()
-            conn.close()
-
 
      def getJewel(self,id):
         jewel = None
@@ -422,12 +358,13 @@ class Datenbank:
             sqlite_insert_with_param = "SELECT * FROM File WHERE ID= ?"
             cur.execute( sqlite_insert_with_param, id)
             b_tuple = cur.fetchone()
-            file = File(b_tuple[0], b_tuple[1], b_tuple[2], b_tuple[3])
+            file = File(b_tuple[0], b_tuple[1], b_tuple[2], b_tuple[3], None)
             conn.commit()
             conn.close()
         return file
 
 
+#unfinished
 def getAllJewels(self,id):
     sum_files_in_jewel = 0
 

@@ -1,4 +1,3 @@
-from array import array
 from datenbank import *
 from datetime import date
 
@@ -14,18 +13,27 @@ blobs_arr1 = [blob1]
 blobs_arr2 = [blob1v2]
 blobs_arr1v2 = [blob2]
 
-file1 = File(1, "shdhsdd", "hallo", "helloworld.txt", blobs_arr1)
-file2 = File(2, "shdhsdd", "hallo", "helloworld.txt", blobs_arr2)
-file1v2 = File(1, "shdhsdd", "hallo", "helloworld.txt", blobs_arr1v2)
+destination_arr = ["Hier"]
+destination_arr2 = ["Dahinten"]
+
+source_arr = ["1"]
+source_arr1 = ["3"]
+
+origin_Name_arr=["test.txt"]
+
+
+file1 = File(1,source_arr,destination_arr, origin_Name_arr, blobs_arr1)
+file2 = File(2, source_arr , destination_arr, origin_Name_arr, blobs_arr2)
+file1v2 = File(1, source_arr,destination_arr, origin_Name_arr, blobs_arr1v2)
 
 
 daten = Datenbank()
-
+#%%
 #Test ob File und backups doppelt hinzugefügt werden.
 #hinzufügen von jewel
-daten.addToDataBase(jewel,file1)
+#daten.addToDataBase(jewel,file1)
 #hinzufügen von  neuen jewel mit gleicher file
-daten.addToDataBase(jewel2,file1)
+#daten.addToDataBase(jewel2,file1)
 #hinzufügen von alten jewel mit alter file, aber neuem backup (zu erkennen am veränderten Hash)
-daten.addToDataBase(jewel,file1v2)
+#daten.addToDataBase(jewel,file1v2)
  

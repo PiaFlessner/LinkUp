@@ -38,11 +38,11 @@ class Jewel:
 
 class File:
 
-    def __init__(self,id, file_source, store_Destination, origin_Name, blobs):
+    def __init__(self,id, file_sources, store_Destinations, origin_Names, blobs):
         self.id = id
-        self.file_source = file_source
-        self.store_Destination =  store_Destination
-        self.origin_Name =  origin_Name
+        self.file_sources = file_sources
+        self.store_Destinations =  store_Destinations
+        self.origin_Names =  origin_Names
         self.blobs = blobs
 
     
@@ -52,23 +52,23 @@ class File:
     def set_id(self, id):
         self.id = id
 
-    def get_file_source(self):
+    def get_file_sources(self):
         return self.file_source
 
-    def set_file_source(self, file_source):
-        self.file_source = file_source
+    def set_file_sources(self, file_sources):
+        self.file_sources = file_sources
     
-    def get_store_Destination(self):
-        return self.store_Destination
+    def get_store_Destinations(self):
+        return self.store_Destinations
 
-    def set_store_Destination(self,store_Destination):
-        self.store_Destination = store_Destination
+    def set_store_Destinations(self,store_Destinations):
+        self.store_Destinations = store_Destinations
     
-    def get_origin_Name (self):
-        return self.origin_Name
+    def get_origin_Namess (self):
+        return self.origin_Names
 
-    def set_origin_Name (self,origin_Name):
-        self.origin_Name = origin_Name
+    def set_origin_Names (self,origin_Names):
+        self.origin_Names = origin_Names
 
     def get_blobs(self):
         return self.backups
@@ -179,17 +179,34 @@ class Datenbank:
                                                  );""")
 
                 cur.execute("""CREATE TABLE File (
-                                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                                    File_Source text NOT NULL,
-                                    Store_Destination text NOT NULL,
-                                    Origin_Name text NOT NULL
-                                             );""") 
+                                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT
+                                             );""")
 
                 cur.execute("""CREATE TABLE File_Source (
                     ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                     Source text NOT NULL,
                     ID_File INTEGER NOT NULL,
                     constraint file_source_fk
+                    FOREIGN KEY (ID_File)
+                        REFERENCES File(ID)
+                );
+                """)
+
+                cur.execute("""CREATE TABLE Origin_Name (
+                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    Origin_Name text NOT NULL,
+                    ID_File INTEGER NOT NULL,
+                    constraint file_OName_fk
+                    FOREIGN KEY (ID_File)
+                        REFERENCES File(ID)
+                );
+                """)
+
+                cur.execute("""CREATE TABLE Store_Destination (
+                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    Store_Destination text NOT NULL,
+                    ID_File INTEGER NOT NULL,
+                    constraint file_StDestination_fk
                     FOREIGN KEY (ID_File)
                         REFERENCES File(ID)
                 );

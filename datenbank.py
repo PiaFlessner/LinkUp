@@ -179,39 +179,9 @@ class Datenbank:
                                                  );""")
 
                 cur.execute("""CREATE TABLE File (
-                                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT
-                                             );""")
-
-                cur.execute("""CREATE TABLE File_Source (
-                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    Source text NOT NULL,
-                    ID_File INTEGER NOT NULL,
-                    constraint file_source_fk
-                    FOREIGN KEY (ID_File)
-                        REFERENCES File(ID)
-                );
-                """)
-
-                cur.execute("""CREATE TABLE Origin_Name (
-                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    Origin_Name text NOT NULL,
-                    ID_File INTEGER NOT NULL,
-                    constraint file_OName_fk
-                    FOREIGN KEY (ID_File)
-                        REFERENCES File(ID)
-                );
-                """)
-
-                cur.execute("""CREATE TABLE Store_Destination (
-                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    Store_Destination text NOT NULL,
-                    ID_File INTEGER NOT NULL,
-                    constraint file_StDestination_fk
-                    FOREIGN KEY (ID_File)
-                        REFERENCES File(ID)
-                );
-                """)
-            
+                                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                                    Birth NUMERIC NOT NULL
+                                             );""")        
             
                 cur.execute("""CREATE TABLE Jewel_File_Assignment (
                                     ID_Jewel INTEGER NOT NULL,
@@ -234,7 +204,9 @@ class Datenbank:
                                     Name TEXT NOT NULL,
                                     FileSize INTEGER NOT NULL,
                                     CreationDate NUMERIC,
-                                    Birth NUMERIC NOT NULL,
+                                    Origin_Name TEXT NOT NULL,
+                                    Source_Path TEXT NOT NULL,
+                                    Store_Destination TEXT NOT NULL,
                                     Change NUMERIC,
                                     Modify NUMERIC,
                                     ID_File INTEGER NOT NULL,
@@ -253,6 +225,47 @@ class Datenbank:
         file1_id = self.addFile(file)
         self.addJewelFileAssignment(jewel_id,file1_id)
         self.addBlob(file)
+
+     def addToDataBase2(self, jewel, file):
+        jewel_id = self.addJewel(jewel)
+        id_File = self.checkIfHashExists(file)
+        if id_File is None:
+            id_Files = self.checkIfOriginNameExists(file)
+
+            if id_Files is None:
+                self.insert_File_Source_Blob_Destination(file)
+
+            else:
+                pass
+
+        else:
+            pass
+
+     def insert_File_Source_Blob_Destination(self,file):
+        conn = self.create_connection('datenbank.py')
+        if conn != None:
+            cur = conn.cursor()
+
+    
+     def checkIfOriginNameExists(self,file):
+        conn = self.create_connection('datenbank.py')
+        if conn != None:
+            cur = conn.cursor()
+            command = "SELECT ID_File FROM Origin_Name WHERE Origin_Name = '?'"
+            params = (file.origin_Names[0])
+            cur.execute(command,params)
+            ids = cur.fetchall()
+            return ids[0]
+
+     def checkIfHashExists(self,file):
+        conn= self.create_connection('datenbank.py')
+        if conn != None:
+            cur = conn.cursor()
+            command = "SELECT ID_File FROM Blob WHERE Hash = ?"
+            params = (file.hash)
+            cur.execute(command, params)
+            id = cur.fetchone()
+            return id[0]
 
      def addJewel(self,jewel):
         conn = self.create_connection('datenbank.db')

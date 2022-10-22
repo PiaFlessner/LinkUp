@@ -38,12 +38,10 @@ class Jewel:
 
 class File:
 
-    def __init__(self,id, file_sources, store_Destinations, origin_Names, blobs):
+    def __init__(self,id, blobs, birth):
         self.id = id
-        self.file_sources = file_sources
-        self.store_Destinations =  store_Destinations
-        self.origin_Names =  origin_Names
         self.blobs = blobs
+        self.birth = birth
 
     
     def get_id(self):
@@ -52,44 +50,33 @@ class File:
     def set_id(self, id):
         self.id = id
 
-    def get_file_sources(self):
-        return self.file_source
-
-    def set_file_sources(self, file_sources):
-        self.file_sources = file_sources
-    
-    def get_store_Destinations(self):
-        return self.store_Destinations
-
-    def set_store_Destinations(self,store_Destinations):
-        self.store_Destinations = store_Destinations
-    
-    def get_origin_Namess (self):
-        return self.origin_Names
-
-    def set_origin_Names (self,origin_Names):
-        self.origin_Names = origin_Names
-
     def get_blobs(self):
-        return self.backups
+        return self.blobs
 
-    def set_blobs (self,backups):
-        self.backups = backups
+    def set_blobs (self,blobs):
+        self.blobs = blobs
 
+    def get_birth(self):
+        return self.birth
+
+    def set_birth (self,birth):
+        self.birth = birth
 
 class Blob:
 
-    def __init__(self,id, number, hash, name, fileSize, creationDate, birth, change, modify,  iD_File ):
+    def __init__(self,id, number, hash, name, fileSize, creationDate, change, modify,  iD_File, origin_name, source_path, store_destination ):
         self.id = id
         self.number = number
         self.hash = hash
         self.name = name
         self.fileSize = fileSize
         self.creationDate = creationDate
-        self.birth = birth
         self.change = change
         self.modify = modify
         self.iD_File = iD_File
+        self.origin_name = origin_name
+        self.store_destination = store_destination
+        self.source_path = source_path
 
     def get_id(self):
         return self.id
@@ -227,45 +214,56 @@ class Datenbank:
         self.addBlob(file)
 
      def addToDataBase2(self, jewel, file):
-        jewel_id = self.addJewel(jewel)
-        id_File = self.checkIfHashExists(file)
-        if id_File is None:
-            id_Files = self.checkIfOriginNameExists(file)
+        conn = self.create_connection('datenbank.py')
+        if conn != None:
+            cur = conn.cursor()
+            jewel.id = self.addJewel(jewel)
+            id_File = self.checkIfHashExists(file, cur)
+            
+            if id_File is None:
+                id_Files = self.checkIfOriginNameExists(file, cur)
 
-            if id_Files is None:
-                self.insert_File_Source_Blob_Destination(file)
+                if id_Files is None:
+                    file.id = self.insert_File(file, cur,conn)
+                    self.insert_first_Blob(file,cur,conn)
+
+                else:
+                    pass
 
             else:
                 pass
 
-        else:
-            pass
+     def insert_first_Blob(self,file,cur,conn):
+        command = """INSERT INTO Blob
+                              (Number, Hash, Name, FileSize, CreationDate, Change, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+                    
+        params = (1, file.blobs[0].hash, file.blobs[0].name , file.blobs[0].fileSize, file.blobs[0].creationDate, file.blobs[0].change, file.blobs[0].modify, file.blobs[0].iD_File, file.blobs[0].origin_name, file.blobs[0].source_path, file.blobs[0].store_destination)
+        cur.execute(command, params)
+        conn.commit()
 
-     def insert_File_Source_Blob_Destination(self,file):
-        conn = self.create_connection('datenbank.py')
-        if conn != None:
-            cur = conn.cursor()
+     def insert_File(self,file,cur,con):
+        command = "INSERT INTO FILE (Birth) VALUES (?);"
+        params = file.birth
+        cur.execute(command,params)
+        fileID = cur.lastrowid()
+        con.commit()
+        return fileID[0]
 
     
-     def checkIfOriginNameExists(self,file):
-        conn = self.create_connection('datenbank.py')
-        if conn != None:
-            cur = conn.cursor()
-            command = "SELECT ID_File FROM Origin_Name WHERE Origin_Name = '?'"
-            params = (file.origin_Names[0])
-            cur.execute(command,params)
-            ids = cur.fetchall()
-            return ids[0]
+     def checkIfOriginNameExists(self,file, cur):
+        command = "SELECT ID_File FROM Blob WHERE Origin_Name = '?'"
+        params = (file.origin_Names[0])
+        cur.execute(command,params)
+        ids = cur.fetchall()
+        return ids[0]
 
-     def checkIfHashExists(self,file):
-        conn= self.create_connection('datenbank.py')
-        if conn != None:
-            cur = conn.cursor()
-            command = "SELECT ID_File FROM Blob WHERE Hash = ?"
-            params = (file.hash)
-            cur.execute(command, params)
-            id = cur.fetchone()
-            return id[0]
+     def checkIfHashExists(self,file, cur):
+        command = "SELECT ID_File FROM Blob WHERE Hash = ?"
+        params = (file.hash)
+        cur.execute(command, params)
+        id = cur.fetchone()
+        return id[0]
 
      def addJewel(self,jewel):
         conn = self.create_connection('datenbank.db')

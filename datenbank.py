@@ -1,4 +1,5 @@
 from ast import And
+import itertools
 import sqlite3
 from os.path import exists as file_exists
 
@@ -233,18 +234,26 @@ class Datenbank:
             jewel.id = self.addJewel(jewel)
             id_File = self.checkIfHashExists(file, cur)
             
+            #does hash exists
             if id_File is None:
-                id_Files = self.checkIfOriginNameExists(file, cur)
+                originNameFiles = self.checkIfOriginNameExists(file, cur)
 
-                if id_Files is None:
+                #does origin name
+                if originNameFiles is None:
                     file.id = self.insert_File(file, cur,conn)
                     self.insert_first_Blob(file,cur,conn)
 
                 else:
-                    pass
+                    #######################is it really this file?
+                    ## if result is clear, add File, because hash is not existent yet
+                    if len(originNameFiles) == 1:
+                        #check if birth is the same, so then it will be **most likely*** be the same file, meaning it could be inserted
+                        if file.birth == originNameFiles[0].birth:
+                            pass
 
             else:
                 pass
+
 
      def insert_first_Blob(self,file,cur,conn):
         command = """INSERT INTO Blob
@@ -257,19 +266,43 @@ class Datenbank:
 
      def insert_File(self,file,cur,con):
         command = "INSERT INTO FILE (Birth) VALUES (?);"
-        params = file.birth
+        params = (file.birth)
         cur.execute(command,params)
         fileID = cur.lastrowid()
         con.commit()
         return fileID[0]
 
-    
+    #Returns Array with Jewels with the same origin name as file
      def checkIfOriginNameExists(self,file, cur):
         command = "SELECT ID_File FROM Blob WHERE Origin_Name = '?'"
         params = (file.origin_Names[0])
         cur.execute(command,params)
         ids = cur.fetchall()
-        return ids[0]
+        command = "SELECT * FROM File INNER JOIN Blob ON File.ID = Blob.ID_File WHERE FILE_ID = ?"
+        command = command + itertools.repeat(" OR FILE.ID = ?",len(ids)-1)
+        cur.execute(command,ids)
+        data = cur.fetchall()
+
+        if data is None:
+            return None
+        
+        oldFileID = data[0]["ID_File"]
+        files = []
+        blobs = []
+
+        # go through data and translate it to file array
+        for row in data:
+            #if file has changed, add file to answer and reset params
+            if oldFileID != row["ID_File"]:
+                files.append((File(row[0],blobs,row[1])))
+                blobs = []
+                oldFileID = row["ID_File"]
+            blobs.append(Blob(row[2], row["Number"],row["Hash"], row["Name"], row["FilSizes"], row["creationDate"],row["Change"], row["Modify"],row["ID_File"], row["Origin_Name"], row["Source_Path"],row["Store_DestinatioN"]))
+        files.append((File(row[0],blobs,row[1])))
+
+        return files
+            
+
 
      def checkIfHashExists(self,file, cur):
         command = "SELECT ID_File FROM Blob WHERE Hash = ?"

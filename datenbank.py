@@ -159,7 +159,7 @@ class Datenbank:
      def create_connection(self, db_file):
         conn = None
         try:
-            conn = sqlite3.connect(db_file)
+            conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         except sqlite3.Error as e:
             print(e)
             
@@ -421,40 +421,138 @@ class Datenbank:
                 return False
             conn.close()
 
-     def getJewel(self,id):
+
+ 
+     def get_Jewel_via_id(self,id):
         jewel = None
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
             sqlite_insert_with_param = "SELECT * FROM Jewel WHERE ID= ?"
-            cur.execute( sqlite_insert_with_param, id)
+            cur.execute( sqlite_insert_with_param, [id])
             j_tuple = cur.fetchone()
             jewel = Jewel(j_tuple[0], j_tuple[1], j_tuple[2], j_tuple[3])
             conn.commit()
             conn.close()
         return jewel
 
-     def getFile(self,id):
+
+
+     def get_File_via_id(self,id):
         file = None
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
             sqlite_insert_with_param = "SELECT * FROM File WHERE ID= ?"
-            cur.execute( sqlite_insert_with_param, id)
+            cur.execute( sqlite_insert_with_param, [id])
             b_tuple = cur.fetchone()
-            file = File(b_tuple[0], b_tuple[1], b_tuple[2], b_tuple[3], None)
             conn.commit()
             conn.close()
+            blobs = self.get_Blobs_via_file_id(b_tuple[0])
+            file = File(b_tuple[0], blobs, b_tuple[1])
         return file
 
+   
+     def get_File_via_hash(self,hash):
+        file = None
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            sqlite_insert_with_param = """SELECT DISTINCT File.ID, File.Birth 
+                                          FROM File, Blob WHERE Blob.Hash = ? AND File.ID = Blob.ID_File"""
+            cur.execute( sqlite_insert_with_param, [hash])
+            b_tuple = cur.fetchone()
+            conn.commit()
+            conn.close()
+            blobs = self.get_Blobs_via_file_id(b_tuple[0])
+            file = File(b_tuple[0], blobs, b_tuple[1])
+        return file
 
-#unfinished
-def getAllJewels(self,id):
-    sum_files_in_jewel = 0
+     def get_all_Files(self):
+        files = []
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM File")
+            records = cur.fetchall()
+            conn.commit()
+            conn.close()
 
-    conn = self.create_connection('datenbank.db')
-    if conn != None:
-        cur = conn.cursor()
-        command = "SELECT * FROM Jewel"
+            for row in records:
+                blobs = self.get_Blobs_via_file_id(row[0])
+                file = File(row[0], blobs, row[1])
+                files.append(file)          
+        return files
+    
+
+     def get_Files_via_jewel_id(self,jewel_id):
+        files = []
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            # Alle Files, die zu einem Jewel gehören, werden aus der Datenbank geholt. 
+            sqlite_insert_with_param = """SELECT DISTINCT File.ID, File.Birth
+                                          FROM Jewel_File_Assignment, File WHERE Jewel_File_Assignment.ID_Jewel= ? AND Jewel_File_Assignment.ID_File = File.ID"""
+            cur.execute( sqlite_insert_with_param, [jewel_id])
+            records = cur.fetchall()
+            conn.commit()
+            conn.close()
+
+            for row in records:
+                blobs = self.get_Blobs_via_file_id(row[0])
+                file = File(row[0], blobs, row[1])
+                files.append(file)              
+        return files
+
+
+     def get_all_Jewels(self):
+        jewels = []
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Jewel")
+            records = cur.fetchall()
+
+            for row in records:
+                jewel =  Jewel(row[0], row[1], row[2], row[3])
+                jewels.append(jewel)
+            
+            conn.commit()
+            conn.close()
+        return jewels
+
+
+     def get_all_Blobs(self):
+        blobs = []
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Blob")
+            records = cur.fetchall()
+
+            for row in records:
+                blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row [11])
+                blobs.append(blob)
+            
+            conn.commit()
+            conn.close()
+        return blobs
+
+ 
+     def get_Blobs_via_file_id(self, file_id):
+        blobs = []
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Blob WHERE ID_File= ?", [file_id])
+            records = cur.fetchall()
+
+            for row in records:
+                blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])
+                blobs.append(blob)
+            
+            conn.commit()
+            conn.close()
+        return blobs
             
 

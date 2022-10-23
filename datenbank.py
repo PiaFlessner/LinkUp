@@ -108,12 +108,6 @@ class Blob:
     def set_creationDate(self, creationDate):
         self.creationDate = creationDate
 
-    def get_birth(self):
-        self.birth
-    
-    def set_birth (self,birth):
-        self.birth = birth
-
     def get_change(self):
         return self.change
 
@@ -131,6 +125,25 @@ class Blob:
 
     def set_iD_File(self,iD_File):
         self.iD_File = iD_File
+
+    def get_origin_name(self):
+        return self.origin_name
+
+    def set_origin_name(self,origin_name):
+        self.origin_name = origin_name
+
+    def get_source_path(self):
+        return self.source_path
+
+    def set_source_path(self,source_path):
+        self.source_path = source_path
+
+    def get_store_destination(self):
+        return self.store_destination
+
+    def set_store_destination(self,store_destination):
+        self.store_destination = store_destination
+    
 
     def __eq__(self, other):
         """Overrides the default implementation"""

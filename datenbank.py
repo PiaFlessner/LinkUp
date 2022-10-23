@@ -2,6 +2,7 @@ from ast import And
 import itertools
 import sqlite3
 from os.path import exists as file_exists
+from unicodedata import numeric
 
 class Jewel:
 
@@ -152,7 +153,7 @@ class Blob:
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, self.__class__):
-            return str(self.hash) == str(other.hash) and str(self.modify) == str(other.modify) and str(self.change) == str(other.change) and str(self.store_destination) == str(other.store_destination) and str(self.origin_name) == str(other.origin_name) and str(self.source_path) == str(other.source_path)
+            return str(self.hash) == str(other.hash) and self.modify == other.modify and self.change == other.change and str(self.store_destination) == str(other.store_destination) and str(self.origin_name) == str(other.origin_name) and str(self.source_path) == str(other.source_path)
         else:
             return False
 
@@ -184,7 +185,7 @@ class Datenbank:
 
                 cur.execute("""CREATE TABLE File (
                                     ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                                    Birth NUMERIC NOT NULL
+                                    Birth TIMESTAMP NOT NULL
                                              );""")        
             
                 cur.execute("""CREATE TABLE Jewel_File_Assignment (
@@ -207,12 +208,12 @@ class Datenbank:
                                     Hash TEXT NOT NULL,
                                     Name TEXT NOT NULL,
                                     FileSize INTEGER NOT NULL,
-                                    CreationDate NUMERIC,
+                                    CreationDate TIMESTAMP,
                                     Origin_Name TEXT NOT NULL,
                                     Source_Path TEXT NOT NULL,
                                     Store_Destination TEXT NOT NULL,
-                                    Change NUMERIC,
-                                    Modify NUMERIC,
+                                    Change TIMESTAMP,
+                                    Modify TIMESTAMP,
                                     ID_File INTEGER NOT NULL,
 
                                     constraint file_blob_fk
@@ -231,7 +232,7 @@ class Datenbank:
             jewel.id = self.addJewel(jewel)
             old_file = self.checkIfHashExists(file, cur)
             
-            #does hash exists
+            #if hash does not exists in db
             if old_file is None:
                 originNameFiles = self.checkIfOriginNameExists(file, cur)
 

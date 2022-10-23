@@ -28,20 +28,17 @@ daten = Datenbank()
 #Test ob File und backups doppelt hinzugefügt werden.
 #hinzufügen von jewel
 #daten.addToDataBase(jewel,file1)
-result = daten.addToDataBase(jewel2, file1)
+result = daten.addToDataBase(jewel2, file1) #true expected (first run)
 print(result)
-result = daten.addToDataBase(jewel2, file1v2)
+result = daten.addToDataBase(jewel2, file1v2) #true expected (first run)
 print(result)
-result = daten.addToDataBase(jewel, file1v3)
+result = daten.addToDataBase(jewel, file1v3) #true expected (first run)
 print(result)
-result = daten.addToDataBase(jewel2, file1v3)
+result = daten.addToDataBase(jewel2, file1v3) #false expected (first run)
 print(result)
-result = daten.addToDataBase(jewel, file2)
+result = daten.addToDataBase(jewel, file2) #true expected (first run)
 print(result)
-result = daten.addToDataBase(jewel2, file1v3)
+result = daten.addToDataBase(jewel2, file1v3) #false expected (first run)
 print(result)
-#hinzufügen von  neuen jewel mit gleicher file
-#daten.addToDataBase(jewel2,file1)
-#hinzufügen von alten jewel mit alter file, aber neuem backup (zu erkennen am veränderten Hash)
-#daten.addToDataBase(jewel,file1v2)
+
  

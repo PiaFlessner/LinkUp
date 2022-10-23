@@ -1,5 +1,5 @@
 from datenbank import *
-from datetime import date
+from datetime import datetime as date
 
 jewel = Jewel(1, None, date.today(), "test")
 jewel2 = Jewel(1, None, date.today(), "hi")

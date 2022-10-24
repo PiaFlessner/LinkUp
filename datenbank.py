@@ -399,7 +399,8 @@ class Datenbank:
             sqlite_insert_with_param = "SELECT * FROM Jewel WHERE ID= ?"
             cur.execute( sqlite_insert_with_param, [id])
             j_tuple = cur.fetchone()
-            jewel = Jewel(j_tuple[0], j_tuple[1], j_tuple[2], j_tuple[3])
+            if j_tuple is not None:
+              jewel = Jewel(j_tuple[0], j_tuple[1], j_tuple[2], j_tuple[3])
             conn.commit()
             conn.close()
         return jewel
@@ -416,8 +417,9 @@ class Datenbank:
             b_tuple = cur.fetchone()
             conn.commit()
             conn.close()
-            blobs = self.get_Blobs_via_file_id(b_tuple[0])
-            file = File(b_tuple[0], blobs, b_tuple[1])
+            if b_tuple is not None:
+               blobs = self.get_Blobs_via_file_id(b_tuple[0])
+               file = File(b_tuple[0], blobs, b_tuple[1])
         return file
 
    
@@ -432,8 +434,9 @@ class Datenbank:
             b_tuple = cur.fetchone()
             conn.commit()
             conn.close()
-            blobs = self.get_Blobs_via_file_id(b_tuple[0])
-            file = File(b_tuple[0], blobs, b_tuple[1])
+            if b_tuple is not None:
+               blobs = self.get_Blobs_via_file_id(b_tuple[0])
+               file = File(b_tuple[0], blobs, b_tuple[1])
         return file
 
      def get_all_Files(self):
@@ -445,11 +448,11 @@ class Datenbank:
             records = cur.fetchall()
             conn.commit()
             conn.close()
-
-            for row in records:
-                blobs = self.get_Blobs_via_file_id(row[0])
-                file = File(row[0], blobs, row[1])
-                files.append(file)          
+            if records is not None:
+                for row in records:
+                    blobs = self.get_Blobs_via_file_id(row[0])
+                    file = File(row[0], blobs, row[1])
+                    files.append(file)          
         return files
     
 
@@ -466,10 +469,11 @@ class Datenbank:
             conn.commit()
             conn.close()
 
-            for row in records:
-                blobs = self.get_Blobs_via_file_id(row[0])
-                file = File(row[0], blobs, row[1])
-                files.append(file)              
+            if records is not None:
+                for row in records:
+                   blobs = self.get_Blobs_via_file_id(row[0])
+                   file = File(row[0], blobs, row[1])
+                   files.append(file)              
         return files
 
 
@@ -481,9 +485,10 @@ class Datenbank:
             cur.execute("SELECT * FROM Jewel")
             records = cur.fetchall()
 
-            for row in records:
-                jewel =  Jewel(row[0], row[1], row[2], row[3])
-                jewels.append(jewel)
+            if records is not None:
+                for row in records:
+                    jewel =  Jewel(row[0], row[1], row[2], row[3])
+                    jewels.append(jewel)
             
             conn.commit()
             conn.close()
@@ -498,9 +503,10 @@ class Datenbank:
             cur.execute("SELECT * FROM Blob")
             records = cur.fetchall()
 
-            for row in records:
-                blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row [11])
-                blobs.append(blob)
+            if records is not None:
+             for row in records:
+                    blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row [11])
+                    blobs.append(blob)
             
             conn.commit()
             conn.close()
@@ -515,9 +521,10 @@ class Datenbank:
             cur.execute("SELECT * FROM Blob WHERE ID_File= ?", [file_id])
             records = cur.fetchall()
 
-            for row in records:
-                blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])
-                blobs.append(blob)
+            if records is not None:
+                for row in records:
+                   blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])
+                   blobs.append(blob)
             
             conn.commit()
             conn.close()

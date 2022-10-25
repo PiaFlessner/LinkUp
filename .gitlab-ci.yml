@@ -31,28 +31,16 @@ before_script:
 
 test:
   script:
-    - python setup.py test
-    - pip install tox flake8  # you can also use tox
-    - tox -e py36,flake8
+    - echo "hier sollte Ihr Testaufruf stehen"
 
-run:
-  script:
-    - python setup.py bdist_wheel
+#run:
+#  script:
+    #- python setup.py bdist_wheel
     # an alternative approach is to install and run:
-    - pip install dist/*
+    #- pip install dist/*
     # run the command here
-  artifacts:
-    paths:
-      - dist/*.whl
+#  artifacts:
+#    paths:
+#      - dist/*.whl
 
-pages:
-  script:
-    - pip install sphinx sphinx-rtd-theme
-    - cd doc
-    - make html
-    - mv build/html/ ../public/
-  artifacts:
-    paths:
-      - public
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+

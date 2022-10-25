@@ -226,6 +226,26 @@ class Datenbank:
                 conn.commit()
                 conn.close()
 
+
+     def getFilePathOfObject(self,file):
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            old_file = self.checkIfHashExists(file,cur)
+
+            if old_file is None:
+                originNameFiles = self.checkIfOriginNameExists(file,cur)
+
+                #if even the origin name dies not exist, then file need a full backup
+                if originNameFiles is None:
+                    return None
+                else:
+                    return originNameFiles[0].blobs[0].sourcePath + "/" + originNameFiles[0].blobs[0].origin_name
+                
+            else:
+                return old_file.blobs[0].source_path + "/" + old_file.blobs[0].origin_name
+
+
      def addToDataBase(self, jewel, file):
         conn = self.create_connection('datenbank.db')
         if conn != None:

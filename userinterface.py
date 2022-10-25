@@ -26,10 +26,7 @@ def show_all_jewels():
 
     else: console.print("No jewels have been created by the user yet")
     
-   
-   
 
-# _(self,id, blobs, birth):
 
 def show_all_files():
     daten = Datenbank()
@@ -47,6 +44,21 @@ def show_all_files():
     else: console.print("No files have been created by the user yet")
 
 
+def show_all_blobs():
+    daten = Datenbank()
+    blobs = daten.get_all_Blobs()
+    console = Console()
+
+    if blobs is not None:
+        table = Table(title="All Files")
+        table.add_column("File ID", justify="left", style="black", no_wrap=True)
+        table.add_column("Number of BackUps", justify="left", style="black", no_wrap=True)
+        table.add_column("File birth", justify="left", style="black", no_wrap=True)
+
+    for blob in blobs:
+
+
+
 # Hier startet das Programm
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Dies ist eine Beschreibung des Programms",
@@ -54,8 +66,19 @@ if __name__ == "__main__":
     parser.add_argument('-sJ', type=str, help='Show Jewels')
     parser.add_argument('-sF', type=str, help='Show Files')
     parser.add_argument('-sB', type=str, help='Show Blobs')
-
-
-
+# -sJ 4 -sB 5 
     arglist = sys.argv
-    if arglist[1] == '-sJ': show_all_jewels()
+    is_number = bool(0)
+    number = 0
+
+    for arg in arglist:
+         if arglist[1] == '-sJ' and last_input is None : last_input = 0
+         if arglist[1] == '-sF' and last_input is None : last_input = 1
+         if arglist[1] == '-sB' and last_input is None : last_input = 2
+
+         if last_input is not None:
+             is_number = any(char.isdigit() for char in arg)
+             if is_number:
+                print("Test")
+
+   

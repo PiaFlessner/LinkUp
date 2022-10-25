@@ -1,9 +1,9 @@
 class File:
-    def __init__(self, name, f_hash, f_size, creation_date, modify):
+    def __init__(self, name, f_hash, f_size, birth, modify):
         self.name = name
         self.f_hash = f_hash
         self.f_size = f_size
-        self.creation_date = creation_date
+        self.birth = birth
         self.modify = modify
 
     def get_f_name(self):
@@ -16,7 +16,7 @@ class File:
         return self.f_size
 
     def get_creation_date(self):
-        return self.creation_date
+        return self.birth
 
     def get_modify(self):
         return self.modify

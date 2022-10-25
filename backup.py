@@ -6,7 +6,7 @@ import sys
 from datenbank import Blob, Datenbank
 from datenbank import Jewel
 from datenbank import File
-import file
+import file as mirco_file
 import argparse
 import datetime
 # from genericpath import isfile
@@ -20,7 +20,7 @@ def get_metadata(filepath: str):
     size = stats.st_size / 1024  # file size in kb
     birth = datetime.datetime.fromtimestamp(stats.st_ctime)
     modify = datetime.datetime.fromtimestamp(stats.st_mtime)
-    file_object = file.File(filepath, checksum, size, birth, modify)
+    file_object = mirco_file.File(filepath, checksum, size, birth, modify)
     return file_object
 
 
@@ -33,35 +33,67 @@ def calculate_checksum(filename: str):
 
 # Hier startet das Programm
 if __name__ == "__main__":
+
+    # Initialisierung des Parsers
     parser = argparse.ArgumentParser(description="Dies ist eine Beschreibung des Programms",
                                      epilog="Dies ist der Epilog")
+
+    # Zuweisung von möglichen arguments
     parser.add_argument('-f', type=str, help='File input')
+    parser.add_argument('-d', type=str, help='Directory input')
+
+    # Arguments einlesen und in Liste schreiben
     args = parser.parse_args()
     arglist = sys.argv
-    if arglist[1] == '-f':
-        filepath = arglist[2]
 
-        # filepath = "/home/mirco/Gitlab/ProjektgruppeBackup/projektgruppe/test.txt"
-        data = pathlib.Path(filepath)
-        if data.exists():
-            file_obj = get_metadata(filepath)
-            print(file_obj.get_f_name())
-            print(file_obj.get_f_hash())
-            filesize = str(file_obj.get_f_size())
-            print(filesize, "kb")
-            print(file_obj.get_creation_date())
-            print(file_obj.get_modify())
+    if len(arglist) > 1:
+        # TODO: Mirco Argument System ueberarbeiten
+        if arglist[1] == '-f':
+            pass
+        elif arglist[1] == '-d':
+            # home/ole/backupTest
+            filepath = arglist[2]
+            fullBackup = filepath + '/fullBackup'
+            pathExists = os.path.exists(fullBackup)
+            if pathExists:
+                # Create differential backup
+                # rsync -aAXv --delete --compare-dest=/home/ole/backupTest/fullBackup jewels backup.0
+                # TODO: remove n Flag
+                subprocessReturn = subprocess.Popen('rsync -aAXn --out-format=''%n'' --compare-dest='
+                                                    '/home/ole/backupTest/fullBackup jewels backup.0 ',
+                                                    shell=True, cwd='/home/ole/backupTest',
+                                                    stdout=subprocess.PIPE)
+                output = subprocessReturn.stdout.read()
+                output = output.decode('utf-8')
+                outputArray = output.splitlines()
+                current_source_path = None
+                print("--------------------------------")
+                # Jewel = das hier will ich Backupen
+                jewel = Jewel(0, None, datetime.datetime.now(), filepath)
 
-            subprocess.run('./backup.sh backup_dir', shell=True, cwd=pathlib.Path().absolute())
-
-            jewel = Jewel(1,"",datetime.datetime.now(),filepath)
-            blob = Blob(1,1,file_obj.f_hash,file_obj.name,file_obj.f_size,datetime.datetime.now(),file_obj.creation_date,None,file_obj.modify,0)
-            blobs = [blob]
-            file = File(1, filepath, "",file_obj.name, blobs)
-
-            datenbank = Datenbank()
-            datenbank.addToDataBase(jewel,file)
+                for line in outputArray:
+                    if line.endswith('/'):
+                        current_source_path = line
+                        # print(line)
+                    else:
+                        file_object = get_metadata(filepath + '/' + line)
+                        # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
+                        file_name = line.rsplit('/', 1)[1]
+                        blob = Blob(0, 0, file_object.f_hash, file_object.name, file_object.f_size,
+                                    datetime.datetime.now(), None, file_object.modify, 0, file_name,
+                                    current_source_path, 'backup.0')
+                        file = File(0, [blob], file_object.birth)
+                        datenbank = Datenbank()
+                        result = datenbank.addToDataBase(jewel, file)
+                        print(result)
+                        pass
+                print("--------------------------------")
+                print("Path exists")
+            else:
+                print("Creating full backup:")
+                print("")
+                subprocess.run('rsync -aAXv --delete jewels fullBackup', shell=True, cwd='/home/ole/backupTest')
         else:
-            print("No file")
+            print("error: unknown option")
     else:
-        print("unknown option")
+        print("error: no argument")

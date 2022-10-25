@@ -5,9 +5,7 @@ import sys
 from rich.console import Console
 from rich.table import Table
 
-last_input = None
 
-# self,id,comment, monitoring_Startdate, jewelSource):
 def show_all_jewels():
     daten = Datenbank()
     jewels = daten.get_all_Jewels()
@@ -22,9 +20,12 @@ def show_all_jewels():
 
         for jewel in jewels:
             table.add_row(str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource))
+        
+        console.print("\n")
         console.print(table)
 
-    else: console.print("No jewels have been created by the user yet")
+    else: 
+        console.print("\nNo jewels have been created by the user yet")
     
 
 
@@ -41,9 +42,11 @@ def show_all_files():
 
         for file in files:
             table.add_row(str(file.id), str(len(file.blobs)), str(file.birth))
+        console.print("\n")
         console.print(table)
         
-    else: console.print("No files have been created by the user yet")
+    else: 
+        console.print("\nNo files have been created by the user yet")
 
 
 def show_all_blobs():
@@ -53,27 +56,26 @@ def show_all_blobs():
 
     if blobs is not None:
         table = Table(title="All Blobs")
-        table2 = Table(title="All Blobs")
-        table.add_column("Blob ID", justify="left", style="black", no_wrap=True)
-        table.add_column("File version", justify="left", style="black", no_wrap=True)
-        table.add_column("Hash", justify="left", style="black", no_wrap=True)
-        table.add_column("Name", justify="left", style="black", no_wrap=True)
-        table.add_column("File size", justify="left", style="black", no_wrap=True)
-        table.add_column("Creationdate", justify="left", style="black", no_wrap=True)
-        table2.add_column("Change", justify="left", style="black", no_wrap=True)
-        table2.add_column("Modify", justify="left", style="black", no_wrap=True)
-        table2.add_column("File ID", justify="left", style="black", no_wrap=True)
-        table2.add_column("Origin name", justify="left", style="black", no_wrap=True)
-        table2.add_column("Source path", justify="left", style="black", no_wrap=True)
-        table2.add_column("Store destination", justify="left", style="black", no_wrap=True)
+        table.add_column("Blob ID", justify="left", style="black", no_wrap=False)
+        table.add_column("File version", justify="left", style="black", no_wrap= False)
+        table.add_column("Hash", justify="left", style="black", no_wrap= False)
+        table.add_column("Name", justify="left", style="black", no_wrap= False)
+        table.add_column("File size", justify="left", style="black", no_wrap= False)
+        table.add_column("Creationdate", justify="left", style="black", no_wrap=False)
+        table.add_column("Change", justify="left", style="black", no_wrap= False)
+        table.add_column("Modify", justify="left", style="black", no_wrap= False)
+        table.add_column("File ID", justify="left", style="black", no_wrap=False)
+        table.add_column("Origin name", justify="left", style="black", no_wrap= False)
+        table.add_column("Source path", justify="left", style="black", no_wrap=False)
+        table.add_column("Store destination", justify="left", style="black", no_wrap=False)
 
         for blob in blobs:
-            table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate))
-            table2.add_row(str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination))
+            table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate),
+           str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination))
+        console.print("\n")
         console.print(table)
-        console.print(table2)
 
-    else: console.print("No blobs have been created by the user yet")
+    else: console.print("\nNo blobs have been created by the user yet")
 
 def show_jewel_via_id(id):
     daten = Datenbank()
@@ -88,8 +90,22 @@ def show_jewel_via_id(id):
         table.add_column("Monitoring startdate", justify="left", style="black", no_wrap=True)
         table.add_column("Source of the jewel", justify="left", style="black", no_wrap=True)
         table.add_row(str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource))
+        filetable = Table(title= "Files of the jewel " + str(id))
+        files = daten.get_Files_via_jewel_id(id)
+        filetable.add_column("File ID", justify="left", style="black", no_wrap=True)
+        filetable.add_column("Number of BackUps", justify="left", style="black", no_wrap=True)
+        filetable.add_column("File birth", justify="left", style="black", no_wrap=True)
+
+        for file in files:
+            filetable.add_row(str(file.id), str(len(file.blobs)), str(file.birth))
+
+        console.print("\n")
         console.print(table)
-    else: console.print("There is no file with the id " + str(id))
+        console.print("\n")
+        console.print(filetable)
+
+
+    else: console.print("\nThere is no jewel with the id " + str(id))
 
 
 def show_file_via_id (id):
@@ -104,29 +120,31 @@ def show_file_via_id (id):
         table.add_column("Number of BackUps", justify="left", style="black", no_wrap=True)
         table.add_column("File birth", justify="left", style="black", no_wrap=True)
         table.add_row(str(file.id), str(len(file.blobs)), str(file.birth))
+        console.print("\n")
         console.print(table)
 
         blobtable = Table(title= "Blobs of the file " + str(id))
-        blobtable2 = Table(title= "Blobs of the file " + str(id))
-        blobtable.add_column("Blob ID", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("File version", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("Hash", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("Name", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("File size", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("Creationdate", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("Change", justify="left", style="black", no_wrap=True)
-        blobtable2.add_column("Modify", justify="left", style="black", no_wrap=True)
-        blobtable2.add_column("File ID", justify="left", style="black", no_wrap=True)
-        blobtable2.add_column("Origin name", justify="left", style="black", no_wrap=True)
-        blobtable2.add_column("Source path", justify="left", style="black", no_wrap=True)
-        blobtable2.add_column("Store destination", justify="left", style="black", no_wrap=True)
+        blobtable.add_column("Blob ID", justify="left", style="black", no_wrap=False)
+        blobtable.add_column("File version", justify="left", style="black", no_wrap= False)
+        blobtable.add_column("Hash", justify="left", style="black", no_wrap= False)
+        blobtable.add_column("Name", justify="left", style="black", no_wrap= False)
+        blobtable.add_column("File size", justify="left", style="black", no_wrap= False)
+        blobtable.add_column("Creationdate", justify="left", style="black", no_wrap= False)
+        blobtable.add_column("Change", justify="left", style="black", no_wrap= False)
+        blobtable.add_column("Modify", justify="left", style="black", no_wrap= False)
+        blobtable.add_column("File ID", justify="left", style="black", no_wrap= False)
+        blobtable.add_column("Origin name", justify="left", style="black", no_wrap=False)
+        blobtable.add_column("Source path", justify="left", style="black", no_wrap=False)
+        blobtable.add_column("Store destination", justify="left", style="black", no_wrap=False)
 
         for blob in file.blobs:
-            blobtable.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate))
-            blobtable2.add_row(str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
+            blobtable.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate),
+            str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
+        
+        console.print("\n")
         console.print(blobtable)
 
-    else: console.print("There is no file with the id " + str(id))
+    else: console.print("\nThere is no file with the id " + str(id))
 
 
 
@@ -136,33 +154,31 @@ def show_blob_via_id (id):
      text = "Blob: " + str(id)
      console = Console()
 
-# (id, number, hash, name, fileSize, creationDate, change, modify,  iD_File, origin_name, source_path, store_destination ):
      if blob is not None:
         table = Table(title=text)
-        table2 = Table(title=text)
         table.add_column("Blob ID", justify="left", style="black", no_wrap=True)
         table.add_column("File version", justify="left", style="black", no_wrap=True)
         table.add_column("Hash", justify="left", style="black", no_wrap=True)
         table.add_column("Name", justify="left", style="black", no_wrap=True)
         table.add_column("File size", justify="left", style="black", no_wrap=True)
         table.add_column("Creationdate", justify="left", style="black", no_wrap=True)
-        table2.add_column("Change", justify="left", style="black", no_wrap=True)
-        table2.add_column("Modify", justify="left", style="black", no_wrap=True)
-        table2.add_column("File ID", justify="left", style="black", no_wrap=True)
-        table2.add_column("Origin name", justify="left", style="black", no_wrap=True)
-        table2.add_column("Source path", justify="left", style="black", no_wrap=True)
-        table2.add_column("Store destination", justify="left", style="black", no_wrap=True)
-        table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate))
-        table2.add_row(str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
+        table.add_column("Change", justify="left", style="black", no_wrap=True)
+        table.add_column("Modify", justify="left", style="black", no_wrap=True)
+        table.add_column("File ID", justify="left", style="black", no_wrap=True)
+        table.add_column("Origin name", justify="left", style="black", no_wrap=True)
+        table.add_column("Source path", justify="left", style="black", no_wrap=True)
+        table.add_column("Store destination", justify="left", style="black", no_wrap=True)
+        table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate),
+        str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
+        console.print("\n")
         console.print(table)
-        console.print(table2)
-     else:  console.print("There is no blob with the id " + str(id))
-
-
+     else:  
+        console.print("\nThere is no blob with the id " + str(id))
 
 
 # Hier startet das Programm
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser(description="Dies ist eine Beschreibung des Programms",
                                      epilog="Dies ist der Epilog")
     parser.add_argument('-sJ', type=str, help='Show Jewels')
@@ -170,14 +186,18 @@ if __name__ == "__main__":
     parser.add_argument('-sB', type=str, help='Show Blobs')
 
     arglist = sys.argv
-    is_number = bool(0)
-    number = 0
+    if len(arglist) != 1:
+        if len(arglist) == 2: 
+            if arglist[1] == '-sJ' : show_all_jewels()
+            if arglist[1] == '-sF' : show_all_files()
+            if arglist[1] == '-sB': show_all_blobs()
+        else: 
+            # Prüft, ob das dritte Argument eine Zahl ist
+            if (any(char.isdigit() for char in arglist[2])):
+                number = int(arglist[2])
+                if arglist[1] == '-sJ' : show_jewel_via_id(number)
+                if arglist[1] == '-sF' : show_file_via_id(number)
+                if arglist[1] == '-sB': show_blob_via_id(number)
 
-    for arg in arglist:
-         if arglist[1] == '-sJ' and last_input is None : last_input = 0
-         if arglist[1] == '-sF' and last_input is None : last_input = 1
-         if arglist[1] == '-sB' and last_input is None : last_input = 2
 
-
-
-   
+    

@@ -209,18 +209,19 @@ class Datenbank:
                                     Name TEXT NOT NULL,
                                     FileSize INTEGER NOT NULL,
                                     CreationDate TIMESTAMP,
-                                    Origin_Name TEXT NOT NULL,
-                                    Source_Path TEXT NOT NULL,
-                                    Store_Destination TEXT NOT NULL,
                                     Change TIMESTAMP,
                                     Modify TIMESTAMP,
                                     ID_File INTEGER NOT NULL,
-
+                                    Origin_Name TEXT NOT NULL,
+                                    Source_Path TEXT NOT NULL,
+                                    Store_Destination TEXT NOT NULL,
                                     constraint file_blob_fk
                                     FOREIGN KEY (ID_File)
                                         REFERENCES File(ID)
                                                    
                                              );""")
+
+                                             # Number, Hash, Name, FileSize, CreationDate, Change, Modify, ID_File, Origin_Name, Source_Path, Store_Destination
   
                 conn.commit()
                 conn.close()
@@ -537,7 +538,7 @@ class Datenbank:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Blob WHERE ID= ?", [id])
             row = cur.fetchone()
-            blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])    
+            if blob is not None: blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])    
             conn.commit()
             conn.close()
         return blob

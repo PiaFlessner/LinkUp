@@ -53,21 +53,25 @@ def show_all_blobs():
 
     if blobs is not None:
         table = Table(title="All Blobs")
+        table2 = Table(title="All Blobs")
         table.add_column("Blob ID", justify="left", style="black", no_wrap=True)
         table.add_column("File version", justify="left", style="black", no_wrap=True)
+        table.add_column("Hash", justify="left", style="black", no_wrap=True)
+        table.add_column("Name", justify="left", style="black", no_wrap=True)
         table.add_column("File size", justify="left", style="black", no_wrap=True)
         table.add_column("Creationdate", justify="left", style="black", no_wrap=True)
-        table.add_column("Change", justify="left", style="black", no_wrap=True)
-        table.add_column("Modify", justify="left", style="black", no_wrap=True)
-        table.add_column("File ID", justify="left", style="black", no_wrap=True)
-        table.add_column("Origin name", justify="left", style="black", no_wrap=True)
-        table.add_column("Source path", justify="left", style="black", no_wrap=True)
-        table.add_column("Store destination", justify="left", style="black", no_wrap=True)
+        table2.add_column("Change", justify="left", style="black", no_wrap=True)
+        table2.add_column("Modify", justify="left", style="black", no_wrap=True)
+        table2.add_column("File ID", justify="left", style="black", no_wrap=True)
+        table2.add_column("Origin name", justify="left", style="black", no_wrap=True)
+        table2.add_column("Source path", justify="left", style="black", no_wrap=True)
+        table2.add_column("Store destination", justify="left", style="black", no_wrap=True)
 
         for blob in blobs:
-            table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate), str(blob.change),
-            str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
+            table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate))
+            table2.add_row(str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination))
         console.print(table)
+        console.print(table2)
 
     else: console.print("No blobs have been created by the user yet")
 
@@ -103,20 +107,23 @@ def show_file_via_id (id):
         console.print(table)
 
         blobtable = Table(title= "Blobs of the file " + str(id))
+        blobtable2 = Table(title= "Blobs of the file " + str(id))
         blobtable.add_column("Blob ID", justify="left", style="black", no_wrap=True)
         blobtable.add_column("File version", justify="left", style="black", no_wrap=True)
+        blobtable.add_column("Hash", justify="left", style="black", no_wrap=True)
+        blobtable.add_column("Name", justify="left", style="black", no_wrap=True)
         blobtable.add_column("File size", justify="left", style="black", no_wrap=True)
         blobtable.add_column("Creationdate", justify="left", style="black", no_wrap=True)
         blobtable.add_column("Change", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("Modify", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("File ID", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("Origin name", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("Source path", justify="left", style="black", no_wrap=True)
-        blobtable.add_column("Store destination", justify="left", style="black", no_wrap=True)
+        blobtable2.add_column("Modify", justify="left", style="black", no_wrap=True)
+        blobtable2.add_column("File ID", justify="left", style="black", no_wrap=True)
+        blobtable2.add_column("Origin name", justify="left", style="black", no_wrap=True)
+        blobtable2.add_column("Source path", justify="left", style="black", no_wrap=True)
+        blobtable2.add_column("Store destination", justify="left", style="black", no_wrap=True)
 
         for blob in file.blobs:
-            blobtable.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate), str(blob.change),
-            str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
+            blobtable.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate))
+            blobtable2.add_row(str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
         console.print(blobtable)
 
     else: console.print("There is no file with the id " + str(id))
@@ -129,27 +136,30 @@ def show_blob_via_id (id):
      text = "Blob: " + str(id)
      console = Console()
 
+# (id, number, hash, name, fileSize, creationDate, change, modify,  iD_File, origin_name, source_path, store_destination ):
      if blob is not None:
         table = Table(title=text)
+        table2 = Table(title=text)
         table.add_column("Blob ID", justify="left", style="black", no_wrap=True)
         table.add_column("File version", justify="left", style="black", no_wrap=True)
+        table.add_column("Hash", justify="left", style="black", no_wrap=True)
+        table.add_column("Name", justify="left", style="black", no_wrap=True)
         table.add_column("File size", justify="left", style="black", no_wrap=True)
         table.add_column("Creationdate", justify="left", style="black", no_wrap=True)
-        table.add_column("Change", justify="left", style="black", no_wrap=True)
-        table.add_column("Modify", justify="left", style="black", no_wrap=True)
-        table.add_column("File ID", justify="left", style="black", no_wrap=True)
-        table.add_column("Origin name", justify="left", style="black", no_wrap=True)
-        table.add_column("Source path", justify="left", style="black", no_wrap=True)
-        table.add_column("Store destination", justify="left", style="black", no_wrap=True)
-        table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate), str(blob.change),
-            str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
+        table2.add_column("Change", justify="left", style="black", no_wrap=True)
+        table2.add_column("Modify", justify="left", style="black", no_wrap=True)
+        table2.add_column("File ID", justify="left", style="black", no_wrap=True)
+        table2.add_column("Origin name", justify="left", style="black", no_wrap=True)
+        table2.add_column("Source path", justify="left", style="black", no_wrap=True)
+        table2.add_column("Store destination", justify="left", style="black", no_wrap=True)
+        table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate))
+        table2.add_row(str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
         console.print(table)
+        console.print(table2)
      else:  console.print("There is no blob with the id " + str(id))
 
 
 
-
-# self,id, number, hash, name, fileSize, creationDate, change, modify,  iD_File, origin_name, source_path, store_destination ):
 
 # Hier startet das Programm
 if __name__ == "__main__":
@@ -168,6 +178,6 @@ if __name__ == "__main__":
          if arglist[1] == '-sF' and last_input is None : last_input = 1
          if arglist[1] == '-sB' and last_input is None : last_input = 2
 
-     
+
 
    

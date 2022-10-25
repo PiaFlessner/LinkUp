@@ -530,4 +530,17 @@ class Datenbank:
             conn.close()
         return blobs
             
+     def get_Blob_via_id(self, id):
+        blob = None
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Blob WHERE ID= ?", [id])
+            row = cur.fetchone()
+            blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])    
+            conn.commit()
+            conn.close()
+        return blob
+            
+
 

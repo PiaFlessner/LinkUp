@@ -1,3 +1,4 @@
+from curses.ascii import isdigit
 from datenbank import *
 import argparse
 import datetime
@@ -186,18 +187,22 @@ if __name__ == "__main__":
     parser.add_argument('-sB', type=str, help='Show Blobs')
 
     arglist = sys.argv
-    if len(arglist) != 1:
-        if len(arglist) == 2: 
-            if arglist[1] == '-sJ' : show_all_jewels()
-            if arglist[1] == '-sF' : show_all_files()
-            if arglist[1] == '-sB': show_all_blobs()
-        else: 
-            # Prüft, ob das dritte Argument eine Zahl ist
-            if (any(char.isdigit() for char in arglist[2])):
-                number = int(arglist[2])
-                if arglist[1] == '-sJ' : show_jewel_via_id(number)
-                if arglist[1] == '-sF' : show_file_via_id(number)
-                if arglist[1] == '-sB': show_blob_via_id(number)
+    length = len(arglist)
+    for i in range (1, length-1): #-1, weil wir dann problemlos auf i+1 zugreifen können.
+        if arglist[i+1].isnumeric() : 
+            number = int(arglist[i+1]) 
+            if arglist[i] == '-sJ' : show_jewel_via_id(number)
+            elif arglist[i] == '-sF' : show_file_via_id(number)
+            elif arglist[i] == '-sB' : show_blob_via_id(number)
+        elif arglist[i] == '-sJ' : show_all_jewels()
+        elif arglist[i] == '-sF' : show_all_files()
+        elif arglist[i] == '-sB': show_all_blobs()
+        
+    #übrig bleibt das letzte Argument. Da es das letzte Argument ist, kann keine Zahl mehr folgen..
+    if arglist[length-1] == '-sJ' : show_all_jewels()
+    if arglist[length-1] == '-sF' : show_all_files()
+    if arglist[length-1] == '-sB': show_all_blobs()
+    if length == 1 : print("Too few arguments. Need at least 1") #vielleicht sollte diese Zeile über die for Schleife verschoben werden
 
 
     

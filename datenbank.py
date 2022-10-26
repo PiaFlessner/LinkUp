@@ -558,7 +558,7 @@ class Datenbank:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Blob WHERE ID= ?", [id])
             row = cur.fetchone()
-            if blob is not None: blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])    
+            if row is not None: blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])    
             conn.commit()
             conn.close()
         return blob

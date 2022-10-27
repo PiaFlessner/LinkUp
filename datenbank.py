@@ -3,6 +3,7 @@ import itertools
 import sqlite3
 from os.path import exists as file_exists
 from unicodedata import numeric
+import uuid
 
 class Jewel:
 
@@ -183,8 +184,8 @@ class Datenbank:
                                                  );""")
 
                 cur.execute("""CREATE TABLE File (
+                                    ID TEXT NOT NULL PRIMARY KEY
                                     Birth TIMESTAMP NOT NULL,
-                                    ID INTEGER NOT NULL PRIMARY KEY
                                                 );""")        
             
                 cur.execute("""CREATE TABLE Jewel_File_Assignment (
@@ -224,11 +225,12 @@ class Datenbank:
                 conn.close()
 
      def set_uri(self, file, device_name, file_path, file_name):
-        uri = device_name + file_path + file_name
-        file.id = uri
+        uri = uuid.uuid3(uuid.NAMESPACE_OID, device_name + file_path + file_name)
+        #uri = device_name + file_path + file_name
+        file.id = uri.int
             
-     def addToDataBase(self, jewel, file, device_name, file_path, file_name):
-        self.set_uri(file, device_name, file_path, file_name)
+     def add_to_database(self, jewel, file, device_name):
+        self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
 
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -245,26 +247,27 @@ class Datenbank:
                     self.addJewelFileAssignment(jewel.id,file.id)
                 # no uri but existing hash
                 else:
-                    return False
+                    self.addJewelFileAssignment(jewel.id, old_file.id)
 
             #uri  
             else:
             ##has old_file a blob with same hash?
                 for blob in old_file.blobs:
                 ## asa blob is same, does not need to be inserted. Its already existing
-                    if blob == file.blobs[0]:
+                    if blob.hash == file.blobs[0].hash:
                         self.addJewelFileAssignment(jewel.id, old_file.id)
-                        return False          
+                        return False
+                #if no hash exists then add new blob
                 self.insert_new_blob_to_existing_file(file,cur,conn,old_file)
                 self.addJewelFileAssignment(jewel.id,old_file.id)
                 return True
         else:
-            pass
+            raise ValueError('No Connection to Database')
 
     
      def check_if_uri_exists(self,file,cur):
         command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID = ?"""
-        params = (file.id)
+        params = (file.id,)
         cur.execute(command, params)
         data = cur.fetchall()
 

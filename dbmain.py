@@ -1,13 +1,14 @@
 import datetime
 from datenbank import *
 from datetime import datetime as date
+import platform
 
 samedate0 = date(2013,1,1,0,0,0)
 samedate1 = date(2013,2,1,0,0,0)
 samedate2 = date(2013,3,1,0,0,0)
 
-jewel = Jewel(1, None, date.today(), "test")
-jewel2 = Jewel(1, None, date.today(), "hi")
+jewel = Jewel(1, "1. Jewel", date.today(), "test")
+jewel2 = Jewel(1, "2. Jewel", date.today(), "hi")
 jewel3 = Jewel(1,"3. Jewel", date.today(), "3.")
 
 
@@ -34,18 +35,17 @@ daten = Datenbank()
 #%%
 #Test ob File und backups doppelt hinzugefügt werden.
 #hinzufügen von jewel
-#daten.addToDataBase(jewel,file1)
-result = daten.addToDataBase(jewel2, file1) #true expected (first run)
+result = daten.add_to_database(jewel2, file1, platform.node()) #true expected (first run)
 print(result)
-result = daten.addToDataBase(jewel2, file1v2) #true expected (first run)
+result = daten.add_to_database(jewel2, file1v2, platform.node()) #true expected (first run)
 print(result)
-result = daten.addToDataBase(jewel, file1v3) #true expected (first run)
+result = daten.add_to_database(jewel, file1v3, platform.node()) #true expected (first run)
 print(result)
-result = daten.addToDataBase(jewel2, file1v3) #false expected (first run)
+result = daten.add_to_database(jewel2, file1v3, platform.node()) #false expected (first run)
 print(result)
-result = daten.addToDataBase(jewel, file2) #true expected (first run)
+result = daten.add_to_database(jewel, file2, platform.node()) #true expected (first run)
 print(result)
-result = daten.addToDataBase(jewel2, file1v3) #false expected (first run)
+result = daten.add_to_database(jewel2, file1v3, platform.node()) #false expected (first run)
 print(result)
 
  

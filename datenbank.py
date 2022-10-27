@@ -72,16 +72,16 @@ class Blob:
     def __init__(self,id, number, hash, name, fileSize, creationDate, change, modify,  iD_File, origin_name, source_path, store_destination ):
         self.id = id
         self.number = number
-        self.hash = hash
-        self.name = name
+        self.hash = str(hash)
+        self.name = str(name)
         self.fileSize = fileSize
         self.creationDate = creationDate
         self.change = change
         self.modify = modify
         self.iD_File = iD_File
-        self.origin_name = origin_name
-        self.store_destination = store_destination
-        self.source_path = source_path
+        self.origin_name = str(origin_name)
+        self.store_destination = str(store_destination)
+        self.source_path = str(source_path)
 
     def get_id(self):
         return self.id
@@ -184,8 +184,8 @@ class Datenbank:
                                                  );""")
 
                 cur.execute("""CREATE TABLE File (
-                                    ID TEXT NOT NULL PRIMARY KEY
-                                    Birth TIMESTAMP NOT NULL,
+                                    ID TEXT NOT NULL PRIMARY KEY,
+                                    Birth TIMESTAMP NOT NULL
                                                 );""")        
             
                 cur.execute("""CREATE TABLE Jewel_File_Assignment (
@@ -225,12 +225,14 @@ class Datenbank:
                 conn.close()
 
      def set_uri(self, file, device_name, file_path, file_name):
-        uri = uuid.uuid3(uuid.NAMESPACE_OID, device_name + file_path + file_name)
-        #uri = device_name + file_path + file_name
-        file.id = uri.int
+        #uri = uuid.uuid3(uuid.NAMESPACE_OID, device_name + file_path + file_name)
+        uri = device_name + file_path + file_name
+        file.id = uri
             
      def add_to_database(self, jewel, file, device_name):
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
+
+        jewel.id = self.addJewel(jewel)
 
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -245,9 +247,11 @@ class Datenbank:
                     self.insert_File(file, cur,conn)
                     self.insert_first_Blob(file,cur,conn)
                     self.addJewelFileAssignment(jewel.id,file.id)
+                    return True
                 # no uri but existing hash
                 else:
                     self.addJewelFileAssignment(jewel.id, old_file.id)
+                    return False
 
             #uri  
             else:
@@ -276,8 +280,8 @@ class Datenbank:
 
         ##create file from data
         blobs = []
-        for row in data:
-            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[11], row[12],row[13], row[8], row[9],row[10]))
+        for row in data:                      
+            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12], row[13] ))
         file = File(data[0][0],blobs,data[0][1])
         return file
 
@@ -318,7 +322,7 @@ class Datenbank:
         ##create file from data
         blobs = []
         for row in data:
-            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[11], row[12],row[13], row[8], row[9],row[10]))
+            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12], row[13]))
         file = File(data[0][0],blobs,data[0][1])
         return file
 

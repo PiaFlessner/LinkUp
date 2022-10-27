@@ -39,7 +39,7 @@ result = daten.add_to_database(jewel2, file1, platform.node()) #true expected (f
 print(result)
 result = daten.add_to_database(jewel2, file1v2, platform.node()) #true expected (first run)
 print(result)
-result = daten.add_to_database(jewel, file1v3, platform.node()) #true expected (first run)
+result = daten.add_to_database(jewel, file1v3, platform.node()) #false expected (first run)
 print(result)
 result = daten.add_to_database(jewel2, file1v3, platform.node()) #false expected (first run)
 print(result)
@@ -47,5 +47,7 @@ result = daten.add_to_database(jewel, file2, platform.node()) #true expected (fi
 print(result)
 result = daten.add_to_database(jewel2, file1v3, platform.node()) #false expected (first run)
 print(result)
+
+##after first run all inserts should return false
 
  

@@ -16,7 +16,7 @@ class TreeTraversal:
     
     
     # Parameter: Gewünschten files in Liste, Ordner, Dateien löschen mit gewünschten start Zeichen, Dateien löschen mit gewünschten ende Zeichen
-    def deleteFiles(self, toDeleteFiles : list, directory : list, start : str, end : str): 
+    def deleteFiles(self, toDeleteFiles : list, directorys : list, start : str, end : str): 
         if not os.path.exists("/home/fatih/backupDestination"): # shutil kann keine Kopie erstellen wenn das Verzeichnis bereits existiert
             shutil.copytree(self.dirName, "/home/fatih/backupDestination") # bevor wir Daten löschen wird das Verzeichnis Kopiert
 
@@ -26,8 +26,8 @@ class TreeTraversal:
                     os.remove(os.path.join(root, file))
                 
             for dir in dirs:    
-                if directory == dir:
-                    os.rmdir(os.path.join(root, directory))
+                if dir in directorys:
+                    os.rmdir(os.path.join(root, dir))
         
     # Ausgabe des Target Verzeichnis ohne Gelöschter Files             
     def printTree(self):

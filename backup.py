@@ -1,7 +1,6 @@
 import subprocess
 import os
 import hashlib
-import pathlib
 import sys
 from datenbank import Blob, Datenbank
 from datenbank import Jewel
@@ -9,19 +8,18 @@ from datenbank import File
 import file as mirco_file
 import argparse
 import datetime
-# from genericpath import isfile
 
 
 # Mirco: Methode um Metadaten der Datei zu erhalten
 # gibt ein Object vom Typ File zurück. Getter sind geschrieben, können in Datenbank importiert werden
-def get_metadata(filepath: str):
-    stats = os.stat(filepath)
-    checksum = calculate_checksum(filepath)
+def get_metadata(filepth: str):
+    stats = os.stat(filepth)
+    checksum = calculate_checksum(filepth)
     size = stats.st_size / 1024  # file size in kb
     birth = datetime.datetime.fromtimestamp(stats.st_ctime)
     modify = datetime.datetime.fromtimestamp(stats.st_mtime)
-    file_object = mirco_file.File(filepath, checksum, size, birth, modify)
-    return file_object
+    file_obj = mirco_file.File(filepth, checksum, size, birth, modify)
+    return file_obj
 
 
 def calculate_checksum(filename: str):
@@ -47,6 +45,11 @@ if __name__ == "__main__":
     arglist = sys.argv
 
     if len(arglist) > 1:
+        # Ermitteln des aktuellen Datums um den Ordner des neusten Backups festzulegen
+        current_date_time = datetime.datetime.now()
+        current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
+        new_backup_location = f"backup-{current_date_time_formatted}"
+
         # TODO: Mirco Argument System ueberarbeiten
         if arglist[1] == '-f':
             pass
@@ -59,9 +62,10 @@ if __name__ == "__main__":
                 # Create differential backup
                 # rsync -aAXv --delete --compare-dest=/home/ole/backupTest/fullBackup jewels backup.0
                 # TODO: remove n Flag
-                subprocessReturn = subprocess.Popen('rsync -aAXn --out-format=''%n'' --compare-dest='
-                                                    '/home/ole/backupTest/fullBackup jewels backup.0 ',
-                                                    shell=True, cwd='/home/ole/backupTest',
+                subprocessReturn = subprocess.Popen(f"rsync -aAX --out-format='%n' "
+                                                    f"--compare-dest=/home/ole/backupTest/fullBackup jewels "
+                                                    f"{new_backup_location}",
+                                                    shell=True, cwd=filepath,
                                                     stdout=subprocess.PIPE)
                 output = subprocessReturn.stdout.read()
                 output = output.decode('utf-8')
@@ -69,7 +73,7 @@ if __name__ == "__main__":
                 current_source_path = None
                 print("--------------------------------")
                 # Jewel = das hier will ich Backupen
-                jewel = Jewel(0, None, datetime.datetime.now(), filepath)
+                jewel = Jewel(0, None, current_date_time, filepath)
 
                 for line in outputArray:
                     if line.endswith('/'):
@@ -80,8 +84,8 @@ if __name__ == "__main__":
                         # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
                         file_name = line.rsplit('/', 1)[1]
                         blob = Blob(0, 0, file_object.f_hash, file_object.name, file_object.f_size,
-                                    datetime.datetime.now(), None, file_object.modify, 0, file_name,
-                                    current_source_path, 'backup.0')
+                                    current_date_time, None, file_object.modify, 0, file_name,
+                                    current_source_path, new_backup_location)
                         file = File(0, [blob], file_object.birth)
                         datenbank = Datenbank()
                         result = datenbank.addToDataBase(jewel, file)

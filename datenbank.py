@@ -3,6 +3,7 @@ import itertools
 import sqlite3
 from os.path import exists as file_exists
 from unicodedata import numeric
+import uuid
 
 class Jewel:
 
@@ -40,12 +41,11 @@ class Jewel:
 
 class File:
 
-    def __init__(self,id, blobs, birth):
+    def __init__(self, id, blobs, birth):
         self.id = id
         self.blobs = blobs
         self.birth = birth
 
-    
     def get_id(self):
         return self.id
 
@@ -72,16 +72,16 @@ class Blob:
     def __init__(self,id, number, hash, name, fileSize, creationDate, change, modify,  iD_File, origin_name, source_path, store_destination ):
         self.id = id
         self.number = number
-        self.hash = hash
-        self.name = name
+        self.hash = str(hash)
+        self.name = str(name)
         self.fileSize = fileSize
         self.creationDate = creationDate
         self.change = change
         self.modify = modify
         self.iD_File = iD_File
-        self.origin_name = origin_name
-        self.store_destination = store_destination
-        self.source_path = source_path
+        self.origin_name = str(origin_name)
+        self.store_destination = str(store_destination)
+        self.source_path = str(source_path)
 
     def get_id(self):
         return self.id
@@ -184,9 +184,9 @@ class Datenbank:
                                                  );""")
 
                 cur.execute("""CREATE TABLE File (
-                                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                                    ID TEXT NOT NULL PRIMARY KEY,
                                     Birth TIMESTAMP NOT NULL
-                                             );""")        
+                                                );""")        
             
                 cur.execute("""CREATE TABLE Jewel_File_Assignment (
                                     ID_Jewel INTEGER NOT NULL,
@@ -198,7 +198,6 @@ class Datenbank:
                                      constraint jewel_assignment_fk
                                      FOREIGN KEY (ID_Jewel)
                                         REFERENCES Jewel(ID)
-
                                                  );""")
 
 
@@ -218,80 +217,73 @@ class Datenbank:
                                     constraint file_blob_fk
                                     FOREIGN KEY (ID_File)
                                         REFERENCES File(ID)
-                                                   
-                                             );""")
+                                                   );""")
 
                                              # Number, Hash, Name, FileSize, CreationDate, Change, Modify, ID_File, Origin_Name, Source_Path, Store_Destination
   
                 conn.commit()
                 conn.close()
 
-
-     def getFilePathOfObject(self,file):
-        conn = self.create_connection('datenbank.db')
-        if conn != None:
-            cur = conn.cursor()
-            old_file = self.checkIfHashExists(file,cur)
-
-            if old_file is None:
-                originNameFiles = self.checkIfOriginNameExists(file,cur)
-
-                #if even the origin name dies not exist, then file need a full backup
-                if originNameFiles is None:
-                    return None
-                else:
-                    return originNameFiles[0].blobs[0].sourcePath + "/" + originNameFiles[0].blobs[0].origin_name
-                
-            else:
-                return old_file.blobs[0].source_path + "/" + old_file.blobs[0].origin_name
-
-
-     def addToDataBase(self, jewel, file):
-        conn = self.create_connection('datenbank.db')
-        if conn != None:
-            cur = conn.cursor()
-            jewel.id = self.addJewel(jewel)
-            old_file = self.checkIfHashExists(file, cur)
+     def set_uri(self, file, device_name, file_path, file_name):
+        #uri = uuid.uuid3(uuid.NAMESPACE_OID, device_name + file_path + file_name)
+        uri = device_name + file_path + file_name
+        file.id = uri
             
-            #if hash does not exists in db
-            if old_file is None:
-                originNameFiles = self.checkIfOriginNameExists(file, cur)
+     def add_to_database(self, jewel, file, device_name):
+        self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
 
-                #does origin name exists
-                ##disclaimer: As soon as the user inserts a file with a unkown hash AND unkown origin Name, the application
-                ##sees this as a new File!
-                if originNameFiles is None:
-                    file.id = self.insert_File(file, cur,conn)
+        jewel.id = self.addJewel(jewel)
+
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+
+            old_file = self.check_if_uri_exists(file,cur)
+            ## no uri 
+            if old_file is None:
+                old_file = self.check_if_hash_exists(file,cur)
+                ##  no uri and no hash
+                if old_file is None:
+                    self.insert_File(file, cur,conn)
                     self.insert_first_Blob(file,cur,conn)
                     self.addJewelFileAssignment(jewel.id,file.id)
                     return True
-
+                # no uri but existing hash
                 else:
-                    #######################is it really this file?
-                    #####TODO what if there are more files with same origin name and same birth
-                    #####current solution: just insert for every file (wtf)
-                    for element in originNameFiles:
-                        #check if birth is the same, so then it will be **most likely*** be the same file, 
-                        #meaning it could be inserted
-                        if str(file.birth) == str(element.birth):
-                            self.insert_new_blob_to_existing_file(file,cur,conn,element)
-                            self.addJewelFileAssignment(jewel.id,element.id)
-                            return True
+                    self.addJewelFileAssignment(jewel.id, old_file.id)
                     return False
 
-            #if hash is existing, just find out, if something has changed
+            #uri  
             else:
+            ##has old_file a blob with same hash?
                 for blob in old_file.blobs:
-                    ## as soon as there is the same blob, the new blob does not needed to be inserted
-                    ##because its already existing
-                    if blob == file.blobs[0]:
-                        self.addJewelFileAssignment(jewel.id,old_file.id)
+                ## asa blob is same, does not need to be inserted. Its already existing
+                    if blob.hash == file.blobs[0].hash:
+                        self.addJewelFileAssignment(jewel.id, old_file.id)
                         return False
-                    
+                #if no hash exists then add new blob
                 self.insert_new_blob_to_existing_file(file,cur,conn,old_file)
                 self.addJewelFileAssignment(jewel.id,old_file.id)
                 return True
-        return False
+        else:
+            raise ValueError('No Connection to Database')
+
+    
+     def check_if_uri_exists(self,file,cur):
+        command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID = ?"""
+        params = (file.id,)
+        cur.execute(command, params)
+        data = cur.fetchall()
+
+        if len(data) == 0:
+            return None
+
+        ##create file from data
+        blobs = []
+        for row in data:                      
+            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12], row[13] ))
+        file = File(data[0][0],blobs,data[0][1])
+        return file
 
 
      def insert_new_blob_to_existing_file(self,new_file,cur,conn,old_file):
@@ -313,49 +305,12 @@ class Datenbank:
         conn.commit()
 
      def insert_File(self,file,cur,con):
-        command = "INSERT INTO FILE (Birth) VALUES (?);"
-        params = (file.birth,)
+        command = "INSERT INTO FILE (ID, Birth) VALUES (?, ?);"
+        params = (file.id , file.birth,)
         cur.execute(command,params)
-        fileID = cur.lastrowid
         con.commit()
-        return fileID
-
-    #Returns Array with Jewels with the same origin name as file
-     def checkIfOriginNameExists(self,file, cur):
-        command = "SELECT ID_File FROM Blob WHERE Origin_Name = ?"
-        params = (file.blobs[0].origin_name,)
-        cur.execute(command,params)
-        ids = cur.fetchall()
-
-        if len(ids) == 0:
-            return None
-
-        command = "SELECT * FROM File INNER JOIN Blob ON File.ID = Blob.ID_File WHERE File.ID = ?"
-        command = command + " ".join(list(itertools.repeat("OR FILE.ID = ?",len(ids)-1)))
-        
-        cur.execute(command,ids[0])
-        data = cur.fetchall()
-
-        if data is None:
-            return None
-        
-        oldFileID = data[0][13]
-        files = []
-        blobs = []
-
-        # go through data and translate it to file array
-        for row in data:
-            #if file has changed, add file to answer and reset params
-            if oldFileID != row[13]:
-                files.append((File(row[0],blobs,row[1])))
-                blobs = []
-                oldFileID = row[13]
-            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[11], row[12],row[13], row[8], row[9],row[10]))
-        files.append((File(row[0],blobs,row[1])))
-
-        return files
             
-     def checkIfHashExists(self,file, cur):
+     def check_if_hash_exists(self,file, cur):
         command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID =(SELECT ID_File FROM Blob WHERE Blob.Hash = ?)"""
         params = (file.blobs[0].hash,)
         cur.execute(command, params)
@@ -367,7 +322,7 @@ class Datenbank:
         ##create file from data
         blobs = []
         for row in data:
-            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[11], row[12],row[13], row[8], row[9],row[10]))
+            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12], row[13]))
         file = File(data[0][0],blobs,data[0][1])
         return file
 

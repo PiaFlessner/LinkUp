@@ -270,6 +270,7 @@ class Datenbank:
 
     
      def check_if_uri_exists(self,file,cur):
+        print("check_if_uri_exists\n")
         command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID = ?"""
         params = (file.id,)
         cur.execute(command, params)
@@ -287,6 +288,7 @@ class Datenbank:
 
 
      def insert_new_blob_to_existing_file(self,new_file,cur,conn,old_file):
+        print("insert_new_blob_to_existing_file\n")
         command = """INSERT INTO Blob
                               (Number, Hash, Name, FileSize, CreationDate, Change, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
@@ -296,6 +298,7 @@ class Datenbank:
         conn.commit()
 
      def insert_first_Blob(self,file,cur,conn):
+        print("insert_first_Blob\n")
         command = """INSERT INTO Blob
                               (Number, Hash, Name, FileSize, CreationDate, Change, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
@@ -305,12 +308,14 @@ class Datenbank:
         conn.commit()
 
      def insert_File(self,file,cur,con):
+        print("insert_File\n")
         command = "INSERT INTO FILE (ID, Birth) VALUES (?, ?);"
         params = (file.id , file.birth,)
         cur.execute(command,params)
         con.commit()
             
      def check_if_hash_exists(self,file, cur):
+        print("check_if_hash_exists\n")
         command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID =(SELECT ID_File FROM Blob WHERE Blob.Hash = ?)"""
         params = (file.blobs[0].hash,)
         cur.execute(command, params)
@@ -327,6 +332,7 @@ class Datenbank:
         return file
 
      def addJewel(self,jewel):
+        print("addjewel\n")
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
@@ -349,6 +355,7 @@ class Datenbank:
         conn.close()
 
      def addJewelFileAssignment (self, id_jewel, id_file):
+        print("addjewelfile assignemtn\n")
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
@@ -368,6 +375,7 @@ class Datenbank:
 
  
      def get_Jewel_via_id(self,id):
+        print("get_Jewel_via_id\n")
         jewel = None
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -384,6 +392,7 @@ class Datenbank:
 
 
      def get_File_via_id(self,id):
+        print("get file via id\n")
         file = None
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -400,6 +409,7 @@ class Datenbank:
 
    
      def get_File_via_hash(self,hash):
+        print("get file via hash\n")
         file = None
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -416,6 +426,7 @@ class Datenbank:
         return file
 
      def get_all_Files(self):
+        print("get all files\n")
         files = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -433,6 +444,7 @@ class Datenbank:
     
 
      def get_Files_via_jewel_id(self,jewel_id):
+        print("get files via jewel id\n")
         files = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -454,6 +466,7 @@ class Datenbank:
 
 
      def get_all_Jewels(self):
+        print("get all jewels\n")
         jewels = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -472,6 +485,7 @@ class Datenbank:
 
 
      def get_all_Blobs(self):
+        print("getallblobs\n")
         blobs = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -490,6 +504,7 @@ class Datenbank:
 
  
      def get_Blobs_via_file_id(self, file_id):
+        print("get_Blobs_via_file_id\n")
         blobs = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -507,6 +522,7 @@ class Datenbank:
         return blobs
             
      def get_Blob_via_id(self, id):
+        print("getblobviaid\n")
         blob = None
         conn = self.create_connection('datenbank.db')
         if conn != None:

@@ -4,6 +4,7 @@ import sqlite3
 from os.path import exists as file_exists
 from unicodedata import numeric
 import uuid
+import datetime
 
 class Jewel:
 
@@ -219,6 +220,18 @@ class Datenbank:
                                         REFERENCES File(ID)
                                                    );""")
 
+                cur.execute("""CREATE TABLE Skipped_Files(
+                    ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    ID_Jewel INTEGER NOT NULL,
+                    UUID TEXT NOT NULL,
+                    Occurance_Date TIMESTAMP NOT NULL,
+                    Hash TEXT NOT NULL,
+                    Reason TEXT NOT NULL,
+                    Additional_Information TEXT,
+                    Connected_File_to_Jewel TEXT
+                );""")
+
+
                                              # Number, Hash, Name, FileSize, CreationDate, Change, Modify, ID_File, Origin_Name, Source_Path, Store_Destination
   
                 conn.commit()
@@ -251,6 +264,7 @@ class Datenbank:
                 # no uri but existing hash
                 else:
                     self.addJewelFileAssignment(jewel.id, old_file.id)
+                    self.protocol_skipped_file(jewel,file,"Version existing in another File","Found in File: " + old_file.id, old_file.id, conn, cur )
                     return False
 
             #uri  
@@ -260,6 +274,7 @@ class Datenbank:
                 ## asa blob is same, does not need to be inserted. Its already existing
                     if blob.hash == file.blobs[0].hash:
                         self.addJewelFileAssignment(jewel.id, old_file.id)
+                        self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
                         return False
                 #if no hash exists then add new blob
                 self.insert_new_blob_to_existing_file(file,cur,conn,old_file)
@@ -517,6 +532,13 @@ class Datenbank:
             conn.commit()
             conn.close()
         return blob
+
+     def protocol_skipped_file(self, jewel, file, reason, additional_information, connected_file, conn, cur):
+        command = "INSERT INTO Skipped_Files (ID_Jewel, UUID, Occurance_Date, Hash, Reason, Additional_Information, Connected_File_to_Jewel) VALUES (?, ?, ?, ?, ?, ?, ? );"
+        params = (jewel.id, file.id, datetime.date.today(), file.blobs[0].hash, reason, additional_information, connected_file)
+        cur.execute(command, params)
+        conn.commit()
+
             
 
 

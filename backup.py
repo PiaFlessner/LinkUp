@@ -29,6 +29,13 @@ def calculate_checksum(filename: str):
     return readable_hash
 
 
+def list_to_string(string_list):
+    formatted_string = ""
+    for item in string_list:
+        formatted_string += item + " "
+    return formatted_string
+
+
 # Hier startet das Programm
 if __name__ == "__main__":
 
@@ -50,6 +57,10 @@ if __name__ == "__main__":
         current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
         new_backup_location = f"backup-{current_date_time_formatted}"
 
+        # TODO: Sources aus der Datenbank holen in Form einer Liste
+        source_list = ["jewels", "jewels2"]
+        source_string = list_to_string(source_list)
+
         # TODO: Mirco Argument System ueberarbeiten
         if arglist[1] == '-f':
             pass
@@ -63,7 +74,7 @@ if __name__ == "__main__":
                 # rsync -aAXv --delete --compare-dest=/home/ole/backupTest/fullBackup jewels backup.0
                 # TODO: remove n Flag
                 subprocessReturn = subprocess.Popen(f"rsync -aAX --out-format='%n' "
-                                                    f"--compare-dest=/home/ole/backupTest/fullBackup jewels "
+                                                    f"--compare-dest=/home/ole/backupTest/fullBackup {source_string} "
                                                     f"{new_backup_location}",
                                                     shell=True, cwd=filepath,
                                                     stdout=subprocess.PIPE)

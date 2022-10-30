@@ -107,7 +107,7 @@ if __name__ == "__main__":
                 #print(output)
 
                 outputArray = output.splitlines()
-                print (outputArray)
+                #print (outputArray)
                 del outputArray[0]# nicht schön aber selten
                 del outputArray[0]
                 del outputArray[-1]

@@ -107,11 +107,12 @@ if __name__ == "__main__":
                 #print(output)
 
                 outputArray = output.splitlines()
+                print (outputArray)
                 del outputArray[0]
                 del outputArray[0]
-                del outputArray[-2]
-                del outputArray[-2]
-                del outputArray[-2]
+                del outputArray[-1]
+                del outputArray[-1]
+                del outputArray[-1]
                 print("--------------------------------")
                 # Jewel = das hier will ich Backupen
                 jewel = Jewel(0, None, date.today(), filepath)

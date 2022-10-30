@@ -97,15 +97,21 @@ if __name__ == "__main__":
                 print("--------------------------------")
                 
             else:
-                print("Creating full backup:")
-                subprocessReturn = subprocess.Popen('rsync -aAXn  jewels backup.0 ',
+                print("creating full backup")
+                subprocessReturn = subprocess.Popen('rsync -aAXnv  jewels backup.0 ',
                                                     shell=True, cwd='/home/gruppe/backupTest',
                                                     stdout=subprocess.PIPE)
                                                    # """rsync -aAX --out-format=''%n'' /home/gruppe/backupTest/jewels /home/gruppe/backupTest/backup """
                 output = subprocessReturn.stdout.read()
                 output = output.decode('utf-8')
+                #print(output)
+
                 outputArray = output.splitlines()
-                current_source_path = None
+                del outputArray[0]
+                del outputArray[0]
+                del outputArray[-2]
+                del outputArray[-2]
+                del outputArray[-2]
                 print("--------------------------------")
                 # Jewel = das hier will ich Backupen
                 jewel = Jewel(0, None, date.today(), filepath)
@@ -123,7 +129,7 @@ if __name__ == "__main__":
                                     current_source_path, new_backup_location)
                         file = File(0, [blob], file_object.birth)
                         datenbank = Datenbank()
-                        result = datenbank.add_to_database(jewel, file)
+                        result = datenbank.add_to_database(jewel, file,platform.node())
                         print(result)
                         pass
 

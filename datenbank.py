@@ -535,10 +535,31 @@ class Datenbank:
 
      def protocol_skipped_file(self, jewel, file, reason, additional_information, connected_file, conn, cur):
         command = "INSERT INTO Skipped_Files (ID_Jewel, UUID, Occurance_Date, Hash, Reason, Additional_Information, Connected_File_to_Jewel) VALUES (?, ?, ?, ?, ?, ?, ? );"
-        params = (jewel.id, file.id, datetime.date.today(), file.blobs[0].hash, reason, additional_information, connected_file)
+        params = (jewel.id, file.id, datetime.datetime.today(), file.blobs[0].hash, reason, additional_information, connected_file)
         cur.execute(command, params)
         conn.commit()
 
+     def get_all_skipped_files (self):
+        row = []
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Skipped_Files")
+            row = cur.fetchall()
+            conn.commit()
+            conn.close()
+        return row
+
+     def get_skipped_file_via_id (self, id):
+        row = []
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Skipped_Files WHERE ID= ?", [id])
+            row = cur.fetchone()
+            conn.commit()
+            conn.close()
+        return row
             
 
 

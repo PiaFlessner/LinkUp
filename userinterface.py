@@ -3,178 +3,143 @@ from datenbank import *
 import argparse
 import datetime
 import sys
-from rich.console import Console
-from rich.table import Table
+from prettytable import PrettyTable
 
 
 def show_all_jewels():
     daten = Datenbank()
     jewels = daten.get_all_Jewels()
-    console = Console()
 
     if jewels is not None:
-        table = Table(title="All jewels")
-        table.add_column("Jewel ID", justify="left", style="black", no_wrap=True)
-        table.add_column("Comment", justify="left", style="black", no_wrap=True)
-        table.add_column("Monitoring startdate", justify="left", style="black", no_wrap=True)
-        table.add_column("Source of the jewel", justify="left", style="black", no_wrap=True)
+        table = PrettyTable()
+        table.field_names = ["Jewel ID","Comment","Monitoring startdate","Source of the jewel"]
 
         for jewel in jewels:
-            table.add_row(str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource))
-        
-        console.print("\n")
-        console.print(table)
+            table.add_row([str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource)])
+
+        print(table)
 
     else: 
-        console.print("\nNo jewels have been created by the user yet")
-    
+        print("\nNo jewels have been created by the user yet")
 
 
 def show_all_files():
     daten = Datenbank()
     files = daten.get_all_Files()
-    console = Console()
 
     if files is not None:
-        table = Table(title="All Files")
-        table.add_column("File ID", justify="left", style="black", no_wrap=True)
-        table.add_column("Number of BackUps", justify="left", style="black", no_wrap=True)
-        table.add_column("File birth", justify="left", style="black", no_wrap=True)
+        table = PrettyTable()
+        table.field_names = ["File ID", "File versions", "File birth"]
 
         for file in files:
-            table.add_row(str(file.id), str(len(file.blobs)), str(file.birth))
-        console.print("\n")
-        console.print(table)
+            table.add_row([str(file.id), str(len(file.blobs)), str(file.birth)])
+
+        print(table)
         
     else: 
-        console.print("\nNo files have been created by the user yet")
+        print("\nNo files have been created by the user yet")
 
 
 def show_all_blobs():
     daten = Datenbank()
     blobs = daten.get_all_Blobs()
-    console = Console()
-
+   
     if blobs is not None:
-        table = Table(title="All Blobs")
-        table.add_column("Blob ID", justify="left", style="black", no_wrap=False)
-        table.add_column("File version", justify="left", style="black", no_wrap= False)
-        table.add_column("Hash", justify="left", style="black", no_wrap= False)
-        table.add_column("Name", justify="left", style="black", no_wrap= False)
-        table.add_column("File size", justify="left", style="black", no_wrap= False)
-        table.add_column("Creationdate", justify="left", style="black", no_wrap=False)
-        table.add_column("Change", justify="left", style="black", no_wrap= False)
-        table.add_column("Modify", justify="left", style="black", no_wrap= False)
-        table.add_column("File ID", justify="left", style="black", no_wrap=False)
-        table.add_column("Origin name", justify="left", style="black", no_wrap= False)
-        table.add_column("Source path", justify="left", style="black", no_wrap=False)
-        table.add_column("Store destination", justify="left", style="black", no_wrap=False)
+        table = PrettyTable()
+
+        table.field_names = ["Blob ID", "File version", "Hash", "Name", "File size","Creationdate", "Change", "Modify", 
+         "File ID", "Origin name","Source path", "Store destination"]
 
         for blob in blobs:
-            table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate),
-           str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination))
-        console.print("\n")
-        console.print(table)
+            table.add_row([str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate),
+           str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination)])
 
-    else: console.print("\nNo blobs have been created by the user yet")
+        print(table)
+
+    else: print("\nNo blobs have been created by the user yet")
+
 
 def show_jewel_via_id(id):
     daten = Datenbank()
     jewel = daten.get_Jewel_via_id(id)
-    text = "Jewel: " + str(id)
-    console = Console() 
-
+    
     if jewel is not None:
-        table = Table(title= text)
-        table.add_column("Jewel ID", justify="left", style="black", no_wrap=True)
-        table.add_column("Comment", justify="left", style="black", no_wrap=True)
-        table.add_column("Monitoring startdate", justify="left", style="black", no_wrap=True)
-        table.add_column("Source of the jewel", justify="left", style="black", no_wrap=True)
-        table.add_row(str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource))
-        filetable = Table(title= "Files of the jewel " + str(id))
+        table = PrettyTable()
+        table.field_names = ["Jewel ID", "Comment","Monitoring startdate","Source of the jewel"]
+        table.add_row([str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource)])
+        filetable = PrettyTable()
         files = daten.get_Files_via_jewel_id(id)
-        filetable.add_column("File ID", justify="left", style="black", no_wrap=True)
-        filetable.add_column("Number of BackUps", justify="left", style="black", no_wrap=True)
-        filetable.add_column("File birth", justify="left", style="black", no_wrap=True)
-
+        filetable.field_names = ["File ID","Number of BackUps","File birth"]
+       
         for file in files:
-            filetable.add_row(str(file.id), str(len(file.blobs)), str(file.birth))
+            filetable.add_row([str(file.id), str(len(file.blobs)), str(file.birth)])
 
-        console.print("\n")
-        console.print(table)
-        console.print("\n")
-        console.print(filetable)
+        print(table)
+        print(filetable)
 
 
-    else: console.print("\nThere is no jewel with the id " + str(id))
+    else: print("\nThere is no jewel with the id " + str(id))
 
 
 def show_file_via_id (id):
     daten = Datenbank()
     file = daten.get_File_via_id(id)
-    text = "File: " + str(id)
-    console = Console()
 
     if file is not None:
-        table = Table(title= text)
-        table.add_column("File ID", justify="left", style="black", no_wrap=True)
-        table.add_column("Number of BackUps", justify="left", style="black", no_wrap=True)
-        table.add_column("File birth", justify="left", style="black", no_wrap=True)
-        table.add_row(str(file.id), str(len(file.blobs)), str(file.birth))
-        console.print("\n")
-        console.print(table)
+        table = PrettyTable()
+        table.field_names = ["File ID","Number of BackUps","File birth"]
+        table.add_row([str(file.id), str(len(file.blobs)), str(file.birth)])
+        print(table)
 
-        blobtable = Table(title= "Blobs of the file " + str(id))
-        blobtable.add_column("Blob ID", justify="left", style="black", no_wrap=False)
-        blobtable.add_column("File version", justify="left", style="black", no_wrap= False)
-        blobtable.add_column("Hash", justify="left", style="black", no_wrap= False)
-        blobtable.add_column("Name", justify="left", style="black", no_wrap= False)
-        blobtable.add_column("File size", justify="left", style="black", no_wrap= False)
-        blobtable.add_column("Creationdate", justify="left", style="black", no_wrap= False)
-        blobtable.add_column("Change", justify="left", style="black", no_wrap= False)
-        blobtable.add_column("Modify", justify="left", style="black", no_wrap= False)
-        blobtable.add_column("File ID", justify="left", style="black", no_wrap= False)
-        blobtable.add_column("Origin name", justify="left", style="black", no_wrap=False)
-        blobtable.add_column("Source path", justify="left", style="black", no_wrap=False)
-        blobtable.add_column("Store destination", justify="left", style="black", no_wrap=False)
+        blobtable = PrettyTable()
+        blobtable.field_names = ["Blob ID","File version","Hash","Name","File size","Creationdate","Change","Modify","File ID","Origin name","Source path", "Store destination"]
 
         for blob in file.blobs:
-            blobtable.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate),
-            str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
-        
-        console.print("\n")
-        console.print(blobtable)
+            blobtable.add_row([str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate),
+            str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination)] )
 
-    else: console.print("\nThere is no file with the id " + str(id))
+        print(blobtable)
 
-
+    else: print("\nThere is no file with the id " + str(id))
 
 def show_blob_via_id (id):
      daten = Datenbank()
      blob = daten.get_Blob_via_id(id)
-     text = "Blob: " + str(id)
-     console = Console()
 
      if blob is not None:
-        table = Table(title=text)
-        table.add_column("Blob ID", justify="left", style="black", no_wrap=True)
-        table.add_column("File version", justify="left", style="black", no_wrap=True)
-        table.add_column("Hash", justify="left", style="black", no_wrap=True)
-        table.add_column("Name", justify="left", style="black", no_wrap=True)
-        table.add_column("File size", justify="left", style="black", no_wrap=True)
-        table.add_column("Creationdate", justify="left", style="black", no_wrap=True)
-        table.add_column("Change", justify="left", style="black", no_wrap=True)
-        table.add_column("Modify", justify="left", style="black", no_wrap=True)
-        table.add_column("File ID", justify="left", style="black", no_wrap=True)
-        table.add_column("Origin name", justify="left", style="black", no_wrap=True)
-        table.add_column("Source path", justify="left", style="black", no_wrap=True)
-        table.add_column("Store destination", justify="left", style="black", no_wrap=True)
-        table.add_row(str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate),
-        str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination) )
-        console.print("\n")
-        console.print(table)
+        table =  PrettyTable()
+        table.field_names = ["Blob ID", "File version", "Hash", "Name", "File size","Creationdate", "Change", "Modify", 
+         "File ID", "Origin name","Source path", "Store destination"]
+        table.add_row([str(blob.id), str(blob.number), str(blob.hash), str(blob.name), str(blob.fileSize), str(blob.creationDate),
+        str(blob.change), str(blob.modify), str(blob.iD_File), str(blob.origin_name), str(blob.source_path), str(blob.store_destination)])
+        print(table)
      else:  
-        console.print("\nThere is no blob with the id " + str(id))
+        print("\nThere is no blob with the id " + str(id))
+
+
+def show_all_skipped_Files():
+     daten = Datenbank()
+     files = daten.get_all_skipped_files()
+
+     if files is not None:
+        table =  PrettyTable()
+        table.field_names = ["File id", "Jewel id", "UUID", "Occurance_Date", "Hash", "Reason", "Additional information", "Connected file to jewel"]
+        for file in files:
+            table.add_row([str(file[0]), str(file[1]),str(file[2]), str(file[3]), str(file[4]), str(file[5]), str(file[6]), str(file[7])])
+        print(table)
+     else:
+        print("\nThere are no skipped files yet")
+
+def show_skipped_file_via_id(id):
+     daten = Datenbank()
+     file = daten.get_skipped_file_via_id(id)
+     print("Moin")
+     if file is not None:
+        table =  PrettyTable()
+        table.field_names = ["File id", "Jewel id", "UUID", "Occurance_Date", "Hash", "Reason", "Additional information", "Connected file to jewel"]
+        table.add_row([str(file[0]), str(file[1]),str(file[2]), str(file[3]), str(file[4]), str(file[5]), str(file[6]),str(file[7])])
+        print(table)
+     else:  print("\nThere is no skipped file with the id " + str(id))
 
 
 # Hier startet das Programm
@@ -184,6 +149,7 @@ if __name__ == "__main__":
                                      epilog="Dies ist der Epilog")
     parser.add_argument('-sJ', type=str, help='Show Jewels')
     parser.add_argument('-sF', type=str, help='Show Files')
+    parser.add_argument('-ssF', type=str, help='Show skipped Files')
     parser.add_argument('-sB', type=str, help='Show Blobs')
 
     arglist = sys.argv
@@ -192,8 +158,9 @@ if __name__ == "__main__":
         if arglist[i+1].isnumeric() : 
             number = int(arglist[i+1]) 
             if arglist[i] == '-sJ' : show_jewel_via_id(number)
-            elif arglist[i] == '-sF' : show_file_via_id(number)
             elif arglist[i] == '-sB' : show_blob_via_id(number)
+            elif arglist[i] == '-ssF' : show_skipped_file_via_id(number)
+        elif arglist[i] == '-sF' and  arglist[i+1] != '-sJ' and arglist[i+1] != '-sF' and arglist[i+1] != '-sB' and arglist[i+1] != '--ssF' : show_file_via_id(arglist[i+1])
         elif arglist[i] == '-sJ' : show_all_jewels()
         elif arglist[i] == '-sF' : show_all_files()
         elif arglist[i] == '-sB': show_all_blobs()
@@ -202,6 +169,7 @@ if __name__ == "__main__":
     if arglist[length-1] == '-sJ' : show_all_jewels()
     if arglist[length-1] == '-sF' : show_all_files()
     if arglist[length-1] == '-sB': show_all_blobs()
+    if arglist[length-1] == '-ssF': show_all_skipped_Files()
     if length == 1 : print("Too few arguments. Need at least 1") #vielleicht sollte diese Zeile über die for Schleife verschoben werden
 
 

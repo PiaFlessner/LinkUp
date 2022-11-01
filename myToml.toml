@@ -1,0 +1,10 @@
+# this is my toml file
+#
+data = [1,2,3]
+
+[first]
+path = "/home/ordner/file"
+
+[second]
+path2 = "/home/ordner/file2"
+

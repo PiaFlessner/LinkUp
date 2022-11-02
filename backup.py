@@ -102,7 +102,7 @@ if __name__ == "__main__":
                                     current_source_path, new_backup_location)
                         file = File(0, [blob], file_object.birth)
                         datenbank = Datenbank()
-                        result = datenbank.add_to_database(jewel, file)
+                        result = datenbank.add_to_database(jewel, file, platform.node())
                         print(result)
                         pass
                 print("--------------------------------")

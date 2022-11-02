@@ -11,26 +11,6 @@ import file as mirco_file
 import argparse
 from datetime import datetime as date
 
-
-# Mirco: Methode um Metadaten der Datei zu erhalten
-# gibt ein Object vom Typ File zurück. Getter sind geschrieben, können in Datenbank importiert werden
-def get_metadata(filepth: str):
-    stats = os.stat(filepth)
-    checksum = calculate_checksum(filepth)
-    size = stats.st_size / 1024  # file size in kb
-    birth = date.fromtimestamp(stats.st_ctime)
-    modify = date.fromtimestamp(stats.st_mtime)
-    file_obj = mirco_file.File(filepth, checksum, size, birth, modify)
-    return file_obj
-
-
-def calculate_checksum(filename: str):
-    with open(filename, "rb") as f:
-        file_as_bytes = f.read()
-        readable_hash = hashlib.sha256(file_as_bytes).hexdigest()
-    return readable_hash
-
-
 def list_to_string(string_list):
     formatted_string = ""
     for item in string_list:

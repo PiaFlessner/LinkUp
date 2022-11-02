@@ -1,0 +1,8 @@
+{
+    "jewel_sources" : { 
+                        "device1": [], 
+                        "device2": []
+                      },
+    "blacklist": [".tmp"],
+    "destination_source": ""
+}

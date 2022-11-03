@@ -48,6 +48,8 @@ print(result)
 result = daten.add_to_database(jewel2, file1v3, platform.node()) #false expected (first run)
 print(result)
 
+result = daten.check_which_jewel_sources_exist(["hi","test", "byw"],platform.node())
+print(result)
 ##after first run all inserts should return false
 
  

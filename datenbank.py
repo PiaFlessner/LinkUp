@@ -389,8 +389,27 @@ class Datenbank:
             conn.close()
 
     
-     def look_if_jewels_exists(self):
-        pass
+     def check_which_jewel_sources_exist(self, jewel_source_arr, device_name):
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            command = "SELECT JewelSource FROM Jewel WHERE (JewelSource = ? AND DeviceName = ?)"
+            command = command + " ".join([" OR (JewelSource = ? AND DeviceName = ?)"]*(len(jewel_source_arr)-1))
+
+            params = []        
+            for source in jewel_source_arr:
+                params.append(source)
+                params.append(device_name)
+
+            cur.execute(command, params)
+            tmp = cur.fetchall()
+            answer = []
+            for row in tmp:
+                answer.append(row[0])
+            return answer
+
+                        
+
 
 
  

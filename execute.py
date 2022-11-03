@@ -89,5 +89,5 @@ if __name__ == "__main__":
     elif args.command == "restore":
         pass
     if args.command == "backup":
-        backup = Backup("/home/ole/backupTest")
+        backup = Backup("/home/gruppe/backupTest")
         backup.execute_fullbackup()

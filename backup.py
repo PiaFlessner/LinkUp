@@ -13,7 +13,7 @@ class Backup:
     current_date_time = date.now()
     current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
     new_backup_location = f"backup-{current_date_time_formatted}"
-    jewel_path_list = ["/home/ole/backupTest/jewels", "/home/ole/backupTest/jewels2", "/home/peter"]
+    jewel_path_list = ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2", "/home/peter"]
 
     def __init__(self, filepath):
         self.filepath = filepath
@@ -31,10 +31,9 @@ class Backup:
                 self.jewel_path_list.remove(jewel_path)
 
         jewel_path_list_string = self.list_to_string(self.jewel_path_list)
-        subprocess_return = subprocess.Popen(f'rsync -aAX --out-format="%n" {jewel_path_list_string} '
-                                             '/home/ole/backupTest/jewels2 '
-                                             '/home/ole/backupTest/fullBackup',
-                                             shell=True, cwd='/home/ole/backupTest',
+        subprocess_return = subprocess.Popen(f'rsync -aAXn --out-format="%n" {jewel_path_list_string} '
+                                             '/home/gruppe/backupTest/fullBackup',
+                                             shell=True, cwd='/home/gruppe/backupTest',
                                              stdout=subprocess.PIPE)
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
@@ -45,12 +44,19 @@ class Backup:
         # ID, comment, datetime, jewel pfad
         # jewel = Jewel(1, "comment 1.jewel", date.today(), self.filepath)
 
-        for jewel_path in self.jewel_path_list:
-            jewel = Jewel(0, "")
-
-        for line in output_array:
+        
+        for line in output_array:     
+                    
             if line.endswith('/'):
                 self.current_source_path = line
+
+                #check wether path is now the jewel
+                for jewel_path in self.jewel_path_list:
+
+                    if jewel_path.rsplit('/', 1)[1] == line.strip("/"):
+                        jewel = Jewel(0, None, date.today(),self.filepath + '/' + line)
+                        break
+
             else:
                 file_object = info_handler.get_metadata(self.filepath + '/' + line)
                 # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash

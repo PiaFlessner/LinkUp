@@ -43,7 +43,7 @@ class Backup:
         print("Creating full backup")
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
-        subprocess_return = subprocess.Popen(f'rsync -aAXn --out-format="%n" {jewel_path_list_string} '
+        subprocess_return = subprocess.Popen(f'rsync -aAX --out-format="%n" {jewel_path_list_string} '
                                              f'{self.destination}/fullBackup',
                                              shell=True,
                                              stdout=subprocess.PIPE)
@@ -71,7 +71,7 @@ class Backup:
                 file_name = line.rsplit('/', 1)[1]
                 blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
                             self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
-                            working_dir, f'{self.destination}/fullBackup')
+                            working_dir + "/" + line, f'{self.destination}/fullBackup/{line}')
 
                 file = File(0, [blob], file_object.birth)
                 datenbank = Datenbank()

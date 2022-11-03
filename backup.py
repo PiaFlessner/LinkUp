@@ -54,7 +54,7 @@ class Backup:
                 for jewel_path in self.jewel_path_list:
 
                     if jewel_path.rsplit('/', 1)[1] == line.strip("/"):
-                        jewel = Jewel(0, None, date.today(),self.filepath + '/' + line)
+                        jewel = Jewel(0, None, date.today(),self.filepath + '/' + line, platform.node())
                         break
 
             else:

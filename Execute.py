@@ -24,7 +24,11 @@ if __name__ == "__main__":
     group.add_argument('-B', '--showBlob', action='store_true', help='Show Blobs')
     #command: python3 Execute.py show -[J F sf B] 123hi
     showTables.add_argument('id', type=str, nargs='?')
+    showTables.add_argument('-v', '--verbose', action='store_true')
+    showTables.add_argument('-vv', '--verboseverbose', action='store_true')
 
+    
+    
     ##idea collection
     #command: python3 execute.py restore
     restoreSection = subparser.add_parser('restore', help="Get into restore section of program.")

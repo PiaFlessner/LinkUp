@@ -25,6 +25,19 @@ if __name__ == "__main__":
     #command: python3 Execute.py show -[J F sf B] 123hi
     showTables.add_argument('id', type=str, nargs='?')
 
+    ##idea collection
+    #command: python3 execute.py restore
+    restoreSection = subparser.add_parser('restore', help="Get into restore section of program.")
+    group = restoreSection.add_mutually_exclusive_group()
+    #command: python3 execute.py restore -F 12hi
+    group.add_argument('-F', '--restoreFile', action='store_true', help='Restore certain File')
+    #command: python3 execute.py restore -J 12hi
+    group.add_argument('-J', '--restoreJewel', action='store_true', help='Restore certain Jewel')
+    #needed Id to restore
+    restoreSection.add_argument('id', type=str)
+
+
+
    #makes args accessable
     args = parser.parse_args()
 

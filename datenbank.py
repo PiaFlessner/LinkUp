@@ -403,7 +403,7 @@ class Datenbank:
             cur.execute( sqlite_insert_with_param, [id])
             j_tuple = cur.fetchone()
             if j_tuple is not None:
-              jewel = Jewel(j_tuple[0], j_tuple[1], j_tuple[2], j_tuple[3])
+              jewel = Jewel(j_tuple[0], j_tuple[1], j_tuple[2], j_tuple[3], j_tuple[4])
             conn.commit()
             conn.close()
         return jewel
@@ -490,7 +490,7 @@ class Datenbank:
 
             if records is not None:
                 for row in records:
-                    jewel =  Jewel(row[0], row[1], row[2], row[3])
+                    jewel =  Jewel(row[0], row[1], row[2], row[3], row[4])
                     jewels.append(jewel)
             
             conn.commit()

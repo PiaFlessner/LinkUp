@@ -12,10 +12,10 @@ class ShowTables:
 
         if jewels is not None:
             table = PrettyTable()
-            table.field_names = ["Jewel ID","Comment","Monitoring startdate","Source of the jewel"]
+            table.field_names = ["Jewel ID","Comment","Monitoring startdate","Source of the jewel", "Device Name"]
 
             for jewel in jewels:
-                table.add_row([str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource)])
+                table.add_row([str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource), str(jewel.device_name)])
 
             print(table)
 
@@ -65,8 +65,8 @@ class ShowTables:
     
         if jewel is not None:
             table = PrettyTable()
-            table.field_names = ["Jewel ID", "Comment","Monitoring startdate","Source of the jewel"]
-            table.add_row([str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource)])
+            table.field_names = ["Jewel ID", "Comment","Monitoring startdate","Source of the jewel", "Device Name"]
+            table.add_row([str(jewel.id), str(jewel.comment), str(jewel.monitoring_Startdate), str(jewel.jewelSource), str(jewel.device_name)])
             filetable = PrettyTable()
             files = daten.get_Files_via_jewel_id(id)
             filetable.field_names = ["File ID","Number of BackUps","File birth"]

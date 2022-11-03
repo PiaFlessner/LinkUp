@@ -84,3 +84,5 @@ if __name__ == "__main__":
         ##########user chooses nothing
         else:
             print("No action choosed.")
+    elif args.command == "restore":
+        pass

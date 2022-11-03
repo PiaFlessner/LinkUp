@@ -3,10 +3,8 @@ from datetime import datetime as date
 import file as mirco_file
 import hashlib
 import json
-class InfoHandler:
 
-   def __init__(self):
-      self.json_file_name = "config.json"
+json_file_name = "config.json"
 
 
 def get_metadata(filepth: str):
@@ -27,6 +25,6 @@ def calculate_checksum(filename: str):
 
 
 def get_json_info(self):
-   file = open(self.json_file_name)
-   self.config = json.load(file)
-   file.close()
+    file = open(self.json_file_name)
+    self.config = json.load(file)
+    file.close()

@@ -1,1 +1,2 @@
-PrettyTable
+prettytable==3.5.0
+wcwidth==0.2.5

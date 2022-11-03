@@ -1,4 +1,5 @@
 import argparse
+from backup import Backup
 from show_tables import ShowTables
 
 # Hier startet das Programm
@@ -8,21 +9,22 @@ if __name__ == "__main__":
     sT=ShowTables()
     parser = argparse.ArgumentParser(description="Dies ist eine Beschreibung des Programms",
                                      epilog="Dies ist der Epilog")
-    # command: python3 Execute.py show (user enters display of tables section)                          
+    # command: python3 execute.py show (user enters display of tables section)
     subparser = parser.add_subparsers(dest='command')
     showTables = subparser.add_parser('show', help="Get into show section of program. Eg. show File Table.")
+    backup = subparser.add_parser('backup', help="Get into backup section of program.")
 
     # user can choose either of one commands now
     group = showTables.add_mutually_exclusive_group()
-    #command: python3 Execute.py show -J 
+    #command: python3 execute.py show -J
     group.add_argument('-J', '--showJewel', action='store_true', help='Show Jewels')
-    #command: python3 Execute.py show -F
+    #command: python3 execute.py show -F
     group.add_argument('-F', '--showFile', action='store_true', help='Show Files')
-    #command: python3 Execute.py show -sF
+    #command: python3 execute.py show -sF
     group.add_argument('-sF', '--showSkippedFile', action='store_true', help='Show skipped Files')
-    #command: python3 Execute.py show -B
+    #command: python3 execute.py show -B
     group.add_argument('-B', '--showBlob', action='store_true', help='Show Blobs')
-    #command: python3 Execute.py show -[J F sf B] 123hi
+    #command: python3 execute.py show -[J F sf B] 123hi
     showTables.add_argument('id', type=str, nargs='?')
     showTables.add_argument('-v', '--verbose', action='store_true')
     showTables.add_argument('-vv', '--verboseverbose', action='store_true')
@@ -86,3 +88,6 @@ if __name__ == "__main__":
             print("No action choosed.")
     elif args.command == "restore":
         pass
+    if args.command == "backup":
+        backup = Backup("/home/ole/backupTest")
+        backup.execute_fullbackup()

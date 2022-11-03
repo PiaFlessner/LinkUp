@@ -27,8 +27,6 @@ if __name__ == "__main__":
     showTables.add_argument('-v', '--verbose', action='store_true')
     showTables.add_argument('-vv', '--verboseverbose', action='store_true')
 
-    parser.add_argument("device")
-
     
     
     ##idea collection

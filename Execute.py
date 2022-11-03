@@ -1,5 +1,5 @@
 import argparse
-from ShowTables import ShowTables
+from show_tables import ShowTables
 
 # Hier startet das Programm
 if __name__ == "__main__":

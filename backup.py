@@ -14,9 +14,9 @@ class Backup:
     current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
     new_backup_location = f"backup-{current_date_time_formatted}"
 
-    def __init__(self, filepath, jewel_path_list):
-        self.filepath = filepath
+    def __init__(self, jewel_path_list, destination):
         self.jewel_path_list = jewel_path_list
+        self.destination = destination
 
     def initialize_backup(self):
         db = Datenbank()
@@ -25,6 +25,7 @@ class Backup:
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
         diff_backup_sources = db.check_which_jewel_sources_exist(tmp, platform.node())
+        #filter out everything, that is in diff_backup already
         full_backup_sources = [e for e in tmp if e not in  diff_backup_sources]
 
         #execute,when not empty
@@ -43,8 +44,8 @@ class Backup:
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
         subprocess_return = subprocess.Popen(f'rsync -aAXn --out-format="%n" {jewel_path_list_string} '
-                                             '/home/gruppe/backupTest/fullBackup',
-                                             shell=True, cwd='/home/gruppe/backupTest',
+                                             f'{self.destination}/fullBackup',
+                                             shell=True,
                                              stdout=subprocess.PIPE)
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
@@ -59,11 +60,13 @@ class Backup:
 
                     #stripping and splitting is needed, since comparison does not work otherwise
                     if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
-                        jewel = Jewel(0, None, date.today(),self.filepath + '/' + line.strip('/'), platform.node())
+                        jewel = Jewel(0, None, date.today(),jewel_path, platform.node())
                         break
 
             else:
-                file_object = info_handler.get_metadata(self.filepath + '/' + line)
+                #get only the working dir without the jewel(because line inherits the jewel)
+                working_dir = jewel_path.rsplit('/',1)[0]
+                file_object = info_handler.get_metadata(working_dir + '/' + line)
                 # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
                 file_name = line.rsplit('/', 1)[1]
                 blob = Blob(0, 0, file_object.f_hash, file_object.name, file_object.f_size,

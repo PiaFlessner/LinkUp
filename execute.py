@@ -92,5 +92,5 @@ if __name__ == "__main__":
         pass
     if args.command == "backup":
         config = ih.get_json_info()
-        backup = Backup("/home/gruppe/backupTest", config["jewel_sources"][platform.node()])
+        backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
         backup.initialize_backup()

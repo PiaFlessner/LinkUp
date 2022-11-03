@@ -7,7 +7,7 @@
     "blacklist": [".tmp"],
     "destination": 
     { 
-      "gruppe-VirtualBox": [], 
+      "gruppe-VirtualBox": "/home/gruppe/backupTest", 
       "device2": []
     }
 }

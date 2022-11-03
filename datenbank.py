@@ -8,11 +8,12 @@ import datetime
 
 class Jewel:
 
-    def __init__(self,id,comment, monitoring_Startdate, jewelSource):
+    def __init__(self,id,comment, monitoring_Startdate, jewelSource, device_name):
         self.id = id
         self.comment = comment
         self.monitoring_Startdate = monitoring_Startdate
         self.jewelSource = jewelSource
+        self.device_name = device_name
 
     def get_id(self):
         return self.id
@@ -37,6 +38,12 @@ class Jewel:
 
     def set_jewelSource(self, jewelSource):
         self.jewelSource = jewelSource
+
+    def get_device_name(self):
+        return self.device_name
+
+    def set_jdevice_name(self, device_name):
+        self.device_name = device_name
 
 
 
@@ -181,7 +188,8 @@ class Datenbank:
                                     ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                     Comment TEXT,
                                     Monitoring_Startdate NUMERIC NOT NULL,
-                                    JewelSource TEXT NOT NULL
+                                    JewelSource TEXT NOT NULL,
+                                    DeviceName TEXT NOT NULL
                                                  );""")
 
                 cur.execute("""CREATE TABLE File (
@@ -346,8 +354,8 @@ class Datenbank:
         if conn != None:
             cur = conn.cursor()
 
-            command= "SELECT ID FROM Jewel WHERE JewelSource = ?"
-            data_tuple = (jewel.jewelSource,)
+            command= "SELECT ID FROM Jewel WHERE JewelSource = ? AND DeviceName = ?"
+            data_tuple = (jewel.jewelSource, jewel.device_name)
             cur.execute(command, data_tuple)
             id = cur.fetchone()
 
@@ -355,9 +363,9 @@ class Datenbank:
                 return id[0]
             else:
                 command = """INSERT INTO 'Jewel'
-                              ('Comment', 'Monitoring_Startdate', 'JewelSource') 
-                              VALUES (?, ?, ?);"""
-                data_tuple = (jewel.comment, jewel.monitoring_Startdate,jewel.jewelSource )
+                              ('Comment', 'Monitoring_Startdate', 'JewelSource', 'DeviceName') 
+                              VALUES (?, ?, ?, ?);"""
+                data_tuple = (jewel.comment, jewel.monitoring_Startdate,jewel.jewelSource, jewel.device_name )
                 cur.execute(command, data_tuple)  
                 conn.commit()
                 return cur.lastrowid
@@ -379,6 +387,10 @@ class Datenbank:
                 # -> User hat Jewel bereits angelegt, und auch die Datei hat zu dem Zeitpunkt schon existiert.
                 return False
             conn.close()
+
+    
+     def look_if_jewels_exists(self):
+        pass
 
 
  

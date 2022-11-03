@@ -1,6 +1,8 @@
 import argparse
 from backup import Backup
 from show_tables import ShowTables
+import info_handler as ih
+import platform
 
 # Hier startet das Programm
 if __name__ == "__main__":
@@ -89,6 +91,6 @@ if __name__ == "__main__":
     elif args.command == "restore":
         pass
     if args.command == "backup":
-        backup = Backup("/home/gruppe/backupTest")
-        #backup.execute_fullbackup()
-        backup.initialize_backup(None)
+        config = ih.get_json_info()
+        backup = Backup("/home/gruppe/backupTest", config["jewel_sources"][platform.node()])
+        backup.initialize_backup()

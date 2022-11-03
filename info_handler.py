@@ -24,7 +24,9 @@ def calculate_checksum(filename: str):
     return readable_hash
 
 
-def get_json_info(self):
-    file = open(self.json_file_name)
-    self.config = json.load(file)
-    file.close()
+def get_json_info():
+
+    with open(json_file_name) as f:
+        config = json.load(f)
+
+    return config

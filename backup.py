@@ -13,12 +13,12 @@ class Backup:
     current_date_time = date.now()
     current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
     new_backup_location = f"backup-{current_date_time_formatted}"
-    jewel_path_list = ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2", "/home/peter", "/home/gruppe/backupTest/jewel3"]
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, jewel_path_list):
         self.filepath = filepath
+        self.jewel_path_list = jewel_path_list
 
-    def initialize_backup(self, jewelsources):
+    def initialize_backup(self):
         db = Datenbank()
 
         #to minimize work, first check if these paths even exists, then continue
@@ -35,10 +35,6 @@ class Backup:
         if full_backup_sources:
             self.execute_fullbackup(full_backup_sources)
 
-        print(diff_backup_sources)
-        print(full_backup_sources)
-
-
     def execute_backup(self, jewel_sources):
         print("Creating differential backup")
 
@@ -53,15 +49,8 @@ class Backup:
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
-        print(output_array)
-
-        # Jewel = das hier will ich Backupen
-        # ID, comment, datetime, jewel pfad
-        # jewel = Jewel(1, "comment 1.jewel", date.today(), self.filepath)
-
         
-        for line in output_array:     
-                    
+        for line in output_array:                     
             if line.endswith('/'):
                 self.current_source_path = line
 

@@ -1,13 +1,13 @@
 {
     "jewel_sources" : 
     { 
-      "device1": [], 
+      "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2", "/home/peter", "/home/gruppe/backupTest/jewel3"], 
       "device2": []
     },
     "blacklist": [".tmp"],
     "destination": 
     { 
-      "device1": [], 
+      "gruppe-VirtualBox": [], 
       "device2": []
     }
 }

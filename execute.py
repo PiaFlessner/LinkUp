@@ -90,4 +90,5 @@ if __name__ == "__main__":
         pass
     if args.command == "backup":
         backup = Backup("/home/gruppe/backupTest")
-        backup.execute_fullbackup()
+        #backup.execute_fullbackup()
+        backup.initialize_backup(None)

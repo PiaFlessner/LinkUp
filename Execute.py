@@ -1,40 +1,69 @@
 import argparse
-import ShowTables as sT
+from ShowTables import ShowTables
 
 # Hier startet das Programm
 if __name__ == "__main__":
 
+    #get Table Functions
+    sT=ShowTables()
     parser = argparse.ArgumentParser(description="Dies ist eine Beschreibung des Programms",
                                      epilog="Dies ist der Epilog")
-    parser.add_argument('-sJ', '--showJewel', type=str, nargs='?', action='store', default= 'all', help='Show Jewels')
-    parser.add_argument('-sF', '--showFile', type=str, nargs='?', action='store',  default= 'all',help='Show Files')
-    parser.add_argument('-ssF', '--showSkippedFile', type=str, nargs='?', action='store',  default= 'all',help='Show skipped Files')
-    parser.add_argument('-sB', '--showBlob',  type=str, nargs='?', action='store', default= 'all', help='Show Blobs')
+    # command: python3 Execute.py show (user enters display of tables section)                          
+    subparser = parser.add_subparsers(dest='command')
+    showTables = subparser.add_parser('show')
 
-   #makes args acessable
+    # user can choose either of one commands now
+    group = showTables.add_mutually_exclusive_group()
+    #command: python3 Execute.py show -J 
+    group.add_argument('-J', '--showJewel', action='store_true', help='Show Jewels')
+    #command: python3 Execute.py show -F
+    group.add_argument('-F', '--showFile', action='store_true', help='Show Files')
+    #command: python3 Execute.py show -sF
+    group.add_argument('-sF', '--showSkippedFile', action='store_true', help='Show skipped Files')
+    #command: python3 Execute.py show -B
+    group.add_argument('-B', '--showBlob', action='store_true', help='Show Blobs')
+    #command: python3 Execute.py show -[J F sf B] 123hi
+    showTables.add_argument('id', type=str, nargs='?')
+
+   #makes args accessable
     args = parser.parse_args()
 
-    if args.showJewel is not None:
-        if args.showJewel == 'all':
-            sT.show_all_jewels()
-        else:
-            sT.show_jewel_via_id(args.showJewel)
+    ######################user chooses the show section
+    if args.command == "show":
 
-    if args.showFile is not None:
-        if args.showFile == 'all':
-            sT.show_all_files()
-        else:
-            sT.show_file_via_id(args.showFile)
 
-    if args.showSkippedFile is not None:
-        if args.showSkippedFile == 'all':
-            sT.show_all_skipped_Files()
-        else:
-            sT.show_skipped_file_via_id(args.showSkippedFile)
+        ##########user chooses show jewel
+        if args.showJewel:
+            if args.id is not None:
+                sT.show_jewel_via_id(args.id)
+            else:
+                sT.show_all_jewels()
 
-    if args.showBlob is not None:
-        if args.showBlob == 'all':
-            sT.show_all_blobs()
-        else:
-            sT.show_blob_via_id(args.showBlob)
 
+        ##########user chooses show File
+        elif args.showFile:
+            if args.id is not None:
+                sT.show_file_via_id(args.id)
+            else:
+                sT.show_all_files()
+
+
+         ##########user chooses show skipped File       
+        elif args.showSkippedFile:
+            if args.id is not None:
+                sT.show_skipped_file_via_id(args.id)
+            else:
+                sT.show_all_skipped_Files()
+
+
+        ##########user chooses show Blob
+        elif args.showBlob:
+            if args.id is not None:
+                sT.show_blob_via_id(args.id)
+            else:
+                sT.show_all_blobs()
+
+
+        ##########user chooses nothing
+        else:
+            print("No action choosed.")

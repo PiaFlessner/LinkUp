@@ -10,7 +10,7 @@ if __name__ == "__main__":
                                      epilog="Dies ist der Epilog")
     # command: python3 Execute.py show (user enters display of tables section)                          
     subparser = parser.add_subparsers(dest='command')
-    showTables = subparser.add_parser('show')
+    showTables = subparser.add_parser('show', help="Get into show section of program. Eg. show File Table.")
 
     # user can choose either of one commands now
     group = showTables.add_mutually_exclusive_group()

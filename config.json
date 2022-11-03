@@ -1,8 +1,13 @@
 {
-    "jewel_sources" : { 
-                        "device1": [], 
-                        "device2": []
-                      },
+    "jewel_sources" : 
+    { 
+      "device1": [], 
+      "device2": []
+    },
     "blacklist": [".tmp"],
-    "destination_source": ""
+    "destination": 
+    { 
+      "device1": [], 
+      "device2": []
+    }
 }

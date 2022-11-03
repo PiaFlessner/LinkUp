@@ -17,12 +17,14 @@ def get_metadata(filepth: str):
     modify = date.fromtimestamp(stats.st_mtime)
     file_obj = mirco_file.File(filepth, checksum, size, birth, modify)
     return file_obj
+    
 
 def calculate_checksum(filename: str):
     with open(filename, "rb") as f:
         file_as_bytes = f.read()
         readable_hash = hashlib.sha256(file_as_bytes).hexdigest()
     return readable_hash
+
 
 def get_json_info(self):
    file = open(self.json_file_name)

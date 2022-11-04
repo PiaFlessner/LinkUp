@@ -62,7 +62,6 @@ class Backup:
                     self.current_source_path = line
 
                 else:
-                    print(line)
                     filename_arr = line.rsplit('/', 1)
                     if len(filename_arr) == 1:
                         file_name = filename_arr[0]
@@ -74,13 +73,14 @@ class Backup:
                     self.current_date_time, file_object.modify, file_object.modify, 0, file_name, old_jewels[i].jewelSource + "/" + line, f'{self.destination}/{differential_backup_name}/{line}')
                     file = File(0, [blob], file_object.birth)
                     result = self.db.add_to_database(old_jewels[i],file,platform.node())
+                    print(result)
 
                     if(not result):
                         ##when result false, the file must be deleted
-                        #why? because the full backup do not contain changes made in diff backups.
+                        #why? rsync checks if the whole jewel has changed, and then, it stores EVERY FILE 
                         #therefore some files would be store again and again and again, 
                         # even tho in one diff backup was this change regognized
-                        pass
+                        os.remove(f'{self.destination}/{differential_backup_name}/{line}')
 
                 
 

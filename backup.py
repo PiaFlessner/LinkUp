@@ -1,159 +1,135 @@
-import platform
-import subprocess
 import os
-import hashlib
-import sys
-from time import sleep
-from datenbank import Blob, Datenbank
-from datenbank import Jewel
-from datenbank import File
-import file as mirco_file
-import argparse
+import subprocess
+import platform
 from datetime import datetime as date
+import info_handler
+from datenbank import Blob, Datenbank, File, Jewel
 
 
-# Mirco: Methode um Metadaten der Datei zu erhalten
-# gibt ein Object vom Typ File zurück. Getter sind geschrieben, können in Datenbank importiert werden
-def get_metadata(filepth: str):
-    stats = os.stat(filepth)
-    checksum = calculate_checksum(filepth)
-    size = stats.st_size / 1024  # file size in kb
-    birth = date.fromtimestamp(stats.st_ctime)
-    modify = date.fromtimestamp(stats.st_mtime)
-    file_obj = mirco_file.File(filepth, checksum, size, birth, modify)
-    return file_obj
+class Backup:
 
+    current_source_path = None
+    current_date_time = date.now()
+    current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
+    new_backup_location = f"backup-{current_date_time_formatted}"
+    fullbackup_name = "fullBackup"+platform.node()
 
-def calculate_checksum(filename: str):
-    with open(filename, "rb") as f:
-        file_as_bytes = f.read()
-        readable_hash = hashlib.sha256(file_as_bytes).hexdigest()
-    return readable_hash
+    def __init__(self, jewel_path_list, destination):
+        self.jewel_path_list = jewel_path_list
+        self.destination = destination
+        self.db = Datenbank()
 
+    def initialize_backup(self):
+        #to minimize work, first check if these paths even exists, then continue
+        tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
-def list_to_string(string_list):
-    formatted_string = ""
-    for item in string_list:
-        formatted_string += item + " "
-    return formatted_string
+        diff_backup_sources = self.db.check_which_jewel_sources_exist(tmp, platform.node())
+        #filter out everything, that is in diff_backup already
+        full_backup_sources = [e for e in tmp if e not in  diff_backup_sources]
 
+        #execute,when not empty
+        if diff_backup_sources:
+            self.execute_backup(diff_backup_sources)
 
-# Hier startet das Programm
-if __name__ == "__main__":
+        #execute, when not empty
+        if full_backup_sources:
+            self.execute_fullbackup(full_backup_sources)
 
-    # Initialisierung des Parsers
-    parser = argparse.ArgumentParser(description="Dies ist eine Beschreibung des Programms",
-                                     epilog="Dies ist der Epilog")
+    def execute_backup(self, jewel_sources):
+        print("Creating differential backup")
+        differential_backup_name = f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
+        old_jewels = self.db.get_fullbackup_paths(jewel_sources)
 
-    # Zuweisung von möglichen arguments
-    parser.add_argument('-f', type=str, help='File input')
-    parser.add_argument('-d', type=str, help='Directory input')
-
-    # Arguments einlesen und in Liste schreiben
-    args = parser.parse_args()
-    arglist = sys.argv
-
-    if len(arglist) > 1:
-        # Ermitteln des aktuellen Datums um den Ordner des neusten Backups festzulegen
-        current_date_time = date.now()
-        current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
-        new_backup_location = f"backup-{current_date_time_formatted}"
-
-        # TODO: Sources aus der Datenbank holen in Form einer Liste
-        source_list = ["jewels", "jewels2"]
-        source_string = list_to_string(source_list)
-
-        # TODO: Mirco Argument System ueberarbeiten
-        if arglist[1] == '-f':
-            pass
-        elif arglist[1] == '-d':
-            # home/ole/backupTest
-            filepath = arglist[2]
-            fullBackup = filepath + '/fullBackup'
-            pathExists = os.path.exists(fullBackup)
-            if pathExists:
-                print("Path exists, creating differential backup?")
-                # Create differential backup
-                # rsync -aAXv --delete --compare-dest=/home/ole/backupTest/fullBackup jewels backup.0
-                # TODO: remove n Flag
-                subprocessReturn = subprocess.Popen(f"rsync -aAX --out-format='%n' "
-                                                    f"--compare-dest=/home/ole/backupTest/fullBackup {source_string} "
-                                                    f"{new_backup_location}",
-                                                    shell=True, cwd=filepath,
+        subprocess_return = subprocess.Popen(f"rsync -aAX --out-format='%n' "
+                                                    f"--compare-dest={self.destination}/{self.fullbackup_name} {jewel_sources} "
+                                                    f"{self.destination}/{differential_backup_name}",
+                                                    shell=True,
                                                     stdout=subprocess.PIPE)
-                output = subprocessReturn.stdout.read()
-                output = output.decode('utf-8')
-                outputArray = output.splitlines()
-                current_source_path = None
-                print("--------------------------------")
-                # Jewel = das hier will ich Backupen
-                jewel = Jewel(1, "comment 1.jewel", date.today(), filepath)
+        output = subprocess_return.stdout.read()
+        output = output.decode('utf-8')
+        output_array = output.splitlines()
 
-                for line in outputArray:
-                    if line.endswith('/'):
-                        current_source_path = line
-                        # print(line)
-                    else:
-                        file_object = get_metadata(filepath + '/' + line)
-                        # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
-                        file_name = line.rsplit('/', 1)[1]
-                        blob = Blob(0, 0, file_object.f_hash, file_object.name, file_object.f_size,
-                                    current_date_time, file_object.modify, file_object.modify, 0, file_name,
-                                    current_source_path, new_backup_location)
-                        file = File(0, [blob], file_object.birth)
-                        datenbank = Datenbank()
-                        result = datenbank.add_to_database(jewel, file, platform.node())
-                        print(result)
-                        pass
-                print("--------------------------------")
-                
+        #since we do it for every jewel, the first line ist always './' and not needed
+        print(output_array)
+        if len(output_array) != 0:
+            output_array.pop(0)
+
+        for line in output_array:
+            if line.endswith('/'):
+                self.current_source_path = line
+
             else:
-                print("creating full backup")
-                subprocessReturn = subprocess.Popen('rsync -aAXnv  jewels backup.0 ',
-                                                    shell=True, cwd='/home/gruppe/backupTest',
-                                                    stdout=subprocess.PIPE)
-                                                   # """rsync -aAX --out-format=''%n'' /home/gruppe/backupTest/jewels /home/gruppe/backupTest/backup """
-                output = subprocessReturn.stdout.read()
-                output = output.decode('utf-8')
-                #print(output)
+                filename_arr = line.rsplit('/', 1)
+                if len(filename_arr) == 1:
+                    file_name = filename_arr[0]
+                else:
+                    file_name = filename_arr[1]
 
-                outputArray = output.splitlines()
-                #print (outputArray)
-                del outputArray[0]# nicht schön aber selten
-                del outputArray[0]
-                del outputArray[-1]
-                del outputArray[-1]
-                del outputArray[-1]
-                print("--------------------------------")
-                # Jewel = das hier will ich Backupen
-                jewel = Jewel(0, None, date.today(), filepath)
+                    file_object = info_handler.get_metadata(old_jewels[i].jewelSource + '/' + line)
+                    blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
+                    self.current_date_time, file_object.modify, file_object.modify, 0, file_name, old_jewels[i].jewelSource + "/" + line, f'{self.destination}/{differential_backup_name}/{line}')
+                    file = File(0, [blob], file_object.birth)
+                    result = self.db.add_to_database(old_jewels[i],file,platform.node())
+                    print(result)
 
-                for line in outputArray:
-                    if line.endswith('/'):
-                        current_source_path = line
-                        # print(line)
-                    else:
-                        file_object = get_metadata(filepath + '/' + line)
-                        # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
-                        file_name = line.rsplit('/', 1)[1]
-                        blob = Blob(0, 0, file_object.f_hash, file_object.name, file_object.f_size,
-                                    current_date_time, file_object.modify, file_object.modify, 0, file_name,
-                                    current_source_path, new_backup_location)
-                        file = File(0, [blob], file_object.birth)
-                        datenbank = Datenbank()
-                        result = datenbank.add_to_database(jewel, file,platform.node())
-                        print(result)
-                        pass
+                    if(not result):
+                        ##when result false, the file must be deleted
+                        #why? rsync checks if the whole jewel has changed, and then, it stores EVERY FILE 
+                        #therefore some files would be store again and again and again, 
+                        # even tho in one diff backup was this change regognized
+                        os.remove(f'{self.destination}/{differential_backup_name}/{line}')
 
-                print("")
-                os.mkdir(fullBackup)
-                sleep(1)
                 
-                subprocess.Popen('rsync -aAX /home/gruppe/backupTest/jewels '' /home/gruppe/backupTest/fullBackup',
-                                                    shell=True, cwd='/home/gruppe/backupTest',
-                                                    stdout=subprocess.PIPE)
-                #TODO sanity checks "ohne ende"
-        else:
-            print("error: unknown option")
-    else:
-        print("error: no argument")
+
+
+
+
+    def execute_fullbackup(self, jewel_sources):
+        print("Creating full backup")
+
+        jewel_path_list_string = self.list_to_string(jewel_sources)
+        subprocess_return = subprocess.Popen(f'rsync -aAX --out-format="%n" {jewel_path_list_string} '
+                                             f'{self.destination}/{self.fullbackup_name}',
+                                             shell=True,
+                                             stdout=subprocess.PIPE)
+
+        output = subprocess_return.stdout.read()
+        output = output.decode('utf-8')
+        output_array = output.splitlines()
+        
+        for line in output_array:                     
+            if line.endswith('/'):
+                self.current_source_path = line
+
+                #check wether path is now the jewel
+                for jewel_path in jewel_sources:
+
+                    #stripping and splitting is needed, since comparison does not work otherwise
+                    if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
+                        jewel = Jewel(0, None, date.today(),jewel_path, platform.node(), f'{self.destination}/{self.fullbackup_name}/{line.strip("/")}')
+                        break
+
+            else:
+                #get only the working dir without the jewel(because line inherits the jewel)
+                working_dir = jewel_path.rsplit('/',1)[0]
+                file_object = info_handler.get_metadata(working_dir + '/' + line)
+                # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
+                file_name = line.rsplit('/', 1)[1]
+                blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
+                            self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
+                            working_dir + "/" + line, f'{self.destination}/{self.fullbackup_name}/{line}')
+
+                file = File(0, [blob], file_object.birth)
+                datenbank = Datenbank()
+                result = datenbank.add_to_database(jewel, file, platform.node())
+                print(result)
+
+    def list_to_string(self, string_list):
+        formatted_string = " ".join(string_list)
+        return formatted_string
+
+    def filter_non_existing_paths(self, paths):
+        for jewel_path in paths:
+            if not(os.path.exists(jewel_path)):
+                paths.remove(jewel_path)
+        return paths

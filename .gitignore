@@ -131,6 +131,7 @@ dmypy.json
 
 # IDE specific folders
 .idea/
+.vscode
 
 # Database
 /datenbank.db

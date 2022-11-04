@@ -1,8 +1,8 @@
 import os
 from datetime import datetime as date
-import file as mirco_file
 import hashlib
 import json
+from wrapper.file_wrapper import Data
 
 json_file_name = "config.json"
 
@@ -13,7 +13,8 @@ def get_metadata(filepth: str):
     size = stats.st_size / 1024  # file size in kb
     birth = date.fromtimestamp(stats.st_ctime)
     modify = date.fromtimestamp(stats.st_mtime)
-    file_obj = mirco_file.File(filepth, checksum, size, birth, modify)
+    change = 12345678
+    file_obj = Data(filepth, checksum, size, birth, change, modify)
     return file_obj
     
 

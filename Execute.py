@@ -26,6 +26,8 @@ if __name__ == "__main__":
     showTables.add_argument('id', type=str, nargs='?')
     showTables.add_argument('-v', '--verbose', action='store_true')
     showTables.add_argument('-vv', '--verboseverbose', action='store_true')
+    paths = parser.add_mutually_exclusive_group()
+    paths.add_argument()
 
     
     

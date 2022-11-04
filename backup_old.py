@@ -11,13 +11,6 @@ import file as mirco_file
 import argparse
 from datetime import datetime as date
 
-def list_to_string(string_list):
-    formatted_string = ""
-    for item in string_list:
-        formatted_string += item + " "
-    return formatted_string
-
-
 # Hier startet das Programm
 if __name__ == "__main__":
 
@@ -36,8 +29,10 @@ if __name__ == "__main__":
     if len(arglist) > 1:
         # Ermitteln des aktuellen Datums um den Ordner des neusten Backups festzulegen
         current_date_time = date.now()
-        current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
+        current_date_time_formatted = date.now().strftime("%d-%m-%Y-%H-%M")
         new_backup_location = f"backup-{current_date_time_formatted}"
+
+        f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
 
         # TODO: Sources aus der Datenbank holen in Form einer Liste
         source_list = ["jewels", "jewels2"]
@@ -86,20 +81,11 @@ if __name__ == "__main__":
                         print(result)
                         pass
                 print("--------------------------------")
-                
-            else:
-                print("creating full backup")
-                subprocessReturn = subprocess.Popen('rsync -aAXnv  jewels backup.0 ',
-                                                    shell=True, cwd='/home/gruppe/backupTest',
-                                                    stdout=subprocess.PIPE)
-                                                   # """rsync -aAX --out-format=''%n'' /home/gruppe/backupTest/jewels /home/gruppe/backupTest/backup """
-                output = subprocessReturn.stdout.read()
-                output = output.decode('utf-8')
-                #print(output)
 
-                outputArray = output.splitlines()
-                #print (outputArray)
-                del outputArray[0]# nicht schön aber selten
+            else:
+
+                # print (outputArray)
+                del outputArray[0]  # nicht schön aber selten
                 del outputArray[0]
                 del outputArray[-1]
                 del outputArray[-1]
@@ -121,18 +107,18 @@ if __name__ == "__main__":
                                     current_source_path, new_backup_location)
                         file = File(0, [blob], file_object.birth)
                         datenbank = Datenbank()
-                        result = datenbank.add_to_database(jewel, file,platform.node())
+                        result = datenbank.add_to_database(jewel, file, platform.node())
                         print(result)
                         pass
 
                 print("")
                 os.mkdir(fullBackup)
                 sleep(1)
-                
+
                 subprocess.Popen('rsync -aAX /home/gruppe/backupTest/jewels '' /home/gruppe/backupTest/fullBackup',
-                                                    shell=True, cwd='/home/gruppe/backupTest',
-                                                    stdout=subprocess.PIPE)
-                #TODO sanity checks "ohne ende"
+                                 shell=True, cwd='/home/gruppe/backupTest',
+                                 stdout=subprocess.PIPE)
+                # TODO sanity checks "ohne ende"
         else:
             print("error: unknown option")
     else:

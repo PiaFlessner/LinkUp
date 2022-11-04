@@ -8,11 +8,13 @@ import datetime
 
 class Jewel:
 
-    def __init__(self,id,comment, monitoring_Startdate, jewelSource):
+    def __init__(self,id,comment, monitoring_Startdate, jewelSource, device_name, fullbackup_source):
         self.id = id
         self.comment = comment
         self.monitoring_Startdate = monitoring_Startdate
         self.jewelSource = jewelSource
+        self.device_name = device_name
+        self.fullbackup_source = fullbackup_source
 
     def get_id(self):
         return self.id
@@ -37,6 +39,12 @@ class Jewel:
 
     def set_jewelSource(self, jewelSource):
         self.jewelSource = jewelSource
+
+    def get_device_name(self):
+        return self.device_name
+
+    def set_jdevice_name(self, device_name):
+        self.device_name = device_name
 
 
 
@@ -181,7 +189,9 @@ class Datenbank:
                                     ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                     Comment TEXT,
                                     Monitoring_Startdate NUMERIC NOT NULL,
-                                    JewelSource TEXT NOT NULL
+                                    JewelSource TEXT NOT NULL,
+                                    DeviceName TEXT NOT NULL,
+                                    FullbackupSource TEXT NOT NULL
                                                  );""")
 
                 cur.execute("""CREATE TABLE File (
@@ -346,8 +356,8 @@ class Datenbank:
         if conn != None:
             cur = conn.cursor()
 
-            command= "SELECT ID FROM Jewel WHERE JewelSource = ?"
-            data_tuple = (jewel.jewelSource,)
+            command= "SELECT ID FROM Jewel WHERE JewelSource = ? AND DeviceName = ?"
+            data_tuple = (jewel.jewelSource, jewel.device_name)
             cur.execute(command, data_tuple)
             id = cur.fetchone()
 
@@ -355,9 +365,9 @@ class Datenbank:
                 return id[0]
             else:
                 command = """INSERT INTO 'Jewel'
-                              ('Comment', 'Monitoring_Startdate', 'JewelSource') 
-                              VALUES (?, ?, ?);"""
-                data_tuple = (jewel.comment, jewel.monitoring_Startdate,jewel.jewelSource )
+                              ('Comment', 'Monitoring_Startdate', 'JewelSource', 'DeviceName', 'FullbackupSource') 
+                              VALUES (?, ?, ?, ?, ?);"""
+                data_tuple = (jewel.comment, jewel.monitoring_Startdate,jewel.jewelSource, jewel.device_name, jewel.fullbackup_source)
                 cur.execute(command, data_tuple)  
                 conn.commit()
                 return cur.lastrowid
@@ -380,6 +390,29 @@ class Datenbank:
                 return False
             conn.close()
 
+    
+     def check_which_jewel_sources_exist(self, jewel_source_arr, device_name):
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            command = "SELECT JewelSource FROM Jewel WHERE (JewelSource = ? AND DeviceName = ?)"
+            command = command + " ".join([" OR (JewelSource = ? AND DeviceName = ?)"]*(len(jewel_source_arr)-1))
+
+            params = []        
+            for source in jewel_source_arr:
+                params.append(source)
+                params.append(device_name)
+
+            cur.execute(command, params)
+            tmp = cur.fetchall()
+            answer = []
+            for row in tmp:
+                answer.append(row[0])
+            return answer
+
+                        
+
+
 
  
      def get_Jewel_via_id(self,id):
@@ -391,7 +424,7 @@ class Datenbank:
             cur.execute( sqlite_insert_with_param, [id])
             j_tuple = cur.fetchone()
             if j_tuple is not None:
-              jewel = Jewel(j_tuple[0], j_tuple[1], j_tuple[2], j_tuple[3])
+              jewel = Jewel(j_tuple[0], j_tuple[1], j_tuple[2], j_tuple[3], j_tuple[4], j_tuple[5])
             conn.commit()
             conn.close()
         return jewel
@@ -478,7 +511,7 @@ class Datenbank:
 
             if records is not None:
                 for row in records:
-                    jewel =  Jewel(row[0], row[1], row[2], row[3])
+                    jewel =  Jewel(row[0], row[1], row[2], row[3], row[4], row[5])
                     jewels.append(jewel)
             
             conn.commit()
@@ -560,6 +593,24 @@ class Datenbank:
             conn.commit()
             conn.close()
         return row
+
+     def get_fullbackup_paths(self, jewel_source_arr):
+        conn = self.create_connection('datenbank.db')
+        params = []        
+        answer = []
+        if conn != None:
+            cur = conn.cursor()
+            command = """SELECT * FROM Jewel WHERE JewelSource = ?"""
+            command = command + " ".join([" OR JewelSource = ?"]*(len(jewel_source_arr)-1))
+
+            for source in jewel_source_arr:
+                params.append(source)
+
+            cur.execute(command, params)
+            tmp = cur.fetchall()
+            for row in tmp:
+                answer.append(Jewel(row[0],row[1],row[2],row[3],row[4],row[5]))
+            return answer
             
 
 

@@ -29,8 +29,10 @@ if __name__ == "__main__":
     if len(arglist) > 1:
         # Ermitteln des aktuellen Datums um den Ordner des neusten Backups festzulegen
         current_date_time = date.now()
-        current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
+        current_date_time_formatted = date.now().strftime("%d-%m-%Y-%H-%M")
         new_backup_location = f"backup-{current_date_time_formatted}"
+
+        f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
 
         # TODO: Sources aus der Datenbank holen in Form einer Liste
         source_list = ["jewels", "jewels2"]

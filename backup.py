@@ -54,16 +54,34 @@ class Backup:
             output_array = output.splitlines()
 
             #since we do it for every jewel, the first line ist always './' and not needed
-            output_array.pop(0)
+            if len(output_array) != 0:
+                output_array.pop(0)
 
-
-            print(output_array)
             for line in output_array:
                 if line.endswith('/'):
                     self.current_source_path = line
 
-            else:
-                pass
+                else:
+                    print(line)
+                    filename_arr = line.rsplit('/', 1)
+                    if len(filename_arr) == 1:
+                        file_name = filename_arr[0]
+                    else:
+                        file_name = filename_arr[1]
+
+                    file_object = info_handler.get_metadata(old_jewels[i].jewelSource + '/' + line)
+                    blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
+                    self.current_date_time, file_object.modify, file_object.modify, 0, file_name, old_jewels[i].jewelSource + "/" + line, f'{self.destination}/{differential_backup_name}/{line}')
+                    file = File(0, [blob], file_object.birth)
+                    result = self.db.add_to_database(old_jewels[i],file,platform.node())
+
+                    if(not result):
+                        ##when result false, the file must be deleted
+                        #why? because the full backup do not contain changes made in diff backups.
+                        #therefore some files would be store again and again and again, 
+                        # even tho in one diff backup was this change regognized
+                        pass
+
                 
 
 

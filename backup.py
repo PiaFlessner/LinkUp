@@ -17,14 +17,13 @@ class Backup:
     def __init__(self, jewel_path_list, destination):
         self.jewel_path_list = jewel_path_list
         self.destination = destination
+        self.db = Datenbank()
 
     def initialize_backup(self):
-        db = Datenbank()
-
         #to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
-        diff_backup_sources = db.check_which_jewel_sources_exist(tmp, platform.node())
+        diff_backup_sources = self.db.check_which_jewel_sources_exist(tmp, platform.node())
         #filter out everything, that is in diff_backup already
         full_backup_sources = [e for e in tmp if e not in  diff_backup_sources]
 
@@ -38,6 +37,37 @@ class Backup:
 
     def execute_backup(self, jewel_sources):
         print("Creating differential backup")
+        differential_backup_name = f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
+        old_jewels = self.db.get_fullbackup_paths(jewel_sources)
+
+        #tried it like 2 hours without using a for loop, but if you give multiple params, it will compare every source with every full backup
+        # means that there will all be stored again, since in jewel2 are other files than in jewel3
+        #google did not help. Only answer "run it multiple times"
+        for i in range(0,len(old_jewels)):
+            subprocess_return = subprocess.Popen(f"rsync -aAX --out-format='%n' "
+                                                    f"--compare-dest={old_jewels[i].fullbackup_source}/ {jewel_sources[i]}/ "
+                                                    f"{self.destination}/{differential_backup_name}",
+                                                    shell=True,
+                                                    stdout=subprocess.PIPE)
+            output = subprocess_return.stdout.read()
+            output = output.decode('utf-8')
+            output_array = output.splitlines()
+
+            #since we do it for every jewel, the first line ist always './' and not needed
+            output_array.pop(0)
+
+
+            print(output_array)
+            for line in output_array:
+                if line.endswith('/'):
+                    self.current_source_path = line
+
+            else:
+                pass
+                
+
+
+
 
     def execute_fullbackup(self, jewel_sources):
         print("Creating full backup")
@@ -60,7 +90,7 @@ class Backup:
 
                     #stripping and splitting is needed, since comparison does not work otherwise
                     if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
-                        jewel = Jewel(0, None, date.today(),jewel_path, platform.node())
+                        jewel = Jewel(0, None, date.today(),jewel_path, platform.node(), f'{self.destination}/fullBackup/{line.strip("/")}')
                         break
 
             else:

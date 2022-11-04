@@ -13,6 +13,7 @@ class Backup:
     current_date_time = date.now()
     current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
     new_backup_location = f"backup-{current_date_time_formatted}"
+    fullbackup_name = fullBackup+platform.node()
 
     def __init__(self, jewel_path_list, destination):
         self.jewel_path_list = jewel_path_list
@@ -45,7 +46,7 @@ class Backup:
         #google did not help. Only answer "run it multiple times"
         for i in range(0,len(old_jewels)):
             subprocess_return = subprocess.Popen(f"rsync -aAX --out-format='%n' "
-                                                    f"--compare-dest={old_jewels[i].fullbackup_source}/ {jewel_sources[i]}/ "
+                                                    f"--compare-dest={old_jewels[i].fullbackup_source}/ {jewel_sources[i]} "
                                                     f"{self.destination}/{differential_backup_name}",
                                                     shell=True,
                                                     stdout=subprocess.PIPE)
@@ -54,6 +55,7 @@ class Backup:
             output_array = output.splitlines()
 
             #since we do it for every jewel, the first line ist always './' and not needed
+            print(output_array)
             if len(output_array) != 0:
                 output_array.pop(0)
 
@@ -95,6 +97,7 @@ class Backup:
                                              f'{self.destination}/fullBackup',
                                              shell=True,
                                              stdout=subprocess.PIPE)
+
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
@@ -108,7 +111,7 @@ class Backup:
 
                     #stripping and splitting is needed, since comparison does not work otherwise
                     if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
-                        jewel = Jewel(0, None, date.today(),jewel_path, platform.node(), f'{self.destination}/fullBackup/{line.strip("/")}')
+                        jewel = Jewel(0, None, date.today(),jewel_path, platform.node(), f'{self.destination}/{self.fullbackup_name}/{line.strip("/")}')
                         break
 
             else:
@@ -119,7 +122,7 @@ class Backup:
                 file_name = line.rsplit('/', 1)[1]
                 blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
                             self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
-                            working_dir + "/" + line, f'{self.destination}/fullBackup/{line}')
+                            working_dir + "/" + line, f'{self.destination}/{self.fullbackup_name}/{line}')
 
                 file = File(0, [blob], file_object.birth)
                 datenbank = Datenbank()

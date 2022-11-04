@@ -2,12 +2,12 @@
     "jewel_sources" : 
     { 
       "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2", "/home/peter", "/home/gruppe/backupTest/jewel3"], 
-      "device2": []
+      "device2": [""]
     },
     "blacklist": [".tmp"],
     "destination": 
     { 
       "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation", 
-      "device2": []
+      "device2": [""]
     }
 }

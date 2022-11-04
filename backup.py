@@ -39,9 +39,13 @@ class Backup:
         print("Creating differential backup")
         differential_backup_name = f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
         old_jewels = self.db.get_fullbackup_paths(jewel_sources)
+        backup_sources_for_r_sync = " ".join(jewel_sources)
 
-        subprocess_return = subprocess.Popen(f"rsync -aAX --out-format='%n' "
-                                                    f"--compare-dest={self.destination}/{self.fullbackup_name} {jewel_sources} "
+        #a would equals -rlptgoD but in Order to make O work, it needs to be written out
+        #O is needed, because otherwise rsync would always backup a folder, when the user only Clicks on it (an therefore opens the folder)
+        #unwanted behavior, so O omits directory changes (only of the folder, not of the files inside the folder!)
+        subprocess_return = subprocess.Popen(f"rsync -rlptgoDAXO --out-format='%n' "
+                                                    f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                                     f"{self.destination}/{differential_backup_name}",
                                                     shell=True,
                                                     stdout=subprocess.PIPE)
@@ -49,35 +53,8 @@ class Backup:
         output = output.decode('utf-8')
         output_array = output.splitlines()
 
-        #since we do it for every jewel, the first line ist always './' and not needed
-        print(output_array)
-        if len(output_array) != 0:
-            output_array.pop(0)
-
-        for line in output_array:
-            if line.endswith('/'):
-                self.current_source_path = line
-
-            else:
-                filename_arr = line.rsplit('/', 1)
-                if len(filename_arr) == 1:
-                    file_name = filename_arr[0]
-                else:
-                    file_name = filename_arr[1]
-
-                    file_object = info_handler.get_metadata(old_jewels[i].jewelSource + '/' + line)
-                    blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
-                    self.current_date_time, file_object.modify, file_object.modify, 0, file_name, old_jewels[i].jewelSource + "/" + line, f'{self.destination}/{differential_backup_name}/{line}')
-                    file = File(0, [blob], file_object.birth)
-                    result = self.db.add_to_database(old_jewels[i],file,platform.node())
-                    print(result)
-
-                    if(not result):
-                        ##when result false, the file must be deleted
-                        #why? rsync checks if the whole jewel has changed, and then, it stores EVERY FILE 
-                        #therefore some files would be store again and again and again, 
-                        # even tho in one diff backup was this change regognized
-                        os.remove(f'{self.destination}/{differential_backup_name}/{line}')
+        self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{differential_backup_name}", self.destination+"/"+self.fullbackup_name )   
+     
 
                 
 
@@ -96,33 +73,8 @@ class Backup:
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
-        
-        for line in output_array:                     
-            if line.endswith('/'):
-                self.current_source_path = line
 
-                #check wether path is now the jewel
-                for jewel_path in jewel_sources:
-
-                    #stripping and splitting is needed, since comparison does not work otherwise
-                    if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
-                        jewel = Jewel(0, None, date.today(),jewel_path, platform.node(), f'{self.destination}/{self.fullbackup_name}/{line.strip("/")}')
-                        break
-
-            else:
-                #get only the working dir without the jewel(because line inherits the jewel)
-                working_dir = jewel_path.rsplit('/',1)[0]
-                file_object = info_handler.get_metadata(working_dir + '/' + line)
-                # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
-                file_name = line.rsplit('/', 1)[1]
-                blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
-                            self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
-                            working_dir + "/" + line, f'{self.destination}/{self.fullbackup_name}/{line}')
-
-                file = File(0, [blob], file_object.birth)
-                datenbank = Datenbank()
-                result = datenbank.add_to_database(jewel, file, platform.node())
-                print(result)
+        self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{self.fullbackup_name}", self.destination+"/"+self.fullbackup_name ) 
 
     def list_to_string(self, string_list):
         formatted_string = " ".join(string_list)
@@ -133,3 +85,45 @@ class Backup:
             if not(os.path.exists(jewel_path)):
                 paths.remove(jewel_path)
         return paths
+
+
+    def read_files_and_jewel_from_rsync_output(self, output_array, jewel_sources,store_destination_body, fullbackup_store_destination_body):
+        result = []
+        for line in output_array:                     
+            if line.endswith('/'):
+                self.current_source_path = line
+
+                #check wether path is now the jewel
+                for jewel_path in jewel_sources:
+
+                    #stripping and splitting is needed, since comparison does not work otherwise
+                    if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
+                        jewel = Jewel(0, None, date.today(),jewel_path, platform.node(), f'{fullbackup_store_destination_body}/{line.strip("/")}')
+                        break
+
+            else:
+                #get only the working dir without the jewel(because line inherits the jewel)
+                working_dir = jewel_path.rsplit('/',1)[0]
+                file_object = info_handler.get_metadata(working_dir + '/' + line)
+                # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
+                file_name = line.rsplit('/', 1)[1]
+                blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
+                            self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
+                            working_dir + "/" + line, f'{store_destination_body}/{line}')
+
+                file = File(0, [blob], file_object.birth)
+                datenbank = Datenbank()
+                r = datenbank.add_to_database(jewel, file, platform.node())
+                result.append(r)
+
+                ##when result false, the file must be deleted
+                #why? rsync chekcs, if the jewel has changed to the fullbackup, but whats with already registered changes in dif backup? 
+                #therefore some files would be store again and again and again, 
+                # even tho in one diff backup was this change regognized
+                #other cause: rsync only can store THE WHOLE directory layer, when one file in this directory layer has changed.
+                #also unwanted behavior.
+                #as long as rsync does not work this out, this line is needed. since now, rsync does not doe all copies right
+                if(not r):
+                    os.remove(f'{store_destination_body}/{line}')
+
+        return result

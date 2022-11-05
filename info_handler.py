@@ -2,6 +2,7 @@ import os
 from datetime import datetime as date
 import hashlib
 import json
+import platform
 from wrapper.file_wrapper import Data
 
 json_file_name = "config.json"
@@ -18,6 +19,7 @@ def get_metadata(filepth: str):
     return file_obj
     
 
+
 def calculate_checksum(filename: str):
     with open(filename, "rb") as f:
         file_as_bytes = f.read()
@@ -31,3 +33,16 @@ def get_json_info():
         config = json.load(f)
 
     return config
+
+def check_destination_path_exists():
+    config = get_json_info()
+    if not isinstance(config["destination"][platform.node()], list ):
+        path=config["destination"][platform.node()]
+        #print("checking: "+path)
+        if not(os.path.exists(path)):
+            os.mkdir(path)
+    else:
+        for i in config["destination"][platform.node()]:
+            #print("checking: "+i)
+            if not(os.path.exists(i)):
+                os.mkdir(i)

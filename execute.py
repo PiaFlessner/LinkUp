@@ -28,6 +28,7 @@ if __name__ == "__main__":
     group.add_argument('-B', '--showBlob', action='store_true', help='Show Blobs')
     #command: python3 execute.py show -[J F sf B] 123hi
     showTables.add_argument('id', type=str, nargs='?')
+    #command: python3 execute.py show -[J F sf B] ? -[v vv]
     showTables.add_argument('-v', '--verbose', action='store_true')
     showTables.add_argument('-vv', '--verboseverbose', action='store_true')
     paths = parser.add_mutually_exclusive_group()
@@ -55,34 +56,46 @@ if __name__ == "__main__":
 
         ##########user chooses show jewel
         if args.showJewel:
+            verbose_level = 0
+            if args.verbose: verbose_level = 1
+            elif args.verboseverbose: verbose_level = 2
             if args.id is not None:
-                sT.show_jewel_via_id(args.id)
+                sT.show_jewel_via_id(args.id, verbose_level)
             else:
-                sT.show_all_jewels()
+                sT.show_all_jewels(verbose_level)
 
 
         ##########user chooses show File
         elif args.showFile:
+            verbose_level = 0
+            if args.verbose: verbose_level = 1
+            elif args.verboseverbose: verbose_level = 2
             if args.id is not None:
-                sT.show_file_via_id(args.id)
+                sT.show_file_via_id(args.id, verbose_level)
             else:
-                sT.show_all_files()
+                sT.show_all_files(verbose_level)
 
 
          ##########user chooses show skipped File       
         elif args.showSkippedFile:
+            verbose_level = 0
+            if args.verbose: verbose_level = 1
+            elif args.verboseverbose: verbose_level = 2
             if args.id is not None:
-                sT.show_skipped_file_via_id(args.id)
+                sT.show_skipped_file_via_id(args.id, verbose_level)
             else:
-                sT.show_all_skipped_Files()
+                sT.show_all_skipped_Files(verbose_level)
 
 
         ##########user chooses show Blob
         elif args.showBlob:
+            verbose_level = 0
+            if args.verbose: verbose_level = 1
+            elif args.verboseverbose: verbose_level = 2
             if args.id is not None:
-                sT.show_blob_via_id(args.id)
+                sT.show_blob_via_id(args.id, verbose_level)
             else:
-                sT.show_all_blobs()
+                sT.show_all_blobs(verbose_level)
 
 
         ##########user chooses nothing

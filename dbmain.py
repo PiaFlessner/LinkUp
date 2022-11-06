@@ -7,9 +7,10 @@ samedate0 = date(2013,1,1,0,0,0)
 samedate1 = date(2013,2,1,0,0,0)
 samedate2 = date(2013,3,1,0,0,0)
 
-jewel = Jewel(1, "1. Jewel", date.today(), "test", platform.node())
-jewel2 = Jewel(1, "2. Jewel", date.today(), "hi", platform.node())
-jewel3 = Jewel(1,"3. Jewel", date.today(), "3.", platform.node())
+# Heike: Ich habe zu den Jewels noch den Parameter Fullbackup source hinzugefügt, sonst kam es beim Einfügen der Testdaten zu Fehlern.
+jewel = Jewel(1, "1. Jewel", date.today(), "test", platform.node(), "Desktop")
+jewel2 = Jewel(1, "2. Jewel", date.today(), "hi", platform.node(), "Desktop")
+jewel3 = Jewel(1,"3. Jewel", date.today(), "3.", platform.node(), "Desktop")
 
 
 blob1 = Blob(0,0,999999,"hs99999",700,samedate0,samedate0,samedate0,0,"Blob1File1.txt", "Desktop","HDD")

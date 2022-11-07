@@ -36,13 +36,9 @@ def get_json_info():
 
 def check_destination_path_exists():
     config = get_json_info()
-    if not isinstance(config["destination"][platform.node()], list ):
+    if isinstance(config["destination"][platform.node()], str ):
         path=config["destination"][platform.node()]
         #print("checking: "+path)
-        if not(os.path.exists(path)):
-            os.mkdir(path)
+        os.makedirs(path, exist_ok=True)
     else:
-        for i in config["destination"][platform.node()]:
-            #print("checking: "+i)
-            if not(os.path.exists(i)):
-                os.mkdir(i)
+        raise TypeError("config destination should be a string.")

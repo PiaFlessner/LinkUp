@@ -20,6 +20,7 @@ class Backup:
         self.db = Datenbank()
 
     def initialize_backup(self):
+        info_handler.check_destination_path_exists
         #to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 

@@ -14,11 +14,13 @@ class Backup:
     new_backup_location = f"backup-{current_date_time_formatted}"
     fullbackup_name = "fullBackup"+platform.node()
 
+
     def __init__(self, jewel_path_list, destination):
         self.jewel_path_list = jewel_path_list
         self.destination = destination
         self.db = Datenbank()
 
+  
     def initialize_backup(self):
         #to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
@@ -35,6 +37,7 @@ class Backup:
         if full_backup_sources:
             self.execute_fullbackup(full_backup_sources)
 
+
     def execute_backup(self, jewel_sources):
         print("Creating differential backup")
         differential_backup_name = f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
@@ -49,9 +52,6 @@ class Backup:
                                                     f"{self.destination}/{differential_backup_name}",
                                                     shell=True,
                                                     stdout=subprocess.PIPE)
-        print(f"rsync -rlptgoDAXO {Backup.excluding_data()} --out-format='%n' "
-                                                    f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
-                                                    f"{self.destination}/{differential_backup_name}")
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
@@ -68,18 +68,17 @@ class Backup:
                                              f'{self.destination}/{self.fullbackup_name}',
                                              shell=True,
                                              stdout=subprocess.PIPE)
-        print(f'rsync -aAX {Backup.excluding_data()} --out-format="%n" '
-                                             f'{jewel_path_list_string} '
-                                             f'{self.destination}/{self.fullbackup_name}')
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
 
         self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{self.fullbackup_name}", self.destination+"/"+self.fullbackup_name ) 
 
+
     def list_to_string(self, string_list):
         formatted_string = " ".join(string_list)
         return formatted_string
+
 
     def filter_non_existing_paths(self, paths):
         for jewel_path in paths:
@@ -128,16 +127,6 @@ class Backup:
                     os.remove(f'{store_destination_body}/{line}')
 
         return result
-    
-
-    def excluding_data_aaa():
-        config = info_handler.get_json_info()
-        return_list = ['--exclude={']
-        for element in config['blacklist']['directories'] + config['blacklist']['files']:
-            return_list.append(f'\'{element}\',')
-        for extension in config['blacklist']['extensions']:
-            return_list.append(f'\'*{extension}\',')
-        return ''.join(return_list)[:-1] + '}'
 
 
     def excluding_data():

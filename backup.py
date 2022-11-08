@@ -44,32 +44,33 @@ class Backup:
         #a would equals -rlptgoD but in Order to make O work, it needs to be written out
         #O is needed, because otherwise rsync would always backup a folder, when the user only Clicks on it (an therefore opens the folder)
         #unwanted behavior, so O omits directory changes (only of the folder, not of the files inside the folder!)
-        subprocess_return = subprocess.Popen(f"rsync -rlptgoDAXO --out-format='%n' "
+        subprocess_return = subprocess.Popen(f"rsync -rlptgoDAXO {Backup.excluding_data()} --out-format='%n' "
                                                     f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                                     f"{self.destination}/{differential_backup_name}",
                                                     shell=True,
                                                     stdout=subprocess.PIPE)
+        print(f"rsync -rlptgoDAXO {Backup.excluding_data()} --out-format='%n' "
+                                                    f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
+                                                    f"{self.destination}/{differential_backup_name}")
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
 
         self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{differential_backup_name}", self.destination+"/"+self.fullbackup_name )   
-     
-
-                
-
-
-
+    
 
     def execute_fullbackup(self, jewel_sources):
         print("Creating full backup")
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
-        subprocess_return = subprocess.Popen(f'rsync -aAX --out-format="%n" {jewel_path_list_string} '
+        subprocess_return = subprocess.Popen(f'rsync -aAX {Backup.excluding_data()} --out-format="%n" '
+                                             f'{jewel_path_list_string} '
                                              f'{self.destination}/{self.fullbackup_name}',
                                              shell=True,
                                              stdout=subprocess.PIPE)
-
+        print(f'rsync -aAX {Backup.excluding_data()} --out-format="%n" '
+                                             f'{jewel_path_list_string} '
+                                             f'{self.destination}/{self.fullbackup_name}')
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
@@ -107,7 +108,7 @@ class Backup:
                 file_object = info_handler.get_metadata(working_dir + '/' + line)
                 # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
                 file_name = line.rsplit('/', 1)[1]
-                blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
+                blob = Blob(0, 0, file_object.f_hash, (f'{file_object.f_size}_{file_object.f_hash}'), file_object.f_size,
                             self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
 
@@ -127,3 +128,23 @@ class Backup:
                     os.remove(f'{store_destination_body}/{line}')
 
         return result
+    
+
+    def excluding_data_aaa():
+        config = info_handler.get_json_info()
+        return_list = ['--exclude={']
+        for element in config['blacklist']['directories'] + config['blacklist']['files']:
+            return_list.append(f'\'{element}\',')
+        for extension in config['blacklist']['extensions']:
+            return_list.append(f'\'*{extension}\',')
+        return ''.join(return_list)[:-1] + '}'
+
+
+    def excluding_data():
+        config = info_handler.get_json_info()
+        return_list = []
+        for element in config['blacklist']['directories'] + config['blacklist']['files']:
+            return_list.append(f'--exclude \'{element}\'')
+        for extension in config['blacklist']['extensions']:
+            return_list.append(f'--exclude \'*{extension}\'')
+        return ' '.join(return_list)

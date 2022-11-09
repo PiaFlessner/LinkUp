@@ -22,6 +22,7 @@ class Backup:
 
   
     def initialize_backup(self):
+        info_handler.check_destination_path_exists
         #to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
@@ -51,8 +52,8 @@ class Backup:
                                                     stdout=subprocess.PIPE)
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
+        print(output)
         output_array = output.splitlines()
-
         self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{differential_backup_name}", self.destination+"/"+self.fullbackup_name )   
     
 
@@ -68,7 +69,6 @@ class Backup:
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
-
         self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{self.fullbackup_name}", self.destination+"/"+self.fullbackup_name ) 
 
 
@@ -86,6 +86,9 @@ class Backup:
 
     def read_files_and_jewel_from_rsync_output(self, output_array, jewel_sources,store_destination_body, fullbackup_store_destination_body):
         result = []
+        if output_array == []:
+            print("result ist leer")
+            exit
         for line in output_array:                     
             if line.endswith('/'):
                 self.current_source_path = line

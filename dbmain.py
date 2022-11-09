@@ -13,11 +13,11 @@ jewel2 = Jewel(1, "2. Jewel", date.today(), "hi", platform.node(), "Desktop")
 jewel3 = Jewel(1,"3. Jewel", date.today(), "3.", platform.node(), "Desktop")
 
 
-blob1 = Blob(0,0,999999,"hs99999",700,samedate0,samedate0,samedate0,0,"Blob1File1.txt", "Desktop","HDD")
-blob1v2 = Blob(0,0,999998,"hs99998",700,samedate0,samedate0,samedate1,0,"Blob1File1.txt", "Desktop","HDD")
-blob1v3 = Blob(0,0,999998,"hs99997",700,samedate0,samedate0,samedate2,0,"Blob2File1.txt", "Desktop","HDD")
+blob1 = Blob(0,0,999999,"hs99999",700,samedate0,samedate0,0,"Blob1File1.txt", "Desktop","HDD")
+blob1v2 = Blob(0,0,999998,"hs99998",700,samedate0,samedate1,0,"Blob1File1.txt", "Desktop","HDD")
+blob1v3 = Blob(0,0,999998,"hs99997",700,samedate0,samedate2,0,"Blob2File1.txt", "Desktop","HDD")
 
-blob2 = Blob(0,0,5677777,"hs88777",100,samedate0,samedate0,samedate0,0,"Blob2File2.txt", "Desktop","HDD")
+blob2 = Blob(0,0,5677777,"hs88777",100,samedate0,samedate0,0,"Blob2File2.txt", "Desktop","HDD")
 
 
 blobs_arr1 = [blob1]

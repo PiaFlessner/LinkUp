@@ -42,25 +42,17 @@ class Backup:
         old_jewels = self.db.get_fullbackup_paths(jewel_sources)
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
-        #a would equals -rlptgoD but in Order to make O work, it needs to be written out
-        #O is needed, because otherwise rsync would always backup a folder, when the user only Clicks on it (an therefore opens the folder)
-        #unwanted behavior, so O omits directory changes (only of the folder, not of the files inside the folder!)
-        subprocess_return = subprocess.Popen(f"rsync -rlptgoDAXO --out-format='%n' "
+        subprocess_return = subprocess.Popen(f"rsync -aAX --out-format='%n' "
                                                     f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                                     f"{self.destination}/{differential_backup_name}",
                                                     shell=True,
                                                     stdout=subprocess.PIPE)
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
+        print(output)
         output_array = output.splitlines()
-
         self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{differential_backup_name}", self.destination+"/"+self.fullbackup_name )   
      
-
-                
-
-
-
 
     def execute_fullbackup(self, jewel_sources):
         print("Creating full backup")
@@ -74,7 +66,6 @@ class Backup:
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
-
         self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{self.fullbackup_name}", self.destination+"/"+self.fullbackup_name ) 
 
     def list_to_string(self, string_list):

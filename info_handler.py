@@ -17,12 +17,11 @@ def get_metadata(filepth: str):
     size = stats.st_size / 1024  # file size in kb
     birth = date.fromtimestamp(stats.st_ctime)
     modify = date.fromtimestamp(stats.st_mtime)
-    change = subprocess.Popen(f"stat --printf='%z\n' {filepth}",shell=True,stdout=subprocess.PIPE)
+    change = subprocess.Popen(f"stat --printf='%z\n' {filepth}", shell=True, stdout=subprocess.PIPE)
     change = change.stdout.read()
     change = change.decode('utf-8')
     file_obj = Data(filepth, checksum, size, birth, change, modify)
     return file_obj
-    
 
 
 def calculate_checksum(filename: str):
@@ -33,18 +32,17 @@ def calculate_checksum(filename: str):
 
 
 def get_json_info():
-
     with open(json_file_name) as f:
         config = json.load(f)
 
     return config
-    
+
 
 def check_destination_path_exists():
     config = get_json_info()
-    if isinstance(config["destination"][platform.node()], str ):
-        path=config["destination"][platform.node()]
-        #print("checking: "+path)
+    if isinstance(config["destination"][platform.node()], str):
+        path = config["destination"][platform.node()]
+        # print("checking: "+path)
         os.makedirs(path, exist_ok=True)
     else:
         raise TypeError("config destination should be a string.")

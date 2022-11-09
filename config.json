@@ -3,20 +3,20 @@
   {
     "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2", "/home/peter", "/home/gruppe/backupTest/jewel3"],
     "kali": ["/home/kali/folderToBackup"],
-    "device2": [""]
+    "deviceX": [""]
   },
 
   "blacklist" :
   {
     "directories": ["folderToIgnore1", "folderToIgnore2"],
     "extensions": [".tmp", ".html"],
-    "files": ["fileToIgnore1.png", "fileToIgnore2.jpg"]
+    "files": ["fileToIgnore1.png", "fileToIgnore2.jpg", "fileToIgnore.txt"]
   },
 
   "destination":
   {
     "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation",
     "kali": "/home/kali/backupLocation",
-    "device2": [""]
+    "deviceX": [""]
   }
 }

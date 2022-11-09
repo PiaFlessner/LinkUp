@@ -9,7 +9,7 @@ from datenbank import Blob, Datenbank, File, Jewel
 class Backup:
     current_source_path = None
     current_date_time = date.now()
-    current_date_time_formatted = current_date_time.strftime("%d-%m-%Y-%H-%M")
+    current_date_time_formatted = current_date_time.strftime("%Y-%m-%d-%H-%M")
     new_backup_location = f"backup-{current_date_time_formatted}"
     fullbackup_name = "fullBackup" + platform.node()
 
@@ -19,7 +19,7 @@ class Backup:
         self.db = Datenbank()
 
     def initialize_backup(self):
-        info_handler.check_destination_path_exists
+        info_handler.check_destination_path_exists()
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 

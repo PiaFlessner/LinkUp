@@ -5,6 +5,7 @@ from os.path import exists as file_exists
 from unicodedata import numeric
 import uuid
 import datetime
+import platform
 
 class Jewel:
 
@@ -16,61 +17,11 @@ class Jewel:
         self.device_name = device_name
         self.fullbackup_source = fullbackup_source
 
-    def get_id(self):
-        return self.id
-
-    def set_id(self, id):
-        self.id = id
-
-    def get_comment(self):
-        return self.comment
-
-    def set_comment(self, comment):
-        self.comment = comment
-
-    def get_monitoring_Startdate(self):
-        return self.monitoring_Startdate
-
-    def set_monitoring_Startdate(self, monitoring_Startdate):
-        self.monitoring_Startdate = monitoring_Startdate
-
-    def get_jewelSource(self):
-        return self.jewelSource
-
-    def set_jewelSource(self, jewelSource):
-        self.jewelSource = jewelSource
-
-    def get_device_name(self):
-        return self.device_name
-
-    def set_jdevice_name(self, device_name):
-        self.device_name = device_name
-
-
-
 class File:
 
     def __init__(self, id, blobs, birth):
         self.id = id
         self.blobs = blobs
-        self.birth = birth
-
-    def get_id(self):
-        return self.id
-
-    def set_id(self, id):
-        self.id = id
-
-    def get_blobs(self):
-        return self.blobs
-
-    def set_blobs (self,blobs):
-        self.blobs = blobs
-
-    def get_birth(self):
-        return self.birth
-
-    def set_birth (self,birth):
         self.birth = birth
 
     def get_last_blob(self):
@@ -92,78 +43,7 @@ class Blob:
         self.store_destination = str(store_destination)
         self.source_path = str(source_path)
 
-    def get_id(self):
-        return self.id
-
-    def set_id(self, id):
-        self.id = id
-
-    def get_number(self):
-        return self.number
-
-    def set_number(self, number):
-        self.number = number
-
-    def get_name(self):
-        return self.name
-
-    def set_name(self, name):
-        self.name = name
-
-    def get_fileSize(self):
-        return self.fileSize
-
-    def set_fileSize(self, fileSize):
-        self.fileSize = fileSize
-
-    def get_creationDate(self):
-        return self.creationDate
-
-    def set_creationDate(self, creationDate):
-        self.creationDate = creationDate
-
-    def get_change(self):
-        return self.change
-
-    def set_change(self, change):
-        self.change = change
-
-    def get_modify(self):
-        return self.modify
-
-    def set_modify(self, modify):
-        self.modify = modify
-
-    def get_iD_File(self):
-        return self.iD_File
-
-    def set_iD_File(self,iD_File):
-        self.iD_File = iD_File
-
-    def get_origin_name(self):
-        return self.origin_name
-
-    def set_origin_name(self,origin_name):
-        self.origin_name = origin_name
-
-    def get_source_path(self):
-        return self.source_path
-
-    def set_source_path(self,source_path):
-        self.source_path = source_path
-
-    def get_store_destination(self):
-        return self.store_destination
-
-    def set_store_destination(self,store_destination):
-        self.store_destination = store_destination
-    
-    def set_hash(self,hash):
-        self.hash = hash
-
-    def get_hash(self):
-        return self.hash
-
+ 
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, self.__class__):
@@ -270,7 +150,7 @@ class Datenbank:
             ## no uri 
             if old_file is None:
                 old_file = self.check_if_hash_exists(file,cur)
-                ##  no uri and no hash
+                ##  no uri and no hash on same device
                 if old_file is None:
                     self.insert_File(file, cur,conn)
                     self.insert_first_Blob(file,cur,conn)
@@ -278,19 +158,22 @@ class Datenbank:
                     return True
                 # no uri but existing hash
                 else:
-                    self.addJewelFileAssignment(jewel.id, old_file.id)
-                    self.protocol_skipped_file(jewel,file,"Version existing in another File","Found in File: " + old_file.id, old_file.id, conn, cur )
-                    return False
-
+                    ##find the same hash
+                    for blob in old_file.blobs:
+                    ## asa blob is same, we need the path to this file
+                        if blob.hash == file.blobs[0].hash:
+                            self.addJewelFileAssignment(jewel.id, old_file.id)
+                            self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
+                            return blob.store_destination
             #uri  
             else:
             ##has old_file a blob with same hash?
                 for blob in old_file.blobs:
-                ## asa blob is same, does not need to be inserted. Its already existing
+                ## asa blob is same,  we need the path to this file
                     if blob.hash == file.blobs[0].hash:
                         self.addJewelFileAssignment(jewel.id, old_file.id)
                         self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
-                        return False
+                        return blob.store_destination
                 #if no hash exists then add new blob
                 self.insert_new_blob_to_existing_file(file,cur,conn,old_file)
                 self.addJewelFileAssignment(jewel.id,old_file.id)
@@ -341,8 +224,13 @@ class Datenbank:
         con.commit()
             
      def check_if_hash_exists(self,file, cur):
-        command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID =(SELECT ID_File FROM Blob WHERE Blob.Hash = ?)"""
-        params = (file.blobs[0].hash,)
+        command = """SELECT File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.Name,Blob.FileSize, Blob.CreationDate, Blob.Change, Blob.Modify, Blob.ID_File, Blob.Origin_Name, Blob.Source_Path, Blob.Store_Destination  FROM File 
+                        INNER JOIN Blob on File.ID = Blob.ID_File
+                        INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
+                        INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
+                        WHERE File.ID =(SELECT ID_File FROM Blob WHERE Blob.Hash = '?')
+                        AND Jewel.DeviceName = '?'"""
+        params = (file.blobs[0].hash, platform.node())
         cur.execute(command, params)
         data = cur.fetchall()
 

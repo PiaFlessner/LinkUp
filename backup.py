@@ -14,11 +14,13 @@ class Backup:
     new_backup_location = f"backup-{current_date_time_formatted}"
     fullbackup_name = "fullBackup"+platform.node()
 
+
     def __init__(self, jewel_path_list, destination):
         self.jewel_path_list = jewel_path_list
         self.destination = destination
         self.db = Datenbank()
 
+  
     def initialize_backup(self):
         info_handler.check_destination_path_exists
         #to minimize work, first check if these paths even exists, then continue
@@ -36,13 +38,14 @@ class Backup:
         if full_backup_sources:
             self.execute_fullbackup(full_backup_sources)
 
+
     def execute_backup(self, jewel_sources):
         print("Creating differential backup")
         differential_backup_name = f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
         old_jewels = self.db.get_fullbackup_paths(jewel_sources)
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
-        subprocess_return = subprocess.Popen(f"rsync -aAX --out-format='%n' "
+        subprocess_return = subprocess.Popen(f"rsync -aAX {Backup.excluding_data()} --out-format='%n' "
                                                     f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                                     f"{self.destination}/{differential_backup_name}",
                                                     shell=True,
@@ -52,25 +55,27 @@ class Backup:
         print(output)
         output_array = output.splitlines()
         self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{differential_backup_name}", self.destination+"/"+self.fullbackup_name )   
-     
+    
 
     def execute_fullbackup(self, jewel_sources):
         print("Creating full backup")
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
-        subprocess_return = subprocess.Popen(f'rsync -aAX --out-format="%n" {jewel_path_list_string} '
+        subprocess_return = subprocess.Popen(f'rsync -aAX {Backup.excluding_data()} --out-format="%n" '
+                                             f'{jewel_path_list_string} '
                                              f'{self.destination}/{self.fullbackup_name}',
                                              shell=True,
                                              stdout=subprocess.PIPE)
-
         output = subprocess_return.stdout.read()
         output = output.decode('utf-8')
         output_array = output.splitlines()
         self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources, f"{self.destination}/{self.fullbackup_name}", self.destination+"/"+self.fullbackup_name ) 
 
+
     def list_to_string(self, string_list):
         formatted_string = " ".join(string_list)
         return formatted_string
+
 
     def filter_non_existing_paths(self, paths):
         for jewel_path in paths:
@@ -102,7 +107,7 @@ class Backup:
                 file_object = info_handler.get_metadata(working_dir + '/' + line)
                 # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
                 file_name = line.rsplit('/', 1)[1]
-                blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
+                blob = Blob(0, 0, file_object.f_hash, (f'{file_object.f_size}_{file_object.f_hash}'), file_object.f_size,
                             self.current_date_time, file_object.modify, file_object.meta_change, 0, file_name,
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
 
@@ -122,3 +127,13 @@ class Backup:
                     os.remove(f'{store_destination_body}/{line}')
 
         return result
+
+
+    def excluding_data():
+        config = info_handler.get_json_info()
+        return_list = []
+        for element in config['blacklist']['directories'] + config['blacklist']['files']:
+            return_list.append(f'--exclude \'{element}\'')
+        for extension in config['blacklist']['extensions']:
+            return_list.append(f'--exclude \'*{extension}\'')
+        return ' '.join(return_list)

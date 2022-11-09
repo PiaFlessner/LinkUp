@@ -158,6 +158,11 @@ class Blob:
     def set_store_destination(self,store_destination):
         self.store_destination = store_destination
     
+    def set_hash(self,hash):
+        self.hash = hash
+
+    def get_hash(self):
+        return self.hash
 
     def __eq__(self, other):
         """Overrides the default implementation"""

@@ -5,6 +5,7 @@ import hashlib
 import json
 import platform
 from wrapper.file_wrapper import Data
+import subprocess
 
 json_file_name = "config.json"
 
@@ -12,6 +13,7 @@ json_file_name = "config.json"
 def get_metadata(filepth: str):
     stats = os.stat(filepth)
     checksum = calculate_checksum(filepth)
+    # checksum = get_hash(filepth)
     size = stats.st_size / 1024  # file size in kb
     birth = date.fromtimestamp(stats.st_ctime)
     modify = date.fromtimestamp(stats.st_mtime)
@@ -38,6 +40,7 @@ def get_json_info():
         config = json.load(f)
 
     return config
+    
 
 def check_destination_path_exists():
     config = get_json_info()
@@ -47,3 +50,11 @@ def check_destination_path_exists():
         os.makedirs(path, exist_ok=True)
     else:
         raise TypeError("config destination should be a string.")
+
+
+def get_hash(total_file_path: str):
+    file_name = total_file_path.split('/')[-1]
+    file_path = '/'.join(total_file_path.split('/')[:-1])
+    output = subprocess.run(f'openssl dgst -sha1 {file_name}', shell=True, cwd=file_path, stdout=subprocess.PIPE)
+    hash = str(output.stdout.decode()).split('= ')[1]
+    return hash

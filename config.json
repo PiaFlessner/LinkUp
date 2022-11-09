@@ -1,13 +1,20 @@
 {
-    "jewel_sources" : 
-    { 
-      "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2", "/home/peter", "/home/gruppe/backupTest/jewel3"], 
-      "device2": [""]
-    },
-    "blacklist": [".tmp"],
-    "destination": 
-    { 
-      "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation", 
-      "device2": [""]
-    }
+  "jewel_sources" :
+  {
+    "kali": ["/home/kali/folderToBackup"],
+    "device2": [""]
+  },
+
+  "blacklist" :
+  {
+    "directories": ["folderToIgnore1", "folderToIgnore2"],
+    "extensions": [".tmp", ".html"],
+    "files": ["fileToIgnore1.png", "fileToIgnore2.jpg"]
+  },
+
+  "destination":
+  {
+    "kali": "/home/kali/backupLocation",
+    "device2": [""]
+  }
 }

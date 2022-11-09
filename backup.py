@@ -40,6 +40,7 @@ class Backup:
 
     def execute_backup(self, jewel_sources):
         print("Creating differential backup")
+        leave_out_sources = []
         differential_backup_name = f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
         old_jewels = self.db.get_fullbackup_paths(jewel_sources)
         backup_sources_for_r_sync = " ".join(jewel_sources)
@@ -60,6 +61,7 @@ class Backup:
         for result in insert_results:
             if result is not True:
                     self.set_hardlink(result[0], result[1])
+                    leave_out_sources.append(result[2])
 
 
     def execute_fullbackup(self, jewel_sources):
@@ -130,7 +132,7 @@ class Backup:
                 db_answer = datenbank.add_to_database(jewel, file, platform.node())
 
                 if db_answer is not True:
-                    result.append((db_answer,blob.store_destination))
+                    result.append((db_answer,blob.store_destination,working_dir + "/" + line))
 
         return result
 
@@ -148,6 +150,7 @@ class Backup:
     def set_hardlink(self, hardlink_path, destination_path):
         #TODO hardlink action must be inserted here
         print("------------------------------------")
-        print("Die Datei am Ort \n" + destination_path + "\n muss zu einem hardlink zum Pfad \n"+ hardlink_path + "\n germacht werden.")
+        print("Die Datei am Ort \n" + destination_path + "\n muss zu einem hardlink zum Pfad \n"+ hardlink_path 
+        + "\n germacht werden. ")
         #create hardlink
         pass

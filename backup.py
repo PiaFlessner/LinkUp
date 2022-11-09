@@ -59,7 +59,7 @@ class Backup:
         
         for result in insert_results:
             if result is not True:
-                    self.set_hardlink(result[0], result[1])
+                    self.set_hardlink(result[0], result[1], result[2])
 
 
     def execute_fullbackup(self, jewel_sources):
@@ -130,7 +130,7 @@ class Backup:
                 db_answer = datenbank.add_to_database(jewel, file, platform.node())
 
                 if db_answer is not True:
-                    result.append((db_answer,blob.store_destination))
+                    result.append((db_answer,blob.store_destination,working_dir + "/" + line))
 
         return result
 
@@ -145,9 +145,10 @@ class Backup:
         return ' '.join(return_list)
 
 
-    def set_hardlink(self, hardlink_path, destination_path):
+    def set_hardlink(self, hardlink_path, destination_path, source_path):
         #TODO hardlink action must be inserted here
         print("------------------------------------")
-        print("Die Datei am Ort \n" + destination_path + "\n muss zu einem hardlink zum Pfad \n"+ hardlink_path + "\n germacht werden.")
+        print("Die Datei am Ort \n" + destination_path + "\n muss zu einem hardlink zum Pfad \n"+ hardlink_path 
+        + "\n germacht werden. Dieser Hardlink entstand beim backuppen von der Datei:\n" + source_path)
         #create hardlink
         pass

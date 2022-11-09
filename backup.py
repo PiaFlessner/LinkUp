@@ -108,7 +108,7 @@ class Backup:
                 # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
                 file_name = line.rsplit('/', 1)[1]
                 blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
-                            self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
+                            self.current_date_time, file_object.modify, file_object.meta_change, 0, file_name,
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
 
                 file = File(0, [blob], file_object.birth)

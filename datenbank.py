@@ -46,7 +46,7 @@ class Blob:
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, self.__class__):
-            return str(self.hash) == str(other.hash) and self.modify == other.modify and self.change == other.change and str(self.store_destination) == str(other.store_destination) and str(self.origin_name) == str(other.origin_name) and str(self.source_path) == str(other.source_path)
+            return str(self.hash) == str(other.hash) and self.modify == other.modify and str(self.store_destination) == str(other.store_destination) and str(self.origin_name) == str(other.origin_name) and str(self.source_path) == str(other.source_path)
         else:
             return False
 
@@ -125,7 +125,7 @@ class Datenbank:
                 );""")
 
 
-                                             # Number, Hash, Name, FileSize, CreationDate, Change, Modify, ID_File, Origin_Name, Source_Path, Store_Destination
+                                             # Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination
   
                 conn.commit()
                 conn.close()
@@ -193,17 +193,17 @@ class Datenbank:
         ##create file from data
         blobs = []
         for row in data:                      
-            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12], row[13] ))
+            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12]))
         file = File(data[0][0],blobs,data[0][1])
         return file
 
 
      def insert_new_blob_to_existing_file(self,new_file,cur,conn,old_file):
         command = """INSERT INTO Blob
-                              (Number, Hash, Name, FileSize, CreationDate, Change, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
-                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+                              (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
         #         
-        params = (old_file.get_last_blob().number+1, new_file.blobs[0].hash,new_file.blobs[0].name , new_file.blobs[0].fileSize, new_file.blobs[0].creationDate, new_file.blobs[0].change, new_file.blobs[0].modify, old_file.id, new_file.blobs[0].origin_name, new_file.blobs[0].source_path, new_file.blobs[0].store_destination)
+        params = (old_file.get_last_blob().number+1, new_file.blobs[0].hash,new_file.blobs[0].name , new_file.blobs[0].fileSize, new_file.blobs[0].creationDate, new_file.blobs[0].modify, old_file.id, new_file.blobs[0].origin_name, new_file.blobs[0].source_path, new_file.blobs[0].store_destination)
         cur.execute(command, params)
         conn.commit()
 
@@ -213,7 +213,7 @@ class Datenbank:
                               (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
                     
-        params = (1, file.blobs[0].hash, file.blobs[0].name , file.blobs[0].fileSize, file.blobs[0].creationDate, file.blobs[0].change, file.blobs[0].modify, file.id, file.blobs[0].origin_name, file.blobs[0].source_path, file.blobs[0].store_destination)
+        params = (1, file.blobs[0].hash, file.blobs[0].name , file.blobs[0].fileSize, file.blobs[0].creationDate, file.blobs[0].modify, file.id, file.blobs[0].origin_name, file.blobs[0].source_path, file.blobs[0].store_destination)
         cur.execute(command, params)
         conn.commit()
 
@@ -230,8 +230,8 @@ class Datenbank:
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
-                        WHERE File.ID =(SELECT ID_File FROM Blob WHERE Blob.Hash = '?')
-                        AND Jewel.DeviceName = '?'"""
+                        WHERE File.ID =(SELECT ID_File FROM Blob WHERE Blob.Hash = ?)
+                        AND Jewel.DeviceName = ?"""
         params = (file.blobs[0].hash, platform.node())
         cur.execute(command, params)
         data = cur.fetchall()

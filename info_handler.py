@@ -1,4 +1,5 @@
 import os
+import subprocess
 from datetime import datetime as date
 import hashlib
 import json
@@ -14,7 +15,11 @@ def get_metadata(filepth: str):
     size = stats.st_size / 1024  # file size in kb
     birth = date.fromtimestamp(stats.st_ctime)
     modify = date.fromtimestamp(stats.st_mtime)
-    change = 12345678
+    change = subprocess.Popen(f"stat --printf='%z\n' {filepth}",
+                             shell=True,
+                             stdout=subprocess.PIPE)
+    change = change.stdout.read()
+    change = change.decode('utf-8')
     file_obj = Data(filepth, checksum, size, birth, change, modify)
     return file_obj
     

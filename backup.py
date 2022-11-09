@@ -90,6 +90,9 @@ class Backup:
 
     def read_files_and_jewel_from_rsync_output(self, output_array, jewel_sources,store_destination_body, fullbackup_store_destination_body):
         result = []
+        if output_array == []:
+            print("result ist leer")
+            exit
         for line in output_array:                     
             if line.endswith('/'):
                 self.current_source_path = line
@@ -109,7 +112,7 @@ class Backup:
                 # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
                 file_name = line.rsplit('/', 1)[1]
                 blob = Blob(0, 0, file_object.f_hash, "PLATZHALTER", file_object.f_size,
-                            self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
+                            self.current_date_time, file_object.modify, file_object.meta_change, 0, file_name,
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
 
                 file = File(0, [blob], file_object.birth)

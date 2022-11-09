@@ -34,27 +34,14 @@ def get_json_info():
 
     return config
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def check_destination_path_exists():
+    config = get_json_info()
+    if isinstance(config["destination"][platform.node()], str ):
+        path=config["destination"][platform.node()]
+        #print("checking: "+path)
+        os.makedirs(path, exist_ok=True)
+    else:
+        raise TypeError("config destination should be a string.")
 
 
 def get_hash(total_file_path: str):

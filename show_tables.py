@@ -41,7 +41,6 @@ class ShowTables:
             hash = blob.hash
             name = blob.name
             creationDate = str(blob.creationDate)
-            change = str(blob.change)
             modify = str(blob.creationDate)
             origin_name = blob.origin_name
             source_path = blob.source_path
@@ -52,7 +51,6 @@ class ShowTables:
                 if len(hash) > 10: hash = hash[0:7] + "..."
                 if len(name) > 10: name[0:7] + "..."
                 creationDate = creationDate.split(" ")[0]
-                change = change.split(" ")[0]
                 modify = modify.split(" ")[0]
                 if len(origin_name) > 5: origin_name = origin_name[0:7] + "..."
                 if len(source_path) > 5: source_path = source_path[0:7] + "..."
@@ -64,14 +62,13 @@ class ShowTables:
                 if len (hash) > 15: hash = hash[0:12] + "..."
                 if len(name) > 15: name[0:12] + "..."
                 creationDate = creationDate.split(".")[0]
-                change = change.split(".")[0]
                 modify = modify.split(".")[0]
                 if len(origin_name) > 20: origin_name = origin_name[0:17] + "..."
                 if len(source_path) > 15: source_path = source_path[0:12] + "..."
                 if len(store_destination) > 15: store_destination = store_destination[0:12] + "..."
                 if len(id_file) > 15: id_file = id_file[0:12] + "..."
 
-            return [str(blob.id), str(blob.number),hash, name, str(blob.fileSize), creationDate, change, modify, id_file, origin_name, source_path,store_destination]
+            return [str(blob.id), str(blob.number),hash, name, str(blob.fileSize), creationDate, modify, id_file, origin_name, source_path,store_destination]
 
 
     def _verbose_skipped_files_to_string(self, s_file, verbose_level):
@@ -166,13 +163,13 @@ class ShowTables:
         if blobs is not None:
             table = PrettyTable()
 
-            table.field_names = ["Blob ID", "File version", "Hash", "Name", "File size","Creationdate", "Change", "Modify", 
+            table.field_names = ["Blob ID", "File version", "Hash", "Name", "File size","Creationdate", "Modify", 
              "File ID", "Origin name","Source path", "Store destination"]
 
             for blob in blobs:
                 b_list = self._verbose_blob_to_string(blob, verbose_level)
                 table.add_row([b_list[0], b_list[1], b_list[2], b_list[3], b_list[4], b_list[5], b_list[6], b_list[7], b_list[8], b_list[9],
-                b_list[10], b_list[11]])
+                b_list[10]])
 
             print(table)
 
@@ -215,12 +212,12 @@ class ShowTables:
             print(table)
 
             blobtable = PrettyTable()
-            blobtable.field_names = ["Blob ID","File version","Hash","Name","File size","Creationdate","Change","Modify","File ID","Origin name","Source path", "Store destination"]
+            blobtable.field_names = ["Blob ID","File version","Hash","Name","File size","Creationdate","Modify","File ID","Origin name","Source path", "Store destination"]
 
             for blob in file.blobs:
                 b_list = self._verbose_blob_to_string(blob, verbose_level)
                 blobtable.add_row([b_list[0], b_list[1], b_list[2], b_list[3], b_list[4], b_list[5], b_list[6], b_list[7], b_list[8], b_list[9],
-                b_list[10], b_list[11]])
+                b_list[10]])
 
             print(blobtable)
 
@@ -232,11 +229,11 @@ class ShowTables:
 
         if blob is not None:
             table =  PrettyTable()
-            table.field_names = ["Blob ID", "File version", "Hash", "Name", "File size","Creationdate", "Change", "Modify", 
+            table.field_names = ["Blob ID", "File version", "Hash", "Name", "File size","Creationdate", "Modify", 
             "File ID", "Origin name","Source path", "Store destination"]
             b_list = self._verbose_blob_to_string(blob, verbose_level)
             table.add_row([b_list[0], b_list[1], b_list[2], b_list[3], b_list[4], b_list[5], b_list[6], b_list[7], b_list[8], b_list[9],
-                b_list[10], b_list[11]])
+                b_list[10]])
             print(table)
         else:  
             print("\nThere is no blob with the id " + str(id))

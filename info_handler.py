@@ -33,6 +33,7 @@ def get_json_info():
         config = json.load(f)
 
     return config
+    
 
 def check_destination_path_exists():
     config = get_json_info()

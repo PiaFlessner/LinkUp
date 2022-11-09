@@ -41,7 +41,7 @@ class Backup:
         old_jewels = self.db.get_fullbackup_paths(jewel_sources)
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
-        subprocess_return = subprocess.Popen(f"rsync -aAX {Backup.excluding_data()} --out-format='%n' "
+        subprocess_return = subprocess.Popen(f"rsync -aAX {self.excluding_data()} --out-format='%n' "
                                              f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                              f"{self.destination}/{differential_backup_name}",
                                              shell=True,
@@ -50,15 +50,21 @@ class Backup:
         output = output.decode('utf-8')
         print(output)
         output_array = output.splitlines()
-        self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
+        insert_results = self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
                                                     f"{self.destination}/{differential_backup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
+        
+        for result in insert_results:
+            if result is not True:
+                    self.set_hardlink(result[0], result[1])
+
+
 
     def execute_fullbackup(self, jewel_sources):
         print("Creating full backup")
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
-        subprocess_return = subprocess.Popen(f'rsync -aAX {Backup.excluding_data()} --out-format="%n" '
+        subprocess_return = subprocess.Popen(f'rsync -aAX {self.excluding_data()} --out-format="%n" '
                                              f'{jewel_path_list_string} '
                                              f'{self.destination}/{self.fullbackup_name}',
                                              shell=True,
@@ -70,18 +76,18 @@ class Backup:
                                                     f"{self.destination}/{self.fullbackup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
 
-    def list_to_string(self, string_list):
+    def list_to_string(self, string_list) -> str:
         formatted_string = " ".join(string_list)
         return formatted_string
 
-    def filter_non_existing_paths(self, paths):
+    def filter_non_existing_paths(self, paths) -> list[str]:
         for jewel_path in paths:
             if not (os.path.exists(jewel_path)):
                 paths.remove(jewel_path)
         return paths
 
     def read_files_and_jewel_from_rsync_output(self, output_array, jewel_sources, store_destination_body,
-                                               fullbackup_store_destination_body):
+                                               fullbackup_store_destination_body) -> list[str|bool]:
         result = []
         if output_array == []:
             print("result ist leer")
@@ -116,20 +122,13 @@ class Backup:
 
                 file = File(0, [blob], file_object.birth)
                 datenbank = Datenbank()
-                r = datenbank.add_to_database(jewel, file, platform.node())
-                result.append(r)
+                db_answer = datenbank.add_to_database(jewel, file, platform.node())
 
-                ##when result false, the file must be deleted
-                # why? rsync chekcs, if the jewel has changed to the fullbackup, but whats with already registered changes in dif backup?
-                # therefore some files would be store again and again and again,
-                # even tho in one diff backup was this change regognized
-                # other cause: rsync only can store THE WHOLE directory layer, when one file in this directory layer has changed.
-                # also unwanted behavior.
-                # as long as rsync does not work this out, this line is needed. since now, rsync does not doe all copies right
-                if (not r):
-                    os.remove(f'{store_destination_body}/{line}')
+                if db_answer is not True:
+                    result.append((db_answer,blob.store_destination))
 
         return result
+
 
     def excluding_data(self):
         config = info_handler.get_json_info()
@@ -139,3 +138,11 @@ class Backup:
         for extension in config['blacklist']['extensions']:
             return_list.append(f'--exclude \'*{extension}\'')
         return ' '.join(return_list)
+
+    def set_hardlink(self, hardlink_path, destination_path):
+        #TODO hardlink action must be inserted here
+        print("------------------------------------")
+        print("Die Datei am Ort \n" + destination_path + "\n muss zu einem hardlink zum Pfad \n"+ hardlink_path + "\n germacht werden.")
+        #create hardlink
+
+        pass

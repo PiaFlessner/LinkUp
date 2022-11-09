@@ -89,6 +89,9 @@ class Backup:
 
     def read_files_and_jewel_from_rsync_output(self, output_array, jewel_sources,store_destination_body, fullbackup_store_destination_body):
         result = []
+        if output_array == []:
+            print("result ist leer")
+            exit
         for line in output_array:                     
             if line.endswith('/'):
                 self.current_source_path = line

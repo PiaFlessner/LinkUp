@@ -35,6 +35,28 @@ def get_json_info():
     return config
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def get_hash(total_file_path: str):
     file_name = total_file_path.split('/')[-1]
     file_path = '/'.join(total_file_path.split('/')[:-1])

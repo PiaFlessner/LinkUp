@@ -100,6 +100,9 @@ class Backup:
                     if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
                         jewel = Jewel(0, None, date.today(),jewel_path, platform.node(), f'{fullbackup_store_destination_body}/{line.strip("/")}')
                         break
+                    #if top layer of jewel was not changed, the jewel would not be in line.strip... so we need to split and get the first folder
+                    elif jewel_path.rsplit('/',1)[1].strip("/") == line.split("/")[0]:
+                        jewel = Jewel(0, None, date.today(),jewel_path, platform.node(), f'{fullbackup_store_destination_body}/{line.strip("/")}')
 
             else:
                 #get only the working dir without the jewel(because line inherits the jewel)
@@ -108,7 +111,7 @@ class Backup:
                 # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
                 file_name = line.rsplit('/', 1)[1]
                 blob = Blob(0, 0, file_object.f_hash, (f'{file_object.f_size}_{file_object.f_hash}'), file_object.f_size,
-                            self.current_date_time, file_object.modify, file_object.meta_change, 0, file_name,
+                            self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
 
                 file = File(0, [blob], file_object.birth)

@@ -1,6 +1,7 @@
 {
   "jewel_sources" :
   {
+    "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2", "/home/peter", "/home/gruppe/backupTest/jewel3"],
     "kali": ["/home/kali/folderToBackup"],
     "device2": [""]
   },
@@ -14,6 +15,7 @@
 
   "destination":
   {
+    "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation",
     "kali": "/home/kali/backupLocation",
     "device2": [""]
   }

@@ -13,10 +13,12 @@ class Backup:
     new_backup_location = f"backup-{current_date_time_formatted}"
     fullbackup_name = "fullBackup" + platform.node()
 
+
     def __init__(self, jewel_path_list, destination):
         self.jewel_path_list = jewel_path_list
         self.destination = destination
         self.db = Datenbank()
+
 
     def initialize_backup(self):
         info_handler.check_destination_path_exists()
@@ -34,6 +36,7 @@ class Backup:
         # execute, when not empty
         if full_backup_sources:
             self.execute_fullbackup(full_backup_sources)
+
 
     def execute_backup(self, jewel_sources):
         print("Creating differential backup")
@@ -59,7 +62,6 @@ class Backup:
                     self.set_hardlink(result[0], result[1])
 
 
-
     def execute_fullbackup(self, jewel_sources):
         print("Creating full backup")
 
@@ -76,15 +78,18 @@ class Backup:
                                                     f"{self.destination}/{self.fullbackup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
 
+
     def list_to_string(self, string_list) -> str:
         formatted_string = " ".join(string_list)
         return formatted_string
+
 
     def filter_non_existing_paths(self, paths) -> list[str]:
         for jewel_path in paths:
             if not (os.path.exists(jewel_path)):
                 paths.remove(jewel_path)
         return paths
+
 
     def read_files_and_jewel_from_rsync_output(self, output_array, jewel_sources, store_destination_body,
                                                fullbackup_store_destination_body) -> list[str|bool]:
@@ -117,7 +122,7 @@ class Backup:
                 file_name = line.rsplit('/', 1)[1]
                 blob = Blob(0, 0, file_object.f_hash, (f'{file_object.f_size}_{file_object.f_hash}'),
                             file_object.f_size,
-                            self.current_date_time, file_object.modify, file_object.modify, 0, file_name,
+                            self.current_date_time, file_object.modify, 0, file_name,
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
 
                 file = File(0, [blob], file_object.birth)
@@ -139,10 +144,10 @@ class Backup:
             return_list.append(f'--exclude \'*{extension}\'')
         return ' '.join(return_list)
 
+
     def set_hardlink(self, hardlink_path, destination_path):
         #TODO hardlink action must be inserted here
         print("------------------------------------")
         print("Die Datei am Ort \n" + destination_path + "\n muss zu einem hardlink zum Pfad \n"+ hardlink_path + "\n germacht werden.")
         #create hardlink
-
         pass

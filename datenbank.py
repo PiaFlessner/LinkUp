@@ -29,14 +29,13 @@ class File:
 
 class Blob:
 
-    def __init__(self,id, number, hash, name, fileSize, creationDate, change, modify,  iD_File, origin_name, source_path, store_destination ):
+    def __init__(self,id, number, hash, name, fileSize, creationDate, modify,  iD_File, origin_name, source_path, store_destination ):
         self.id = id
         self.number = number
         self.hash = str(hash)
         self.name = str(name)
         self.fileSize = fileSize
         self.creationDate = creationDate
-        self.change = change
         self.modify = modify
         self.iD_File = iD_File
         self.origin_name = str(origin_name)
@@ -104,7 +103,6 @@ class Datenbank:
                                     Name TEXT NOT NULL,
                                     FileSize INTEGER NOT NULL,
                                     CreationDate TIMESTAMP,
-                                    Change TIMESTAMP,
                                     Modify TIMESTAMP,
                                     ID_File INTEGER NOT NULL,
                                     Origin_Name TEXT NOT NULL,
@@ -136,6 +134,7 @@ class Datenbank:
         #uri = uuid.uuid3(uuid.NAMESPACE_OID, device_name + file_path + file_name)
         uri = device_name + file_path + file_name
         file.id = uri
+        
             
      def add_to_database(self, jewel, file, device_name):
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
@@ -208,23 +207,26 @@ class Datenbank:
         cur.execute(command, params)
         conn.commit()
 
+
      def insert_first_Blob(self,file,cur,conn):
         command = """INSERT INTO Blob
-                              (Number, Hash, Name, FileSize, CreationDate, Change, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
-                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+                              (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
                     
         params = (1, file.blobs[0].hash, file.blobs[0].name , file.blobs[0].fileSize, file.blobs[0].creationDate, file.blobs[0].change, file.blobs[0].modify, file.id, file.blobs[0].origin_name, file.blobs[0].source_path, file.blobs[0].store_destination)
         cur.execute(command, params)
         conn.commit()
+
 
      def insert_File(self,file,cur,con):
         command = "INSERT INTO FILE (ID, Birth) VALUES (?, ?);"
         params = (file.id , file.birth,)
         cur.execute(command,params)
         con.commit()
+
             
      def check_if_hash_exists(self,file, cur):
-        command = """SELECT File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.Name,Blob.FileSize, Blob.CreationDate, Blob.Change, Blob.Modify, Blob.ID_File, Blob.Origin_Name, Blob.Source_Path, Blob.Store_Destination  FROM File 
+        command = """SELECT File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.Name,Blob.FileSize, Blob.CreationDate, Blob.Modify, Blob.ID_File, Blob.Origin_Name, Blob.Source_Path, Blob.Store_Destination  FROM File 
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
@@ -240,9 +242,10 @@ class Datenbank:
         ##create file from data
         blobs = []
         for row in data:
-            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12], row[13]))
+            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12]))
         file = File(data[0][0],blobs,data[0][1])
         return file
+
 
      def addJewel(self,jewel):
         conn = self.create_connection('datenbank.db')
@@ -265,6 +268,7 @@ class Datenbank:
                 conn.commit()
                 return cur.lastrowid
         conn.close()
+
 
      def addJewelFileAssignment (self, id_jewel, id_file):
         conn = self.create_connection('datenbank.db')
@@ -302,11 +306,7 @@ class Datenbank:
             for row in tmp:
                 answer.append(row[0])
             return answer
-
-                        
-
-
-
+                   
  
      def get_Jewel_via_id(self,id):
         jewel = None
@@ -321,7 +321,6 @@ class Datenbank:
             conn.commit()
             conn.close()
         return jewel
-
 
 
      def get_File_via_id(self,id):
@@ -355,6 +354,7 @@ class Datenbank:
                blobs = self.get_Blobs_via_file_id(b_tuple[0])
                file = File(b_tuple[0], blobs, b_tuple[1])
         return file
+
 
      def get_all_Files(self):
         files = []
@@ -422,7 +422,7 @@ class Datenbank:
 
             if records is not None:
              for row in records:
-                    blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row [11])
+                    blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])
                     blobs.append(blob)
             
             conn.commit()
@@ -440,13 +440,14 @@ class Datenbank:
 
             if records is not None:
                 for row in records:
-                   blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])
+                   blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])
                    blobs.append(blob)
             
             conn.commit()
             conn.close()
         return blobs
             
+
      def get_Blob_via_id(self, id):
         blob = None
         conn = self.create_connection('datenbank.db')
@@ -454,16 +455,18 @@ class Datenbank:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Blob WHERE ID= ?", [id])
             row = cur.fetchone()
-            if row is not None: blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10], row[11])    
+            if row is not None: blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])    
             conn.commit()
             conn.close()
         return blob
+
 
      def protocol_skipped_file(self, jewel, file, reason, additional_information, connected_file, conn, cur):
         command = "INSERT INTO Skipped_Files (ID_Jewel, UUID, Occurance_Date, Hash, Reason, Additional_Information, Connected_File_to_Jewel) VALUES (?, ?, ?, ?, ?, ?, ? );"
         params = (jewel.id, file.id, datetime.datetime.today(), file.blobs[0].hash, reason, additional_information, connected_file)
         cur.execute(command, params)
         conn.commit()
+
 
      def get_all_skipped_files (self):
         row = []
@@ -476,6 +479,7 @@ class Datenbank:
             conn.close()
         return row
 
+
      def get_skipped_file_via_id (self, id):
         row = []
         conn = self.create_connection('datenbank.db')
@@ -486,6 +490,7 @@ class Datenbank:
             conn.commit()
             conn.close()
         return row
+
 
      def get_fullbackup_paths(self, jewel_source_arr):
         conn = self.create_connection('datenbank.db')
@@ -505,5 +510,3 @@ class Datenbank:
                 answer.append(Jewel(row[0],row[1],row[2],row[3],row[4],row[5]))
             return answer
             
-
-

@@ -30,16 +30,19 @@ def calculate_checksum(filename: str):
 
 
 def get_json_info():
-    with open(json_file_name) as f:
-        config = json.load(f)
-
+    try:
+        with open(json_file_name) as f:
+            config = json.load(f)
+    except json.decoder.JSONDecodeError:
+        print("There is a form error in the config.json.")
+        sys.exit()
     return config
 
 
 def check_destination_path_exists():
 
     try:
-        config = get_json_info()
+        #config = get_json_info()
         destination = get_str_info_from_config("destination", platform.node())
 
         print("creating backup in: "+destination)
@@ -68,25 +71,20 @@ def get_hash(total_file_path: str):
 
 def get_str_info_from_config(property:str, key:str):
     value = get_info_from_config(property,key)
-    try: 
-         if isinstance(value,str):
-            return value
-         else: raise TypeError() 
-    except TypeError:
+    if isinstance(value,str):
+        return value
+    else: 
         print("The corresponding Value of the Key in the " + property + " table has to be a String. For Example:\n \"myPC\": \"/home/username/backupLocation\"")
         sys.exit()
 
 
 def get_str_list_info_from_config(property:str, key:str):
     value = get_info_from_config(property,key)
-    try: 
-         if isinstance(value,list):
-            return value
-         else: raise TypeError() 
-    except TypeError:
-        print("The corresponding Value of the Key in the " + property + " table has to be a String List.")
+    if isinstance(value,list) and all(isinstance(n, str) for n in value):
+        return value
+    else:
+        print("The corresponding Value of the Key in the " + property + " table has to be a List of Strings.")
         sys.exit()
-    
 
 
 def get_info_from_config(property:str, key:str):
@@ -96,6 +94,6 @@ def get_info_from_config(property:str, key:str):
     except KeyError:
         print("Your Computer \""+platform.node()+"\" was not found as a key in the "+ property + " table of the config.json.")
         sys.exit()
-    except json.JSONDecodeError:
+    except json.decoder.JSONDecodeError:
         print("There is a form error in the config.json.")
         sys.exit()

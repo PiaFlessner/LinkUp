@@ -110,10 +110,5 @@ if __name__ == "__main__":
     elif args.command == "restore":
         pass
     if args.command == "backup":
-        try:
-            config = ih.get_json_info() # TODO Could throw an error
-        except JSONDecodeError:
-            print("There is a form error in the config.json.")
-            sys.exit()
-        backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
+        backup = Backup(ih.get_str_list_info_from_config("jewel_sources", platform.node()), ih.get_str_info_from_config("destination", platform.node()))
         backup.initialize_backup()

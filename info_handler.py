@@ -1,11 +1,9 @@
 import os
 import subprocess
 from datetime import datetime as date
-import hashlib
 import json
 import platform
 from wrapper.file_wrapper import Data
-import subprocess
 import sys
 
 json_file_name = "config.json"
@@ -13,20 +11,12 @@ json_file_name = "config.json"
 
 def get_metadata(filepth: str):
     stats = os.stat(filepth)
-    checksum = calculate_checksum(filepth)
-    # checksum = get_hash(filepth)
+    checksum = get_hash(filepth)
     size = stats.st_size / 1024  # file size in kb
     birth = date.fromtimestamp(stats.st_ctime)
     modify = date.fromtimestamp(stats.st_mtime)
     file_obj = Data(filepth, checksum, size, birth, modify)
     return file_obj
-
-
-def calculate_checksum(filename: str):
-    with open(filename, "rb") as f:
-        file_as_bytes = f.read()
-        readable_hash = hashlib.sha256(file_as_bytes).hexdigest()
-    return readable_hash
 
 
 def get_json_info():
@@ -58,11 +48,14 @@ def check_destination_path_exists():
     
 
 
+# Description:  Generate a SHA-1 Hash based on the content of a file.
+# Input:        Total path of a file as a String. Example: "home/user/directory/file.txt"
+# Output:       20 bytes (40 characters) large SHA-1 Hash as a String. Example: "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 def get_hash(total_file_path: str):
     file_name = total_file_path.split('/')[-1]
     file_path = '/'.join(total_file_path.split('/')[:-1])
-    output = subprocess.run(f'openssl dgst -sha1 {file_name}', shell=True, cwd=file_path, stdout=subprocess.PIPE)
-    hash = str(output.stdout.decode()).split('= ')[1]
+    bash_output = subprocess.run(f'openssl dgst -sha1 {file_name}', shell=True, cwd=file_path, stdout=subprocess.PIPE)
+    hash = str(bash_output.stdout.decode()).split('= ')[1]
     return hash
 
 

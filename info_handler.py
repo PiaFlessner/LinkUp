@@ -39,8 +39,13 @@ def check_destination_path_exists():
     config = get_json_info()
     if isinstance(config["destination"][platform.node()], str):
         path = config["destination"][platform.node()]
-        # print("checking: "+path)
+        print("creating backup in: "+path)
         os.makedirs(path, exist_ok=True)
+        if not(os.path.exists(path)):
+            print("Backup-Zielordner erstellen hat nicht geklappt")
+        if not(path.startswith("/")):
+            print("Der erstellte Backup-Zielordner ist relativ!")
+        
     else:
         raise TypeError("config destination should be a string.")
 

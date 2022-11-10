@@ -15,7 +15,7 @@
 
   "destination":
   {
-    "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation",
+    "gruppe-VirtualBox": "meep" ,
     "kali": "/home/kali/backupLocation",
     "deviceX": [""]
   }

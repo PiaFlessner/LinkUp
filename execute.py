@@ -108,6 +108,6 @@ if __name__ == "__main__":
     elif args.command == "restore":
         pass
     if args.command == "backup":
-        config = ih.get_json_info()
+        config = ih.get_json_info() # TODO Could throw an error
         backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
         backup.initialize_backup()

@@ -1,7 +1,9 @@
+from json.decoder import JSONDecodeError
 import os
 import subprocess
 import platform
 from datetime import datetime as date
+import sys
 import info_handler
 from datenbank import Blob, Datenbank, File, Jewel
 
@@ -21,7 +23,25 @@ class Backup:
 
 
     def initialize_backup(self):
-        info_handler.check_destination_path_exists()
+        try:
+            info_handler.check_destination_path_exists()
+        
+        except KeyError:
+            print("Your Computer\""+platform.node()+"\" was not found as a key in the destination table of the config.json.")
+            sys.exit()
+        except TypeError:
+            print("The corresponding Value of the Key in the destination table has to be a String. For Example:\n \"myPC\": \"/home/username/backupLocation\"")
+            sys.exit()
+        except PermissionError:
+            print("You do not have the necessary permission to create the backup folder "+info_handler.get_json_info()["destination"][platform.node()])
+            sys.exit()
+        except JSONDecodeError:
+            print("Json error")
+            sys.exit()
+
+
+
+        
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 

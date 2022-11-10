@@ -25,7 +25,6 @@ class Backup:
     def initialize_backup(self):
         try:
             info_handler.check_destination_path_exists()
-        
         except KeyError:
             print("Your Computer\""+platform.node()+"\" was not found as a key in the destination table of the config.json.")
             sys.exit()
@@ -33,10 +32,10 @@ class Backup:
             print("The corresponding Value of the Key in the destination table has to be a String. For Example:\n \"myPC\": \"/home/username/backupLocation\"")
             sys.exit()
         except PermissionError:
-            print("You do not have the necessary permission to create the backup folder "+info_handler.get_json_info()["destination"][platform.node()])
+            print("You do not have the necessary permission to create the backup folder "+info_handler.get_json_info()["destination"][platform.node()]+".")
             sys.exit()
         except JSONDecodeError:
-            print("Json error")
+            print("There is a form error in the config.json.")
             sys.exit()
 
 

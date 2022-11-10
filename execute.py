@@ -1,4 +1,6 @@
 import argparse
+from json import JSONDecodeError
+import sys
 from backup import Backup
 from show_tables import ShowTables
 import info_handler as ih
@@ -108,6 +110,10 @@ if __name__ == "__main__":
     elif args.command == "restore":
         pass
     if args.command == "backup":
-        config = ih.get_json_info() # TODO Could throw an error
+        try:
+            config = ih.get_json_info() # TODO Could throw an error
+        except JSONDecodeError:
+            print("There is a form error in the config.json.")
+            sys.exit()
         backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
         backup.initialize_backup()

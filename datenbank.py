@@ -19,33 +19,6 @@ class Jewel:
         self.device_name = device_name
         self.fullbackup_source = fullbackup_source
 
-
-    def _encode_base64(self, name):
-        name = str(name)
-        name_bytes = bytes(name,'UTF-8')
-        return base64.b64encode(name_bytes).decode("UTF-8") 
-
-
-    def _decode_base64(self, name):
-        name = str(name)
-        name_bytes = bytes(name,'UTF-8')
-        return base64.b64decode(name_bytes).decode("UTF-8") 
-
-
-    def encode_jewel(self):
-         self.comment = self._encode_base64(self.comment)
-         self.jewelSource = self._encode_base64(self.jewelSource)
-         self.device_name = self._encode_base64(self.device_name)
-         self.fullbackup_source = self._encode_base64(self.fullbackup_source)
-      
-
-    def decode_jewel(self):
-        self.comment = self._decode_base64(self.comment)
-        self.jewelSource = self._decode_base64(self.jewelSource)
-        self.device_name = self._decode_base64(self.device_name)
-        self.fullbackup_source = self._decode_base64(self.fullbackup_source)
-     
-
 class File:
 
     def __init__(self, id, blobs, birth):
@@ -70,33 +43,6 @@ class Blob:
         self.origin_name = str(origin_name)
         self.store_destination = str(store_destination)
         self.source_path = str(source_path)
-
-
-    def _encode_base64(self, name):
-        name = str(name)
-        name_bytes = bytes(name,'UTF-8')
-        return base64.b64encode(name_bytes).decode("UTF-8") 
-
-
-    def _decode_base64(self, name):
-        name = str(name)
-        name_bytes = bytes(name,'UTF-8')
-        return base64.b64decode(name_bytes).decode("UTF-8") 
-
-
-    def encode_blob(self):
-        self.name = self._encode_base64(self.name)
-        self.origin_name = self._encode_base64(self.origin_name)
-        self.store_destination = self._encode_base64(self.store_destination)
-        self.source_path = self._encode_base64(self.source_path)
-
-
-    def decode_blob(self):
-        self.name = self._decode_base64(self.name)
-        self.origin_name = self._decode_base64(self.origin_name)
-        self.store_destination = self._decode_base64(self.store_destination)
-        self.source_path = self._decode_base64(self.source_path)
-
  
     def __eq__(self, other):
         """Overrides the default implementation"""
@@ -201,16 +147,13 @@ class Datenbank:
 
      def set_uri(self, file, device_name, file_path, file_name):
         #uri = uuid.uuid3(uuid.NAMESPACE_OID, device_name + file_path + file_name)
-        uri = self._encode_base64(device_name) + self._encode_base64(file_path) + self._encode_base64(file_name)
+        uri = device_name + file_path
         file.id = uri
         
             
      def add_to_database(self, jewel, file, device_name):
+              
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
-
-        for blob in file.blobs:
-            blob.encode_blob()
-      
         jewel.id = self.addJewel(jewel)
 
         conn = self.create_connection('datenbank.db')
@@ -255,7 +198,7 @@ class Datenbank:
     
      def check_if_uri_exists(self,file,cur):
         command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID = ?"""
-        params = (file.id,)
+        params = (self._encode_base64(file.id),)
         cur.execute(command, params)
         data = cur.fetchall()
 
@@ -265,8 +208,8 @@ class Datenbank:
         ##create file from data
         blobs = []
         for row in data:                      
-            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12]))
-        file = File(data[0][0],blobs,data[0][1])
+            blobs.append(Blob(row[2], row[3],row[4], self._decode_base64(row[5]), row[6], row[7],row[8],self._decode_base64(row[9]),self._decode_base64(row[10]), self._decode_base64(row[11]), self._decode_base64(row[12])))
+        file = File(self._decode_base64(data[0][0]),blobs,data[0][1])
         return file
 
 
@@ -275,7 +218,7 @@ class Datenbank:
                               (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
         #         
-        params = (old_file.get_last_blob().number+1, new_file.blobs[0].hash,new_file.blobs[0].name , new_file.blobs[0].fileSize, new_file.blobs[0].creationDate, new_file.blobs[0].modify, old_file.id, new_file.blobs[0].origin_name, new_file.blobs[0].source_path, new_file.blobs[0].store_destination)
+        params = (old_file.get_last_blob().number+1, new_file.blobs[0].hash,self._encode_base64(new_file.blobs[0].name) , new_file.blobs[0].fileSize, new_file.blobs[0].creationDate, new_file.blobs[0].modify,self._encode_base64(old_file.id), self._encode_base64(new_file.blobs[0].origin_name), self._encode_base64(new_file.blobs[0].source_path), self._encode_base64(new_file.blobs[0].store_destination))
         cur.execute(command, params)
         conn.commit()
 
@@ -284,15 +227,15 @@ class Datenbank:
         command = """INSERT INTO Blob
                               (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
-                    
-        params = (1, file.blobs[0].hash, file.blobs[0].name , file.blobs[0].fileSize, file.blobs[0].creationDate, file.blobs[0].modify, file.id, file.blobs[0].origin_name, file.blobs[0].source_path, file.blobs[0].store_destination)
+ 
+        params = (1, file.blobs[0].hash, self._encode_base64(file.blobs[0].name) , file.blobs[0].fileSize, file.blobs[0].creationDate, file.blobs[0].modify, self._encode_base64(file.id), self._encode_base64(file.blobs[0].origin_name), self._encode_base64(file.blobs[0].source_path), self._encode_base64(file.blobs[0].store_destination))
         cur.execute(command, params)
         conn.commit()
 
 
      def insert_File(self,file,cur,con):
         command = "INSERT INTO FILE (ID, Birth) VALUES (?, ?);"
-        params = (file.id , file.birth,)
+        params = (self._encode_base64(file.id) , file.birth,)
         cur.execute(command,params)
         con.commit()
 
@@ -314,8 +257,8 @@ class Datenbank:
         ##create file from data
         blobs = []
         for row in data:
-            blobs.append(Blob(row[2], row[3],row[4], row[5], row[6], row[7],row[8],row[9],row[10], row[11], row[12]))
-        file = File(data[0][0],blobs,data[0][1])
+            blobs.append(Blob(row[2], row[3],row[4], self._decode_base64(row[5]), row[6], row[7],row[8],self._decode_base64(row[9]),self._decode_base64(row[10]), self._decode_base64(row[11]), self._decode_base64(row[12])))
+        file = File(self._decode_base64(data[0][0]),blobs,data[0][1])
         return file
 
 
@@ -350,7 +293,7 @@ class Datenbank:
             sqlite_insert_with_param = """INSERT INTO 'Jewel_File_Assignment'
                               ('ID_Jewel', 'ID_File') 
                               VALUES (?, ?);"""
-            data_tuple = (id_jewel, id_file)
+            data_tuple = (id_jewel, self._encode_base64(id_file))
             try:
                 cur.execute(sqlite_insert_with_param, data_tuple)
                 conn.commit()
@@ -393,8 +336,7 @@ class Datenbank:
             cur.execute( sqlite_insert_with_param, [id])
             j_tuple = cur.fetchone()
             if j_tuple is not None:
-              jewel = Jewel(j_tuple[0], j_tuple[1], j_tuple[2], j_tuple[3], j_tuple[4], j_tuple[5])
-              jewel.decode_jewel()
+              jewel = Jewel(j_tuple[0], self._decode_base64(j_tuple[1]), j_tuple[2], self._decode_base64(j_tuple[3]), self._decode_base64(j_tuple[4]),self._decode_base64(j_tuple[5]))
             conn.commit()
             conn.close()
         return jewel
@@ -406,13 +348,13 @@ class Datenbank:
         if conn != None:
             cur = conn.cursor()
             sqlite_insert_with_param = "SELECT * FROM File WHERE ID= ?"
-            cur.execute( sqlite_insert_with_param, [id])
+            cur.execute( sqlite_insert_with_param, self._encode_base64([id]))
             b_tuple = cur.fetchone()
             conn.commit()
             conn.close()
             if b_tuple is not None:
-               blobs = self.get_Blobs_via_file_id(b_tuple[0])
-               file = File(b_tuple[0], blobs, b_tuple[1])
+               blobs = self.get_Blobs_via_file_id(self._decode_base64(b_tuple[0]))
+               file = File(self._decode_base64(b_tuple[0]), blobs, b_tuple[1])
         return file
 
    
@@ -428,8 +370,8 @@ class Datenbank:
             conn.commit()
             conn.close()
             if b_tuple is not None:
-               blobs = self.get_Blobs_via_file_id(b_tuple[0])
-               file = File(b_tuple[0], blobs, b_tuple[1])
+               blobs = self.get_Blobs_via_file_id(self._decode_base64(b_tuple[0]))
+               file = File(self._decode_base64(b_tuple[0]), blobs, b_tuple[1])
         return file
 
 
@@ -444,8 +386,8 @@ class Datenbank:
             conn.close()
             if records is not None:
                 for row in records:
-                    blobs = self.get_Blobs_via_file_id(row[0])
-                    file = File(row[0], blobs, row[1])
+                    blobs = self.get_Blobs_via_file_id(self._decode_base64(row[0]))
+                    file = File(self._decode_base64(row[0]), blobs, row[1])
                     files.append(file)          
         return files
     
@@ -465,8 +407,8 @@ class Datenbank:
 
             if records is not None:
                 for row in records:
-                   blobs = self.get_Blobs_via_file_id(row[0])
-                   file = File(row[0], blobs, row[1])
+                   blobs = self.get_Blobs_via_file_id(self._decode_base64(row[0]))
+                   file = File(self._decode_base64(row[0]), blobs, row[1])
                    files.append(file)              
         return files
 
@@ -481,8 +423,7 @@ class Datenbank:
 
             if records is not None:
                 for row in records:
-                    jewel =  Jewel(row[0], row[1], row[2], row[3], row[4], row[5])
-                    jewel.decode_jewel()
+                    jewel =  Jewel(row[0], self._decode_base64(row[1]), row[2], self._decode_base64(row[3]), self._decode_base64(row[4]), self._decode_base64(row[5]))
                     jewels.append(jewel)
             
             conn.commit()
@@ -500,8 +441,7 @@ class Datenbank:
 
             if records is not None:
              for row in records:
-                    blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])
-                    blob.decode_blob()
+                    blob = Blob(row[0], row[1], row[2], self._decode_base64(row[3]),row[4],row[5], row[6], self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]), self._decode_base64(row[10]))
                     blobs.append(blob)
             
             conn.commit()
@@ -514,13 +454,12 @@ class Datenbank:
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
-            cur.execute("SELECT * FROM Blob WHERE ID_File= ?", [file_id])
+            cur.execute("SELECT * FROM Blob WHERE ID_File= ?", [self._encode_base64(file_id)])
             records = cur.fetchall()
 
             if records is not None:
                 for row in records:
-                   blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])
-                   blob.decode_blob()
+                   blob = Blob(row[0], row[1], row[2], self._decode_base64(row[3]),row[4],row[5], row[6], self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]), self._decode_base64(row[10]))
                    blobs.append(blob)
             
             conn.commit()
@@ -536,8 +475,7 @@ class Datenbank:
             cur.execute("SELECT * FROM Blob WHERE ID= ?", [id])
             row = cur.fetchone()
             if row is not None: 
-                blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])    
-                blob.decode_blob()
+                blob = Blob(row[0], row[1], row[2], self._decode_base64(row[3]),row[4],row[5], row[6], self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]), self._decode_base64(row[10]))   
             conn.commit()
             conn.close()
             
@@ -546,7 +484,7 @@ class Datenbank:
 
      def protocol_skipped_file(self, jewel, file, reason, additional_information, connected_file, conn, cur):
         command = "INSERT INTO Skipped_Files (ID_Jewel, UUID, Occurance_Date, Hash, Reason, Additional_Information, Connected_File_to_Jewel) VALUES (?, ?, ?, ?, ?, ?, ? );"
-        params = (jewel.id, file.id, datetime.datetime.today(), file.blobs[0].hash, reason, additional_information, connected_file)
+        params = (jewel.id, self._encode_base64(file.id), datetime.datetime.today(), file.blobs[0].hash, reason, additional_information, self._encode_base64(connected_file))
         cur.execute(command, params)
         conn.commit()
 
@@ -560,6 +498,8 @@ class Datenbank:
             row = cur.fetchall()
             conn.commit()
             conn.close()
+            row[2] = self._decode_base64(row[2])
+            row[7] = self._decode_base64(row[7])
         return row
 
 
@@ -572,6 +512,8 @@ class Datenbank:
             row = cur.fetchone()
             conn.commit()
             conn.close()
+            row[2] = self._decode_base64(row[2])
+            row[7] = self._decode_base64(row[7])
         return row
 
 
@@ -585,11 +527,11 @@ class Datenbank:
             command = command + " ".join([" OR JewelSource = ?"]*(len(jewel_source_arr)-1))
 
             for source in jewel_source_arr:
-                params.append(source)
+                params.append(self._encode_base64(source))
 
             cur.execute(command, params)
             tmp = cur.fetchall()
             for row in tmp:
-                answer.append(Jewel(row[0],row[1],row[2],row[3],row[4],row[5]))
+                answer.append(Jewel(row[0],self._decode_base64(row[1]),row[2],self._decode_base64(row[3]),self._decode_base64(row[4]),self._decode_base64(row[5])))
             return answer
             

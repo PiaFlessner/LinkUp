@@ -66,6 +66,7 @@ def get_hash(total_file_path: str):
     file_path = '/'.join(total_file_path.split('/')[:-1])
     bash_output = subprocess.run(f'openssl dgst -sha1 {file_name}', shell=True, cwd=file_path, stdout=subprocess.PIPE)
     hash = str(bash_output.stdout.decode()).split('= ')[1]
+    hash = hash.replace("\n","")
     return hash
 
 

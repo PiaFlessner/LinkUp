@@ -22,9 +22,7 @@ class Backup:
         self.db = Datenbank()
 
 
-    def initialize_backup(self):
-        info_handler.check_destination_path_exists()
-        
+    def initialize_backup(self):        
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
@@ -153,7 +151,7 @@ class Backup:
     def set_hardlink(self, hardlink_path, destination_path):
         #TODO hardlink action must be inserted here
         print("------------------------------------")
-        print("Die Datei am Ort \n" + destination_path + "\n muss zu einem hardlink zum Pfad \n"+ hardlink_path 
+        print("Die Datei die am Ort \n" + destination_path + "\n abgespeichert werden würde muss zu einem hardlink zum Pfad \n"+ hardlink_path 
         + "\n germacht werden. ")
         #create hardlink
         pass

@@ -18,5 +18,13 @@
     "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation",
     "kali": "/home/kali/backupLocation",
     "deviceX": [""]
+  },
+
+  "restore_destination":
+  {
+    "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/Restore",
+    "kali": "/home/kali/Restore",
+    "deviceX": [""]
   }
+
 }

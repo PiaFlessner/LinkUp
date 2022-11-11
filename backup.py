@@ -61,9 +61,9 @@ class Backup:
         
         print(insert_results)
         for result in insert_results:
-            if result is not True:
-                    self.set_hardlink(result[0], result[1])
-                    leave_out_sources.append(result[2])
+                self.set_hardlink(result[0], result[1])
+                leave_out_sources.append(result[2])
+        print(leave_out_sources)
 
 
     def execute_fullbackup(self, jewel_sources):

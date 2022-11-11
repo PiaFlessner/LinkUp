@@ -368,16 +368,19 @@ class Datenbank:
             command = "SELECT JewelSource FROM Jewel WHERE (JewelSource = ? AND DeviceName = ?)"
             command = command + " ".join([" OR (JewelSource = ? AND DeviceName = ?)"]*(len(jewel_source_arr)-1))
 
-            params = []        
+            params = []
+
+
+
             for source in jewel_source_arr:
-                params.append(source)
-                params.append(device_name)
+                params.append(self._encode_base64(source))
+                params.append(self._encode_base64(device_name))
 
             cur.execute(command, params)
             tmp = cur.fetchall()
             answer = []
             for row in tmp:
-                answer.append(row[0])
+                answer.append(self._decode_base64(row[0]))
             return answer
                    
  

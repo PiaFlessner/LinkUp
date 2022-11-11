@@ -59,6 +59,7 @@ class Backup:
                                                     f"{self.destination}/{differential_backup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
         
+        print(insert_results)
         for result in insert_results:
             if result is not True:
                     self.set_hardlink(result[0], result[1])

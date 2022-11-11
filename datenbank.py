@@ -4,10 +4,12 @@ import sqlite3
 from os.path import exists as file_exists
 from unicodedata import numeric
 import uuid
+import base64
 import datetime
 import platform
 
 class Jewel:
+
 
     def __init__(self,id,comment, monitoring_Startdate, jewelSource, device_name, fullbackup_source):
         self.id = id
@@ -16,6 +18,33 @@ class Jewel:
         self.jewelSource = jewelSource
         self.device_name = device_name
         self.fullbackup_source = fullbackup_source
+
+
+    def _encode_base64(self, name):
+        name = str(name)
+        name_bytes = bytes(name,'UTF-8')
+        return base64.b64encode(name_bytes).decode("UTF-8") 
+
+
+    def _decode_base64(self, name):
+        name = str(name)
+        name_bytes = bytes(name,'UTF-8')
+        return base64.b64decode(name_bytes).decode("UTF-8") 
+
+
+    def encode_jewel(self):
+         self.comment = self._encode_base64(self.comment)
+         self.jewelSource = self._encode_base64(self.jewelSource)
+         self.device_name = self._encode_base64(self.device_name)
+         self.fullbackup_source = self._encode_base64(self.fullbackup_source)
+      
+
+    def decode_jewel(self):
+        self.comment = self._decode_base64(self.comment)
+        self.jewelSource = self._decode_base64(self.jewelSource)
+        self.device_name = self._decode_base64(self.device_name)
+        self.fullbackup_source = self._decode_base64(self.fullbackup_source)
+     
 
 class File:
 
@@ -41,6 +70,32 @@ class Blob:
         self.origin_name = str(origin_name)
         self.store_destination = str(store_destination)
         self.source_path = str(source_path)
+
+
+    def _encode_base64(self, name):
+        name = str(name)
+        name_bytes = bytes(name,'UTF-8')
+        return base64.b64encode(name_bytes).decode("UTF-8") 
+
+
+    def _decode_base64(self, name):
+        name = str(name)
+        name_bytes = bytes(name,'UTF-8')
+        return base64.b64decode(name_bytes).decode("UTF-8") 
+
+
+    def encode_blob(self):
+        self.name = self._encode_base64(self.name)
+        self.origin_name = self._encode_base64(self.origin_name)
+        self.store_destination = self._encode_base64(self.store_destination)
+        self.source_path = self._encode_base64(self.source_path)
+
+
+    def decode_blob(self):
+        self.name = self._decode_base64(self.name)
+        self.origin_name = self._decode_base64(self.origin_name)
+        self.store_destination = self._decode_base64(self.store_destination)
+        self.source_path = self._decode_base64(self.source_path)
 
  
     def __eq__(self, other):
@@ -130,15 +185,32 @@ class Datenbank:
                 conn.commit()
                 conn.close()
 
+
+
+     def _encode_base64(self, name):
+        name = str(name)
+        name_bytes = bytes(name,'UTF-8')
+        return base64.b64encode(name_bytes).decode("UTF-8") 
+
+
+     def _decode_base64(self, name):
+        name = str(name)
+        name_bytes = bytes(name,'UTF-8')
+        return base64.b64decode(name_bytes).decode("UTF-8") 
+
+
      def set_uri(self, file, device_name, file_path, file_name):
         #uri = uuid.uuid3(uuid.NAMESPACE_OID, device_name + file_path + file_name)
-        uri = device_name + file_path + file_name
+        uri = self._encode_base64(device_name) + self._encode_base64(file_path) + self._encode_base64(file_name)
         file.id = uri
         
             
      def add_to_database(self, jewel, file, device_name):
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
 
+        for blob in file.blobs:
+            blob.encode_blob()
+      
         jewel.id = self.addJewel(jewel)
 
         conn = self.create_connection('datenbank.db')
@@ -232,7 +304,7 @@ class Datenbank:
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
                         WHERE File.ID =(SELECT ID_File FROM Blob WHERE Blob.Hash = ?)
                         AND Jewel.DeviceName = ?"""
-        params = (file.blobs[0].hash, platform.node())
+        params = (file.blobs[0].hash, self._encode_base64(platform.node()))
         cur.execute(command, params)
         data = cur.fetchall()
 
@@ -253,7 +325,7 @@ class Datenbank:
             cur = conn.cursor()
 
             command= "SELECT ID FROM Jewel WHERE JewelSource = ? AND DeviceName = ?"
-            data_tuple = (jewel.jewelSource, jewel.device_name)
+            data_tuple = (self._encode_base64(jewel.jewelSource), self._encode_base64(jewel.device_name))
             cur.execute(command, data_tuple)
             id = cur.fetchone()
 
@@ -263,7 +335,8 @@ class Datenbank:
                 command = """INSERT INTO 'Jewel'
                               ('Comment', 'Monitoring_Startdate', 'JewelSource', 'DeviceName', 'FullbackupSource') 
                               VALUES (?, ?, ?, ?, ?);"""
-                data_tuple = (jewel.comment, jewel.monitoring_Startdate,jewel.jewelSource, jewel.device_name, jewel.fullbackup_source)
+                data_tuple = (self._encode_base64(jewel.comment), jewel.monitoring_Startdate,self._encode_base64(jewel.jewelSource), self._encode_base64(jewel.device_name), 
+                self._encode_base64(jewel.fullbackup_source))
                 cur.execute(command, data_tuple)  
                 conn.commit()
                 return cur.lastrowid
@@ -318,6 +391,7 @@ class Datenbank:
             j_tuple = cur.fetchone()
             if j_tuple is not None:
               jewel = Jewel(j_tuple[0], j_tuple[1], j_tuple[2], j_tuple[3], j_tuple[4], j_tuple[5])
+              jewel.decode_jewel()
             conn.commit()
             conn.close()
         return jewel
@@ -405,6 +479,7 @@ class Datenbank:
             if records is not None:
                 for row in records:
                     jewel =  Jewel(row[0], row[1], row[2], row[3], row[4], row[5])
+                    jewel.decode_jewel()
                     jewels.append(jewel)
             
             conn.commit()
@@ -423,6 +498,7 @@ class Datenbank:
             if records is not None:
              for row in records:
                     blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])
+                    blob.decode_blob()
                     blobs.append(blob)
             
             conn.commit()
@@ -441,6 +517,7 @@ class Datenbank:
             if records is not None:
                 for row in records:
                    blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])
+                   blob.decode_blob()
                    blobs.append(blob)
             
             conn.commit()
@@ -455,9 +532,12 @@ class Datenbank:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Blob WHERE ID= ?", [id])
             row = cur.fetchone()
-            if row is not None: blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])    
+            if row is not None: 
+                blob = Blob(row[0], row[1], row[2], row[3],row[4],row[5], row[6], row[7], row[8], row[9], row[10])    
+                blob.decode_blob()
             conn.commit()
             conn.close()
+            
         return blob
 
 

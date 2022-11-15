@@ -31,7 +31,8 @@ def are_dir_trees_equal(dir1, dir2):
 
 class TestBackup(unittest.TestCase):
     global backup
-    backup = Backup(ih.get_str_list_info_from_config("jewel_sources", platform.node()), ih.get_str_info_from_config("destination", platform.node()))
+    config = ih.get_json_info()
+    backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
     #erstellen von Fullbackup, wenn nicht keins vorhanden ist
     if not os.path.exists(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation/fullBackup"f"{platform.node()}")): 
         backup.initialize_backup()

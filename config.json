@@ -3,6 +3,7 @@
   {
     "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2", "/home/peter", "/home/gruppe/backupTest/jewel3"],
     "kali": ["/home/kali/folderToBackup"],
+    "fatih" : ["./unitTestFiles/jewel", "./unitTestFiles/jewel2"], 
     "deviceX": [""]
   },
 
@@ -17,6 +18,7 @@
   {
     "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation",
     "kali": "/home/kali/backupLocation",
+    "fatih" : "./unitTestFiles/backupLocation",
     "deviceX": [""]
   }
 }

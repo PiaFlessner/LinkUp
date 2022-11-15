@@ -4,15 +4,17 @@ import os
 class TreeTraversal:
     def __init__(self, dirName): # Initialisierung der Variablen
         self.dirName = dirName
-        self.fileList = []
+        self.fileAndDirList = []
 
 
     def getAllFiles(self):
         for root, dirs, files in os.walk(self.dirName): # "Walked" über das Verzeichnis und fügt in
             for file in files:                          # jeder Ebene die Dateien in eine Liste und gibt sie zurück
-                self.fileList.append(os.path.join(root,file))
-        print(self.fileList)
-        return self.fileList
+                self.fileAndDirList.append(os.path.join(root,file))
+            for dir in dirs:
+                self.fileAndDirList.append(os.path.join(root, dir))    
+        print(self.fileAndDirList)
+        return self.fileAndDirList
     
     
     # Parameter: Gewünschten files in Liste, Ordner, Dateien löschen mit gewünschten start Zeichen, Dateien löschen mit gewünschten ende Zeichen
@@ -39,13 +41,13 @@ class TreeTraversal:
                 print(len(path) * '---', file) # Ausgabe der Dateien
 
 # Übergabe der Argumente
-t = TreeTraversal("/home/fatih/backupTarget")
-print("#################")
-t.printTree()
-print("#################")
-t.getAllFiles()
-print("#################")
-t.deleteFiles(["file1", "topSecret.txt"], ["meinOrdner", "Ordner"], "start", "4")
+# t = TreeTraversal("/home/fatih/projektBackup/testdir")
+# print("#################")
+# t.printTree()
+# print("#################")
+# t.getAllFiles()
+# print("#################")
+# t.deleteFiles(["file1", "topSecret.txt"], ["meinOrdner", "Ordner"], "start", "4")
 
 
 

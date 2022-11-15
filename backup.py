@@ -22,9 +22,7 @@ class Backup:
         self.db = Datenbank()
 
 
-    def initialize_backup(self):
-        info_handler.check_destination_path_exists()
-        
+    def initialize_backup(self):        
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
@@ -48,7 +46,7 @@ class Backup:
         old_jewels = self.db.get_fullbackup_paths(jewel_sources)
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
-        subprocess_return = subprocess.Popen(f"rsync -aAX {self.excluding_data()} --out-format='%n' "
+        subprocess_return = subprocess.Popen(f"rsync -aAXn {self.excluding_data()} --out-format='%n' "
                                              f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                              f"{self.destination}/{differential_backup_name}",
                                              shell=True,
@@ -61,10 +59,22 @@ class Backup:
                                                     f"{self.destination}/{differential_backup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
         
+        print(insert_results)
         for result in insert_results:
-            if result is not True:
-                    self.set_hardlink(result[0], result[1])
-                    leave_out_sources.append(result[2])
+                leave_out_sources.append(result[2])
+
+        
+        subprocess.Popen(f"rsync -aAX {self.excluding_data()} --out-format='%n' "
+                                             f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
+                                             f"{self.destination}/{differential_backup_name}",
+                                             shell=True,
+                                             stdout=subprocess.PIPE)
+
+        for result in insert_results:
+                self.set_hardlink(result[0], result[1])
+
+
+        print(leave_out_sources)
 
 
     def execute_fullbackup(self, jewel_sources):
@@ -150,10 +160,22 @@ class Backup:
         return ' '.join(return_list)
 
 
-    def set_hardlink(self, hardlink_path, destination_path):
+    def set_hardlink(self, source_path, destination_path):
         #TODO hardlink action must be inserted here
         print("------------------------------------")
-        print("Die Datei am Ort \n" + destination_path + "\n muss zu einem hardlink zum Pfad \n"+ hardlink_path 
+        print("Die Datei die am Ort \n" + destination_path + "\n abgespeichert werden würde muss zu einem hardlink zum Pfad \n"+ source_path 
         + "\n germacht werden. ")
         #create hardlink
+        #source_path = '\'' + source_path + '\''
+        #destination_path = '\'' + destination_path + '\''+
+        
+        subprocess.run(f"tree -a {'/home/mirco/backuptarget'}", shell=True)
+        d_path = os.path.dirname(os.path.abspath(destination_path))
+        subprocess.run(f"ls {d_path}", shell=True)
+        print(d_path)
+        os.remove(destination_path)
+        print("BRÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ", source_path, destination_path)
+        subprocess.run(f'ln {source_path} {destination_path}', shell=True)
+        #os.link(source_path, destination_path)
+
         pass

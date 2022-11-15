@@ -348,7 +348,7 @@ class Datenbank:
         if conn != None:
             cur = conn.cursor()
             sqlite_insert_with_param = "SELECT * FROM File WHERE ID= ?"
-            cur.execute( sqlite_insert_with_param, self._encode_base64([id]))
+            cur.execute( sqlite_insert_with_param, [self._encode_base64(id)])
             b_tuple = cur.fetchone()
             conn.commit()
             conn.close()

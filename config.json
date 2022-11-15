@@ -4,7 +4,8 @@
     "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2", "/home/peter", "/home/gruppe/backupTest/jewel3"],
     "kali": ["/home/kali/folderToBackup"],
     "deviceX": [""],
-    "mirco-ThinkPad-T495": ["/home/mirco/Backuptest"]
+    "mirco-ThinkPad-T495": ["/home/mirco/Backuptest"],
+    "fatih" : ["./unitTestFiles/jewel", "./unitTestFiles/jewel2"]
   },
 
   "blacklist" :
@@ -19,7 +20,8 @@
     "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation",
     "kali": "/home/kali/backupLocation",
     "deviceX": [""],
-    "mirco-ThinkPad-T495": "/home/mirco/backuptarget"
+    "mirco-ThinkPad-T495": "/home/mirco/backuptarget",
+    "fatih" : "./unitTestFiles/backupLocation"
   },
 
   "restore_destination":
@@ -29,5 +31,5 @@
     "deviceX": [""],
     "mirco-ThinkPad-T495": "/home/mirco/Backuptest"
   }
-
 }
+

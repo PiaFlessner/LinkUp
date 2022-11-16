@@ -35,7 +35,7 @@ test:
     - python miron_test_ci.py
     # Das funktioniert nicht so, wie es soll, es kommt zu keiner assertion, obwohl hier ja ein Fehler vorliegt, siehe Log
     #-python test_backup.py
-    - python -m unittest test_backup.py
+    - python -m unittest
 
 run:
   script:

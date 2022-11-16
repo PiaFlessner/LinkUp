@@ -33,7 +33,9 @@ before_script:
 test:
   script:
     - python miron_test_ci.py
-    - python test_backup.py
+    # Das funktioniert nicht so, wie es soll, es kommt zu keiner assertion, obwohl hier ja ein Fehler vorliegt, siehe Log
+    #-python test_backup.py
+    - python -m unittest discover
 
 run:
   script:

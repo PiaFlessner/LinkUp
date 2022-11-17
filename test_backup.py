@@ -81,9 +81,6 @@ def are_dir_trees_equal(dir1, dir2):
 
 
 class TestRestore(unittest.TestCase):
-    daten = None
-    config = None
-    backup = None
 
     @classmethod
     def setUpClass(cls):
@@ -108,11 +105,39 @@ class TestRestore(unittest.TestCase):
         jewel = self.daten.get_restore_Jewel(restoreDay,1)
         self.assertTrue(jewel== None,"The answer should be None")
 
+
+    def test_c_restore_File_only_Fullbackup(self):
+        restoreDay = date.today()
+        file = self.daten.get_restore_File(restoreDay, "testCases./unitTestFiles/jewel/test1.txt")
+        self.assertTrue(file!= None,"An answer is None")
+
+        self.assertTrue(file[0] == 'test1.txt', 'Name is wrong')
+        self.assertTrue(file[1] == './unitTestFiles/jewel/test1.txt', 'jewel path is wrong')
+        self.assertTrue(file[2] == './unitTestFiles/backupLocation/fullBackuptestCases/jewel/test1.txt', 'backup location is wrong')
+
+    def test_c_restore_Jewel_diff_backup_new_file(self):
+        restoreDay = date.today()
+        #create_new_file
+        file = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel/test_new.txt"), "a")
+
+        for i in range(5):
+            file.write("Hello World in test1.txt\n")
+
+        file.close()
+        self.backup.initialize_backup()
+        jewel = self.daten.get_restore_Jewel(restoreDay,1)
+        self.assertTrue(jewel!= None,"An answer is None")
+        self.assertTrue(len(jewel[1]) == 2,"The lenght is incorrect")
+
+
+    def test_c_restore_File_diff_backup(self):
+        pass
     @classmethod
     def tearDownClass(cls):
         os.remove("datenbank.db")
         shutil.rmtree(cls.config["destination"][device_name])
         shutil.rmtree(cls.config["restore_destination"][device_name])
+        os.remove("unitTestFiles/jewel/test_new.txt")
 
     
         

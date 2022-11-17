@@ -163,7 +163,7 @@ class Datenbank:
             old_file = self.check_if_uri_exists(file,cur)
             ## no uri 
             if old_file is None:
-                old_file = self.check_if_hash_exists(file,cur)
+                old_file = self.check_if_hash_exists(file,cur,device_name)
                 ##  no uri and no hash on same device
                 if old_file is None:
                     self.insert_File(file, cur,conn)
@@ -240,14 +240,14 @@ class Datenbank:
         con.commit()
 
             
-     def check_if_hash_exists(self,file, cur):
+     def check_if_hash_exists(self,file, cur, device_name):
         command = """SELECT File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.Name,Blob.FileSize, Blob.CreationDate, Blob.Modify, Blob.ID_File, Blob.Origin_Name, Blob.Source_Path, Blob.Store_Destination  FROM File 
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
                         WHERE File.ID =(SELECT ID_File FROM Blob WHERE Blob.Hash = ?)
                         AND Jewel.DeviceName = ?"""
-        params = (file.blobs[0].hash, self._encode_base64(platform.node()))
+        params = (file.blobs[0].hash, self._encode_base64(device_name))
         cur.execute(command, params)
         data = cur.fetchall()
 

@@ -30,7 +30,7 @@
     "kali": "/home/kali/Restore",
     "deviceX": [""],
     "mirco-ThinkPad-T495": "/home/mirco/Backuptest",
-    "testCases": "/home/fatih/Restore"
+    "testCases": "./unitTestFiles/restoreLocation"
   }
 }
 

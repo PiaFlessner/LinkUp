@@ -13,20 +13,22 @@ class Backup:
     current_date_time = date.now()
     current_date_time_formatted = current_date_time.strftime("%Y-%m-%d-%H-%M")
     new_backup_location = f"backup-{current_date_time_formatted}"
-    fullbackup_name = "fullBackup" + platform.node()
+    device_name = platform.node()
 
 
-    def __init__(self, jewel_path_list, destination):
+    def __init__(self, jewel_path_list, destination, testcase):
         self.jewel_path_list = jewel_path_list
         self.destination = destination
         self.db = Datenbank()
-
+        if(testcase):
+            self.device_name = "testCases"
+        fullbackup_name = "fullBackup" + self.device_name
 
     def initialize_backup(self):        
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
-        diff_backup_sources = self.db.check_which_jewel_sources_exist(tmp, platform.node())
+        diff_backup_sources = self.db.check_which_jewel_sources_exist(tmp, self.device_name)
         # filter out everything, that is in diff_backup already
         full_backup_sources = [e for e in tmp if e not in diff_backup_sources]
 
@@ -121,12 +123,12 @@ class Backup:
 
                     # stripping and splitting is needed, since comparison does not work otherwise
                     if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
-                        jewel = Jewel(0, None, date.today(), jewel_path, platform.node(),
+                        jewel = Jewel(0, None, date.today(), jewel_path, self.device_name,
                                       f'{fullbackup_store_destination_body}/{line.strip("/")}')
                         break
                     # if top layer of jewel was not changed, the jewel would not be in line.strip... so we need to split and get the first folder
                     elif jewel_path.rsplit('/', 1)[1].strip("/") == line.split("/")[0]:
-                        jewel = Jewel(0, None, date.today(), jewel_path, platform.node(),
+                        jewel = Jewel(0, None, date.today(), jewel_path, self.device_name,
                                       f'{fullbackup_store_destination_body}/{line.strip("/")}')
 
             else:
@@ -142,7 +144,7 @@ class Backup:
 
                 file = File(0, [blob], file_object.birth)
                 datenbank = Datenbank()
-                db_answer = datenbank.add_to_database(jewel, file, platform.node())
+                db_answer = datenbank.add_to_database(jewel, file, self.device_name)
 
                 if db_answer is not True:
                     result.append((db_answer,blob.store_destination,working_dir + "/" + line))

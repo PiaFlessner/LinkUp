@@ -6,7 +6,9 @@ import os
 from filecmp import dircmp
 from filecmp import cmpfiles
 from datetime import datetime as date
+import datenbank
 
+device_name = "testCases"
 
 def are_dir_trees_equal(dir1, dir2):
     
@@ -32,7 +34,7 @@ def are_dir_trees_equal(dir1, dir2):
 class TestBackup(unittest.TestCase):
     global backup
     config = ih.get_json_info()
-    backup = Backup(config["jewel_sources"]["testCases"], config["destination"][platform.node()])
+    backup = Backup(config["jewel_sources"][device_name], config["destination"][device_name],True)
     #erstellen von Fullbackup, wenn nicht keins vorhanden ist
     if not os.path.exists(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation/fullBackup"f"{platform.node()}")): 
         backup.initialize_backup()
@@ -71,11 +73,23 @@ class TestBackup(unittest.TestCase):
         self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2")
                         , os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel2")))
 
-    def __del__(self):
+    #def __del__(self):
+        #os.remove("datenbank.db")
+        #os.remove(self.config["destination"][device_name])
+        #os.remove(self.config["restore_destination"][device_name])
 
 
 class TestRestore(unittest.TestCase):
-    pass
+
+    daten = datenbank.Datenbank()
+    config = ih.get_json_info()
+    backup = Backup(config["jewel_sources"][device_name], config["destination"][device_name])   
+
+
+    def test_a_restore_Jewel_right_date(self):
+        restoreDay = date.today()
+        self.daten.get_restore_Jewel(restoreDay, 1)
+
     
         
 if __name__ == "__main__":

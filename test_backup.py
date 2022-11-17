@@ -1,3 +1,4 @@
+import time
 import unittest
 from backup import Backup
 import info_handler as ih
@@ -30,31 +31,26 @@ def are_dir_trees_equal(dir1, dir2):
         if not are_dir_trees_equal(new_dir1, new_dir2):
             return False
     return True
-
-#
 #class TestBackup(unittest.TestCase):
-#    global backup
-#    config = ih.get_json_info()
-#    backup = Backup(config["jewel_sources"][device_name], config["destination"][device_name],True)
-#    #erstellen von Fullbackup, wenn nicht keins vorhanden ist
-#    if not os.path.exists(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation/fullBackup"f"{device_name}")): 
-#        backup.initialize_backup()
-#    
-#    
+#
+#    @classmethod
+#    def setUpClass(cls):
+#        cls.daten = datenbank.Datenbank()
+#        cls.config = ih.get_json_info(device_name)
+#        cls.backup = Backup(cls.config["jewel_sources"][device_name], cls.config["destination"][device_name], True)
+#        cls.backup.initialize_backup()
+# 
 #         
 #    def test_a_fullbackup_jewel(self):
-#    
 #        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel"),
 #                                                    os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel")))
 #    
 #    def test_b_fullbackup_jewel2(self):
-#    
 #        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2"),
 #                                             os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel2")))
 #   
 #  
 #    def test_c_diffBackup_jewel(self):
-#       
 #        file = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel/test1.txt"), "a")
 #        file2 = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2/test2.txt"), "a")
 #        
@@ -63,7 +59,7 @@ def are_dir_trees_equal(dir1, dir2):
 #            file2.write("Hello World in test2.txt\n")
 #        file.close()
 #        file2.close()
-#        backup.initialize_backup() 
+#        self.backup.initialize_backup() 
 #        
 #        
 #        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel")
@@ -74,11 +70,13 @@ def are_dir_trees_equal(dir1, dir2):
 #        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2")
 #                        , os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel2")))
 #
-#    #def __del__(self):
-#        #os.remove("datenbank.db")
-#        #os.remove(self.config["destination"][device_name])
-#        #os.remove(self.config["restore_destination"][device_name])
-
+#    @classmethod
+#    def tearDownClass(cls):
+#        time.sleep(20)
+#        os.remove("datenbank.db")
+#        shutil.rmtree(cls.config["destination"][device_name])
+#        shutil.rmtree(cls.config["restore_destination"][device_name])
+#
 
 class TestRestore(unittest.TestCase):
 
@@ -86,6 +84,7 @@ class TestRestore(unittest.TestCase):
     def setUpClass(cls):
         cls.daten = datenbank.Datenbank()
         cls.config = ih.get_json_info(device_name)
+
         cls.backup = Backup(cls.config["jewel_sources"][device_name], cls.config["destination"][device_name], True)
         cls.backup.initialize_backup()
 
@@ -148,15 +147,17 @@ class TestRestore(unittest.TestCase):
         self.assertTrue(file!= None,"An answer is None")
         self.assertTrue(file[3] == 2, f"Version Number ist wrong, should be 2, is {file[3]}")
 
-        
+
     @classmethod
     def tearDownClass(cls):
+
+        #needed, because rsync code is lamer than the tearDown occurance
+        time.sleep(30)
         os.remove("datenbank.db")
         shutil.rmtree(cls.config["destination"][device_name])
         shutil.rmtree(cls.config["restore_destination"][device_name])
         os.remove("unitTestFiles/jewel/test_new.txt")
-
-    
+   
         
 if __name__ == "__main__":
     unittest.main()

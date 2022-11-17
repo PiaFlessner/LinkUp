@@ -16,7 +16,7 @@ class Backup:
     device_name = platform.node()
 
 
-    def __init__(self, jewel_path_list, destination, testcase):
+    def __init__(self, jewel_path_list, destination, testcase=False):
         self.jewel_path_list = jewel_path_list
         self.destination = destination
         self.db = Datenbank()

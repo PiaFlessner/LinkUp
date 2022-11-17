@@ -13,20 +13,23 @@ class Backup:
     current_date_time = date.now()
     current_date_time_formatted = current_date_time.strftime("%Y-%m-%d-%H-%M")
     new_backup_location = f"backup-{current_date_time_formatted}"
-    fullbackup_name = "fullBackup" + platform.node()
+    device_name = platform.node()
+    fullbackup_name = None
 
 
-    def __init__(self, jewel_path_list, destination):
+    def __init__(self, jewel_path_list, destination, testcase=False):
         self.jewel_path_list = jewel_path_list
         self.destination = destination
         self.db = Datenbank()
-
+        if(testcase):
+            self.device_name = "testCases"
+        self.fullbackup_name = "fullBackup" + self.device_name
 
     def initialize_backup(self):        
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
-        diff_backup_sources = self.db.check_which_jewel_sources_exist(tmp, platform.node())
+        diff_backup_sources = self.db.check_which_jewel_sources_exist(tmp, self.device_name)
         # filter out everything, that is in diff_backup already
         full_backup_sources = [e for e in tmp if e not in diff_backup_sources]
 
@@ -46,7 +49,7 @@ class Backup:
         old_jewels = self.db.get_fullbackup_paths(jewel_sources)
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
-        subprocess_return = subprocess.Popen(f"rsync -aAXn {self.excluding_data()} --out-format='%n' "
+        subprocess_return = subprocess.Popen(f"rsync -aAXn {self.excluding_data(self.device_name)} --out-format='%n' "
                                              f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                              f"{self.destination}/{differential_backup_name}",
                                              shell=True,
@@ -64,7 +67,7 @@ class Backup:
                 leave_out_sources.append(result[2])
 
         
-        subprocess.Popen(f"rsync -aAX {self.excluding_data()} --out-format='%n' "
+        subprocess.Popen(f"rsync -aAX {self.excluding_data(self.device_name)} --out-format='%n' "
                                              f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                              f"{self.destination}/{differential_backup_name}",
                                              shell=True,
@@ -81,7 +84,7 @@ class Backup:
         print("Creating full backup")
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
-        subprocess_return = subprocess.Popen(f'rsync -aAX {self.excluding_data()} --out-format="%n" '
+        subprocess_return = subprocess.Popen(f'rsync -aAX {self.excluding_data(self.device_name)} --out-format="%n" '
                                              f'{jewel_path_list_string} '
                                              f'{self.destination}/{self.fullbackup_name}',
                                              shell=True,
@@ -121,12 +124,12 @@ class Backup:
 
                     # stripping and splitting is needed, since comparison does not work otherwise
                     if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
-                        jewel = Jewel(0, None, date.today(), jewel_path, platform.node(),
+                        jewel = Jewel(0, None, date.today(), jewel_path, self.device_name,
                                       f'{fullbackup_store_destination_body}/{line.strip("/")}')
                         break
                     # if top layer of jewel was not changed, the jewel would not be in line.strip... so we need to split and get the first folder
                     elif jewel_path.rsplit('/', 1)[1].strip("/") == line.split("/")[0]:
-                        jewel = Jewel(0, None, date.today(), jewel_path, platform.node(),
+                        jewel = Jewel(0, None, date.today(), jewel_path, self.device_name,
                                       f'{fullbackup_store_destination_body}/{line.strip("/")}')
 
             else:
@@ -142,7 +145,7 @@ class Backup:
 
                 file = File(0, [blob], file_object.birth)
                 datenbank = Datenbank()
-                db_answer = datenbank.add_to_database(jewel, file, platform.node())
+                db_answer = datenbank.add_to_database(jewel, file, self.device_name)
 
                 if db_answer is not True:
                     result.append((db_answer,blob.store_destination,working_dir + "/" + line))
@@ -150,8 +153,8 @@ class Backup:
         return result
 
 
-    def excluding_data(self):
-        config = info_handler.get_json_info()
+    def excluding_data(self, device_name):
+        config = info_handler.get_json_info(device_name)
         return_list = []
         for element in config['blacklist']['directories'] + config['blacklist']['files']:
             return_list.append(f'--exclude \'{element}\'')

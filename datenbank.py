@@ -163,7 +163,7 @@ class Datenbank:
             old_file = self.check_if_uri_exists(file,cur)
             ## no uri 
             if old_file is None:
-                old_file = self.check_if_hash_exists(file,cur)
+                old_file = self.check_if_hash_exists(file,cur,device_name)
                 ##  no uri and no hash on same device
                 if old_file is None:
                     self.insert_File(file, cur,conn)
@@ -240,14 +240,14 @@ class Datenbank:
         con.commit()
 
             
-     def check_if_hash_exists(self,file, cur):
+     def check_if_hash_exists(self,file, cur, device_name):
         command = """SELECT File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.Name,Blob.FileSize, Blob.CreationDate, Blob.Modify, Blob.ID_File, Blob.Origin_Name, Blob.Source_Path, Blob.Store_Destination  FROM File 
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
                         WHERE File.ID =(SELECT ID_File FROM Blob WHERE Blob.Hash = ?)
                         AND Jewel.DeviceName = ?"""
-        params = (file.blobs[0].hash, self._encode_base64(platform.node()))
+        params = (file.blobs[0].hash, self._encode_base64(device_name))
         cur.execute(command, params)
         data = cur.fetchall()
 
@@ -534,4 +534,61 @@ class Datenbank:
             for row in tmp:
                 answer.append(Jewel(row[0],self._decode_base64(row[1]),row[2],self._decode_base64(row[3]),self._decode_base64(row[4]),self._decode_base64(row[5])))
             return answer
+
+     def get_restore_Jewel(self,until_date:datetime.datetime, jewel_id:int):
+        #the database shall look in every value of this day
+        until_date = until_date.replace(hour=23,minute=59,second=59)
+        assert(until_date.minute == 59 and until_date.hour==23 and until_date.second==59)
+        conn = self.create_connection('datenbank.db')
+        #temporär, da objekt struktur noch nicht existiert
+        files = []
+        jewel = None
+
+        if conn != None:
+            cur = conn.cursor()
+            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination FROM File
+                        INNER JOIN Blob on File.ID = Blob.ID_File
+                        INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
+                        INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
+                        WHERE Jewel.ID = ?
+                        AND Blob.CreationDate <= ?
+                        GROUP BY Blob.ID_File;"""
+            params = (jewel_id,until_date)
+            cur.execute(command,params)
+            tmp = cur.fetchall()
+
+            if tmp:
+                for row in tmp:
+                    files.append((self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
+                jewel = (row[0], files)
+                return jewel
+            else: return None
+
+
+
+
+     def get_restore_File(self,until_date:datetime, file_id:str):
+        #the database shall look in every value of this day
+        until_date = until_date.replace(hour=23,minute=59,second=59)
+        assert(until_date.minute == 59 and until_date.hour==23 and until_date.second==59)
+        conn = self.create_connection('datenbank.db')
+        #temporär, da objekt struktur noch nicht existiert
+        file = None
+
+        if conn != None:
+            cur = conn.cursor()
+            command = """SELECT Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination FROM File
+                            INNER JOIN Blob on File.ID = Blob.ID_File
+                            WHERE File.ID = ?
+                            AND Blob.CreationDate <=  ?
+                            GROUP BY Blob.ID_File;"""
+            params = (self._encode_base64(file_id),until_date)
+            cur.execute(command,params)
+            row = cur.fetchone()
+
+            if row:
+                file = (self._decode_base64(row[3]),self._decode_base64(row[2]), self._decode_base64(row[4]), row[1])
+            return file
+
+     
             

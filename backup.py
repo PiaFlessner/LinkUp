@@ -49,7 +49,7 @@ class Backup:
         old_jewels = self.db.get_fullbackup_paths(jewel_sources)
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
-        subprocess_return = subprocess.Popen(f"rsync -aAXn {self.excluding_data()} --out-format='%n' "
+        subprocess_return = subprocess.Popen(f"rsync -aAXn {self.excluding_data(self.device_name)} --out-format='%n' "
                                              f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                              f"{self.destination}/{differential_backup_name}",
                                              shell=True,
@@ -67,7 +67,7 @@ class Backup:
                 leave_out_sources.append(result[2])
 
         
-        subprocess.Popen(f"rsync -aAX {self.excluding_data()} --out-format='%n' "
+        subprocess.Popen(f"rsync -aAX {self.excluding_data(self.device_name)} --out-format='%n' "
                                              f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                              f"{self.destination}/{differential_backup_name}",
                                              shell=True,
@@ -84,7 +84,7 @@ class Backup:
         print("Creating full backup")
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
-        subprocess_return = subprocess.Popen(f'rsync -aAX {self.excluding_data()} --out-format="%n" '
+        subprocess_return = subprocess.Popen(f'rsync -aAX {self.excluding_data(self.device_name)} --out-format="%n" '
                                              f'{jewel_path_list_string} '
                                              f'{self.destination}/{self.fullbackup_name}',
                                              shell=True,
@@ -153,8 +153,8 @@ class Backup:
         return result
 
 
-    def excluding_data(self):
-        config = info_handler.get_json_info()
+    def excluding_data(self, device_name):
+        config = info_handler.get_json_info(device_name)
         return_list = []
         for element in config['blacklist']['directories'] + config['blacklist']['files']:
             return_list.append(f'--exclude \'{element}\'')

@@ -559,7 +559,7 @@ class Datenbank:
 
             if tmp:
                 for row in tmp:
-                    files.append((self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7])))
+                    files.append((self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
                 jewel = (row[0], files)
                 return jewel
             else: return None
@@ -587,7 +587,7 @@ class Datenbank:
             row = cur.fetchone()
 
             if row:
-                file = (self._decode_base64(row[3]),self._decode_base64(row[2]), self._decode_base64(row[4]))
+                file = (self._decode_base64(row[3]),self._decode_base64(row[2]), self._decode_base64(row[4]), row[1])
             return file
 
      

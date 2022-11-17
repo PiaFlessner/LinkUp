@@ -83,8 +83,7 @@ class TestRestore(unittest.TestCase):
 
     daten = datenbank.Datenbank()
     config = ih.get_json_info()
-    backup = Backup(config["jewel_sources"][device_name], config["destination"][device_name], True)   
-
+    backup = Backup(config["jewel_sources"][device_name], config["destination"][device_name], True)
 
     def test_a_restore_Jewel_right_date(self):
         restoreDay = date.today()

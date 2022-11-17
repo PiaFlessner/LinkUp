@@ -14,6 +14,7 @@ class Backup:
     current_date_time_formatted = current_date_time.strftime("%Y-%m-%d-%H-%M")
     new_backup_location = f"backup-{current_date_time_formatted}"
     device_name = platform.node()
+    fullbackup_name = None
 
 
     def __init__(self, jewel_path_list, destination, testcase=False):
@@ -22,7 +23,7 @@ class Backup:
         self.db = Datenbank()
         if(testcase):
             self.device_name = "testCases"
-        fullbackup_name = "fullBackup" + self.device_name
+        self.fullbackup_name = "fullBackup" + self.device_name
 
     def initialize_backup(self):        
         # to minimize work, first check if these paths even exists, then continue

@@ -7,6 +7,7 @@ from filecmp import dircmp
 from filecmp import cmpfiles
 from datetime import datetime as date
 import datenbank
+import shutil
 
 device_name = "testCases"
 
@@ -86,15 +87,14 @@ class TestRestore(unittest.TestCase):
     backup = Backup(config["jewel_sources"][device_name], config["destination"][device_name], True)
     backup.initialize_backup()
 
-    def test_a_restore_Jewel_right_date(self):
+    def test_a_restore_Jewel_only_Fullbackup(self):
         restoreDay = date.today()
         self.daten.get_restore_Jewel(restoreDay, 1)
 
     def __del__(self):
-        pass
         os.remove("datenbank.db")
-        #os.remove(self.config["destination"][device_name])
-        #os.remove(self.config["restore_destination"][device_name])
+        shutil.rmtree(self.config["destination"][device_name])
+        shutil.rmtree(self.config["restore_destination"][device_name])
 
     
         

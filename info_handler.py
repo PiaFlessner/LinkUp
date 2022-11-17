@@ -19,16 +19,16 @@ def get_metadata(filepth: str):
     return file_obj
 
 
-def get_json_info():
+def get_json_info(device_name=platform.node()):
     try:
         with open(json_file_name) as f:
             config = json.load(f)
-            check_destination_path_exists(config,"backup", "destination")
-            check_destination_path_exists(config,"restore", "restore_destination")
-            check_str_list_info_from_config("jewel_sources", platform.node(),config)
-            check_str_list_info_from_config("blacklist","directories",config)
-            check_str_list_info_from_config("blacklist", "extensions",config)
-            check_str_list_info_from_config("blacklist", "files",config)
+            check_destination_path_exists(config,"backup", "destination", device_name)
+            check_destination_path_exists(config,"restore", "restore_destination", device_name)
+            check_str_list_info_from_config("jewel_sources", device_name,config, device_name)
+            check_str_list_info_from_config("blacklist","directories",config,device_name)
+            check_str_list_info_from_config("blacklist", "extensions",config,device_name)
+            check_str_list_info_from_config("blacklist", "files",config,device_name)
 
 
     except json.decoder.JSONDecodeError:
@@ -37,10 +37,10 @@ def get_json_info():
     return config
 
 
-def check_destination_path_exists(config, purpose:str, property:str):
+def check_destination_path_exists(config, purpose:str, property:str, device_name:str):
 
     try:
-        destination = check_str_info_from_config(property, platform.node(),config)
+        destination = check_str_info_from_config(property, device_name,config,device_name)
 
         print("creating "+ purpose +" in: "+destination)
         os.makedirs(destination, exist_ok=True)
@@ -50,10 +50,10 @@ def check_destination_path_exists(config, purpose:str, property:str):
             print("Created "+ purpose +"-destination directory is realtive")
  
     except PermissionError:
-        print("You do not have the necessary permission to create the "+ purpose +" folder "+ get_json_info()[property][platform.node()]+".")
+        print("You do not have the necessary permission to create the "+ purpose +" folder "+ get_json_info()[property][device_name]+".")
         sys.exit()
     except FileNotFoundError:
-        print("The Path in " + property +" could not be found nor be created. Please check the " + property +" path of the device " +platform.node())
+        print("The Path in " + property +" could not be found nor be created. Please check the " + property +" path of the device " + device_name)
         sys.exit()
     
 
@@ -70,8 +70,8 @@ def get_hash(total_file_path: str):
     return hash
 
 
-def check_str_info_from_config(property:str, key:str,config):
-    value = check_info_from_config(property,key, config)
+def check_str_info_from_config(property:str, key:str,config,device_name:str, ):
+    value = check_info_from_config(property,key, config, device_name)
     if isinstance(value,str):
         return value
     else: 
@@ -79,8 +79,8 @@ def check_str_info_from_config(property:str, key:str,config):
         sys.exit()
 
 
-def check_str_list_info_from_config(property:str, key:str, config):
-    value = check_info_from_config(property,key,config)
+def check_str_list_info_from_config(property:str, key:str, config, device_name:str):
+    value = check_info_from_config(property,key,config,device_name)
     if isinstance(value,list) and all(isinstance(n, str) for n in value):
         return value
     else:
@@ -88,11 +88,11 @@ def check_str_list_info_from_config(property:str, key:str, config):
         sys.exit()
 
 
-def check_info_from_config(property:str, key:str, config):
+def check_info_from_config(property:str, key:str, config, device_name):
     try: 
         return config[property][key] 
     except KeyError:
-        print("Your Computer \""+platform.node()+"\" was not found as a key in the "+ property + " table of the config.json.\nOr the property '" + property +"' was deleted. Please create the property.")
+        print("Your Computer \""+device_name+"\" was not found as a key in the "+ property + " table of the config.json.\nOr the property '" + property +"' was deleted. Please create the property.")
         sys.exit()
     except json.decoder.JSONDecodeError:
         print("There is a form error in the config.json.")

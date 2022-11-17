@@ -82,17 +82,19 @@ def are_dir_trees_equal(dir1, dir2):
 class TestRestore(unittest.TestCase):
 
     daten = datenbank.Datenbank()
-    config = ih.get_json_info()
+    config = ih.get_json_info(device_name)
     backup = Backup(config["jewel_sources"][device_name], config["destination"][device_name], True)
+    backup.initialize_backup()
 
     def test_a_restore_Jewel_right_date(self):
         restoreDay = date.today()
         self.daten.get_restore_Jewel(restoreDay, 1)
 
     def __del__(self):
+        pass
         os.remove("datenbank.db")
-        os.remove(self.config["destination"][device_name])
-        os.remove(self.config["restore_destination"][device_name])
+        #os.remove(self.config["destination"][device_name])
+        #os.remove(self.config["restore_destination"][device_name])
 
     
         

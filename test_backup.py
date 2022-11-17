@@ -81,20 +81,38 @@ def are_dir_trees_equal(dir1, dir2):
 
 
 class TestRestore(unittest.TestCase):
+    daten = None
+    config = None
+    backup = None
 
-    daten = datenbank.Datenbank()
-    config = ih.get_json_info(device_name)
-    backup = Backup(config["jewel_sources"][device_name], config["destination"][device_name], True)
-    backup.initialize_backup()
+    @classmethod
+    def setUpClass(cls):
+        cls.daten = datenbank.Datenbank()
+        cls.config = ih.get_json_info(device_name)
+        cls.backup = Backup(cls.config["jewel_sources"][device_name], cls.config["destination"][device_name], True)
+        cls.backup.initialize_backup()
 
     def test_a_restore_Jewel_only_Fullbackup(self):
         restoreDay = date.today()
-        self.daten.get_restore_Jewel(restoreDay, 1)
+        jewel = self.daten.get_restore_Jewel(restoreDay, 1)
+        self.assertTrue(jewel!= None,"An answer is None")
+        self.assertTrue(len(jewel[1]) == 1,"The lenght is incorrect")
+        self.assertTrue(jewel[0] == 1, f"The id is wrong. Must be 1, but is {jewel[0]}")
+        self.assertTrue(jewel[1][0][0] == 'test1.txt', 'Name is wrong')
+        self.assertTrue(jewel[1][0][1] == './unitTestFiles/jewel/test1.txt', 'jewel path is wrong')
+        self.assertTrue(jewel[1][0][2] == './unitTestFiles/backupLocation/fullBackuptestCases/jewel/test1.txt', 'backup location is wrong')
 
-    def __del__(self):
+    def test_b_restore_Jewel_date_in_past(self):
+        restoreDay = date.today()
+        restoreDay = restoreDay.replace(year=2000)
+        jewel = self.daten.get_restore_Jewel(restoreDay,1)
+        self.assertTrue(jewel== None,"The answer should be None")
+
+    @classmethod
+    def tearDownClass(cls):
         os.remove("datenbank.db")
-        shutil.rmtree(self.config["destination"][device_name])
-        shutil.rmtree(self.config["restore_destination"][device_name])
+        shutil.rmtree(cls.config["destination"][device_name])
+        shutil.rmtree(cls.config["restore_destination"][device_name])
 
     
         

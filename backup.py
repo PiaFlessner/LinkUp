@@ -54,30 +54,29 @@ class Backup:
                                              f"{self.destination}/{differential_backup_name}",
                                              shell=True,
                                              stdout=subprocess.PIPE)
+        subprocess_return.wait()
         output = subprocess_return.stdout.read()
+        subprocess_return.stdout.close()
         output = output.decode('utf-8')
-        print(output)
         output_array = output.splitlines()
         insert_results = self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
                                                     f"{self.destination}/{differential_backup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
         
-        print(insert_results)
         for result in insert_results:
                 leave_out_sources.append(result[2])
 
         
-        subprocess.Popen(f"rsync -aAX {self.excluding_data(self.device_name)} --out-format='%n' "
+        subprocess_Pointer = subprocess.Popen(f"rsync -aAX {self.excluding_data(self.device_name)} --out-format='%n' "
                                              f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
                                              f"{self.destination}/{differential_backup_name}",
                                              shell=True,
                                              stdout=subprocess.PIPE)
+        subprocess_Pointer.wait()
+        subprocess_Pointer.stdout.close()
 
         for result in insert_results:
                 self.set_hardlink(result[0], result[1])
-
-
-        print(leave_out_sources)
 
 
     def execute_fullbackup(self, jewel_sources):
@@ -89,13 +88,14 @@ class Backup:
                                              f'{self.destination}/{self.fullbackup_name}',
                                              shell=True,
                                              stdout=subprocess.PIPE)
+        subprocess_return.wait()
         output = subprocess_return.stdout.read()
+        subprocess_return.stdout.close()
         output = output.decode('utf-8')
         output_array = output.splitlines()
         self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
                                                     f"{self.destination}/{self.fullbackup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
-
 
     def list_to_string(self, string_list) -> str:
         formatted_string = " ".join(string_list)
@@ -149,7 +149,6 @@ class Backup:
 
                 if db_answer is not True:
                     result.append((db_answer,blob.store_destination,working_dir + "/" + line))
-
         return result
 
 
@@ -163,22 +162,8 @@ class Backup:
         return ' '.join(return_list)
 
 
-    def set_hardlink(self, source_path, destination_path):
-        #TODO hardlink action must be inserted here
-        print("------------------------------------")
-        print("Die Datei die am Ort \n" + destination_path + "\n abgespeichert werden würde muss zu einem hardlink zum Pfad \n"+ source_path 
-        + "\n germacht werden. ")
-        #create hardlink
-        #source_path = '\'' + source_path + '\''
-        #destination_path = '\'' + destination_path + '\''+
-        
-        subprocess.run(f"tree -a {'/home/mirco/backuptarget'}", shell=True)
+    def set_hardlink(self, source_path, destination_path):        
         d_path = os.path.dirname(os.path.abspath(destination_path))
         subprocess.run(f"ls {d_path}", shell=True)
-        print(d_path)
         os.remove(destination_path)
-        print("BRÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ", source_path, destination_path)
         subprocess.run(f'ln {source_path} {destination_path}', shell=True)
-        #os.link(source_path, destination_path)
-
-        pass

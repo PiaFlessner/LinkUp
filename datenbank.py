@@ -560,7 +560,7 @@ class Datenbank:
             if tmp:
                 for row in tmp:
                     files.append((self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
-                jewel = (row[0], files)
+                jewel = (row[0], files, self._decode_base64(row[3]))
                 return jewel
             else: return None
 
@@ -573,22 +573,26 @@ class Datenbank:
         assert(until_date.minute == 59 and until_date.hour==23 and until_date.second==59)
         conn = self.create_connection('datenbank.db')
         #temporär, da objekt struktur noch nicht existiert
-        file = None
+        files = []
 
         if conn != None:
             cur = conn.cursor()
-            command = """SELECT Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination FROM File
-                            INNER JOIN Blob on File.ID = Blob.ID_File
-                            WHERE File.ID = ?
-                            AND Blob.CreationDate <=  ?
-                            GROUP BY Blob.ID_File;"""
+            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination FROM File
+                        INNER JOIN Blob on File.ID = Blob.ID_File
+                        INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
+                        INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
+                        WHERE File.ID = ?
+                        AND Blob.CreationDate <= ?
+                        GROUP BY Blob.ID_File;"""
             params = (self._encode_base64(file_id),until_date)
             cur.execute(command,params)
             row = cur.fetchone()
 
             if row:
-                file = (self._decode_base64(row[3]),self._decode_base64(row[2]), self._decode_base64(row[4]), row[1])
-            return file
+                files.append((self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
+                jewel = (row[0], files, self._decode_base64(row[3]))
+                return jewel
+            else: return None
 
      
             

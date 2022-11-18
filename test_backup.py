@@ -93,8 +93,6 @@ class TestRestore(unittest.TestCase):
             jewel_list[i] = cls.workingDirectory + element
             i= i+ 1
 
-        print(jewel_list)
-
         cls.backup = Backup(jewel_list, cls.workingDirectory + "/" + cls.config["destination"][device_name], True)
         cls.backup.initialize_backup()
         time.sleep(15)
@@ -172,7 +170,24 @@ class TestRestore(unittest.TestCase):
         shutil.rmtree(cls.config["destination"][device_name])
         shutil.rmtree(cls.config["restore_destination"][device_name])
         os.remove("unitTestFiles/jewel/test_new.txt")
-   
+
+
+def suite():
+  suite = unittest.TestSuite()
+
+ 
+
+  suite.addTest(TestRestore.test_a_restore_Jewel_only_Fullbackup)
+  suite.addTest(TestRestore.test_b_restore_Jewel_date_in_past)
+  suite.addTest(TestRestore.test_c_restore_File_only_Fullbackup)
+  suite.addTest(TestRestore.test_d_restore_jewel_diff_backup_change_file)
+  suite.addTest(TestRestore.test_e_restore_Jewel_diff_backup_new_file)
+  suite.addTest(TestRestore.test_f_restore_File_diff_backup)
+  return suite
+
         
 if __name__ == "__main__":
-    unittest.main()
+    runner = unittest.TextTestRunner(failfast=True)
+    runner.run(suite())
+
+    #run tests with python3 -m unittest test_backup.py

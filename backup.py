@@ -116,6 +116,7 @@ class Backup:
             print("result ist leer")
             exit
         for line in output_array:
+            print(line)
             if line.endswith('/'):
                 self.current_source_path = line
 

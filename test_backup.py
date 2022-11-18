@@ -32,52 +32,7 @@ def are_dir_trees_equal(dir1, dir2):
         if not are_dir_trees_equal(new_dir1, new_dir2):
             return False
     return True
-#class TestBackup(unittest.TestCase):
-#
-#    @classmethod
-#    def setUpClass(cls):
-#        cls.daten = datenbank.Datenbank()
-#        cls.config = ih.get_json_info(device_name)
-#        cls.backup = Backup(cls.config["jewel_sources"][device_name], cls.config["destination"][device_name], True)
-#        cls.backup.initialize_backup()
-# 
-#         
-#    def test_a_fullbackup_jewel(self):
-#        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel"),
-#                                                    os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel")))
-#    
-#    def test_b_fullbackup_jewel2(self):
-#        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2"),
-#                                             os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel2")))
-#   
-#  
-#    def test_c_diffBackup_jewel(self):
-#        file = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel/test1.txt"), "a")
-#        file2 = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2/test2.txt"), "a")
-#        
-#        for i in range(5):
-#            file.write("Hello World in test1.txt\n")
-#            file2.write("Hello World in test2.txt\n")
-#        file.close()
-#        file2.close()
-#        self.backup.initialize_backup() 
-#        
-#        
-#        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel")
-#                        ,os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel")))
-#        
-#    def test_d_diffBackup_jewel2(self):
-#
-#        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2")
-#                        , os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel2")))
-#
-#    @classmethod
-#    def tearDownClass(cls):
-#        time.sleep(20)
-#        os.remove("datenbank.db")
-#        shutil.rmtree(cls.config["destination"][device_name])
-#        shutil.rmtree(cls.config["restore_destination"][device_name])
-#
+
 
 class TestRestore(unittest.TestCase):
 
@@ -95,7 +50,7 @@ class TestRestore(unittest.TestCase):
 
         cls.backup = Backup(jewel_list, cls.workingDirectory + "/" + cls.config["destination"][device_name], True)
         cls.backup.initialize_backup()
-        time.sleep(15)
+        #time.sleep(1)
 
     def test_a_restore_Jewel_only_Fullbackup(self):
         restoreDay = date.today()
@@ -134,9 +89,9 @@ class TestRestore(unittest.TestCase):
       os.utime(f"{self.workingDirectory}/unitTestFiles/jewel")
 
     
-      time.sleep(10)
+      time.sleep(1)
       self.backup.initialize_backup()
-      time.sleep(30)
+      time.sleep(1)
       jewel = self.daten.get_restore_Jewel(restoreDay,1)
       self.assertTrue(jewel[1][0][3] == 2, f'Version Number is wrong. Should be 2, but is {jewel[1][0][3]}')
 
@@ -150,7 +105,7 @@ class TestRestore(unittest.TestCase):
             file.write("Hello World in test_new.txt\n")
         file.close()
         self.backup.initialize_backup()
-        time.sleep(45)
+        time.sleep(1)
         jewel = self.daten.get_restore_Jewel(restoreDay,1)
         self.assertTrue(jewel!= None,"An answer is None")
         self.assertTrue(len(jewel[1]) == 2,"The lenght is incorrect")
@@ -177,16 +132,17 @@ def suite():
 
  
 
-  suite.addTest(TestRestore.test_a_restore_Jewel_only_Fullbackup)
-  suite.addTest(TestRestore.test_b_restore_Jewel_date_in_past)
-  suite.addTest(TestRestore.test_c_restore_File_only_Fullbackup)
-  suite.addTest(TestRestore.test_d_restore_jewel_diff_backup_change_file)
+  #suite.addTest(TestRestore.test_a_restore_Jewel_only_Fullbackup)
+  #suite.addTest(TestRestore.test_b_restore_Jewel_date_in_past)
+  #suite.addTest(TestRestore.test_c_restore_File_only_Fullbackup)
+  #suite.addTest(TestRestore.test_d_restore_jewel_diff_backup_change_file)
   suite.addTest(TestRestore.test_e_restore_Jewel_diff_backup_new_file)
-  suite.addTest(TestRestore.test_f_restore_File_diff_backup)
+  #suite.addTest(TestRestore.test_f_restore_File_diff_backup)
   return suite
 
         
 if __name__ == "__main__":
+    unittest.main()
     runner = unittest.TextTestRunner(failfast=True)
     runner.run(suite())
 

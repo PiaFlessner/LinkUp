@@ -94,8 +94,6 @@ class TestRestore(unittest.TestCase):
             i= i+ 1
 
         print(jewel_list)
-        print("$$$$$$$$$$$$$$$$$$$$$$")
-
 
         cls.backup = Backup(jewel_list, cls.workingDirectory + "/" + cls.config["destination"][device_name], True)
         cls.backup.initialize_backup()
@@ -134,6 +132,10 @@ class TestRestore(unittest.TestCase):
       for i in range(5):
           file.write("Change change change")
       file.close()
+      #touch the the dir, for the real behavior of
+      os.utime("/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/unitTestFiles/jewel")
+
+    
       time.sleep(10)
       self.backup.initialize_backup()
       time.sleep(30)

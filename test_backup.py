@@ -104,8 +104,8 @@ class TestRestore(unittest.TestCase):
         self.assertTrue(len(jewel[1]) == 1,"The lenght is incorrect")
         self.assertTrue(jewel[0] == 1, f"The id is wrong. Must be 1, but is {jewel[0]}")
         self.assertTrue(jewel[1][0][0] == 'test1.txt', 'Name is wrong')
-        self.assertTrue(jewel[1][0][1] == '/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/unitTestFiles/jewel/test1.txt', f'jewel path is wrong. Its {jewel[1][0][1]}')
-        self.assertTrue(jewel[1][0][2] == '/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/unitTestFiles/backupLocation/fullBackuptestCases/jewel/test1.txt', 'backup location is wrong')
+        self.assertTrue(jewel[1][0][1] == f'{self.workingDirectory}/unitTestFiles/jewel/test1.txt', f'jewel path is wrong. Its {jewel[1][0][1]}')
+        self.assertTrue(jewel[1][0][2] == f'{self.workingDirectory}/unitTestFiles/backupLocation/fullBackuptestCases/jewel/test1.txt', 'backup location is wrong')
         self.assertTrue(jewel[1][0][3] == 1, f'Version Number is wrong. Should be 1, but is {jewel[1][0][3]}')
 
     def test_b_restore_Jewel_date_in_past(self):
@@ -117,21 +117,21 @@ class TestRestore(unittest.TestCase):
 
     def test_c_restore_File_only_Fullbackup(self):
         restoreDay = date.today()
-        file = self.daten.get_restore_File(restoreDay, "testCases/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/unitTestFiles/jewel/test1.txt")
+        file = self.daten.get_restore_File(restoreDay, f"testCases{self.workingDirectory}/unitTestFiles/jewel/test1.txt")
         self.assertTrue(file!= None,"An answer is None")
 
         self.assertTrue(file[0] == 'test1.txt', 'Name is wrong')
-        self.assertTrue(file[1] == '/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/unitTestFiles/jewel/test1.txt', f'jewel path is wrong: {file[1]}')
-        self.assertTrue(file[2] == '/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/unitTestFiles/backupLocation/fullBackuptestCases/jewel/test1.txt', 'backup location is wrong')
+        self.assertTrue(file[1] == f'{self.workingDirectory}/unitTestFiles/jewel/test1.txt', f'jewel path is wrong: {file[1]}')
+        self.assertTrue(file[2] == f'{self.workingDirectory}/unitTestFiles/backupLocation/fullBackuptestCases/jewel/test1.txt', 'backup location is wrong')
 
     def test_d_restore_jewel_diff_backup_change_file(self):
       restoreDay = date.today()
-      file = open("/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/unitTestFiles/jewel/test1.txt", "a")
+      file = open(f"{self.workingDirectory}/unitTestFiles/jewel/test1.txt", "a")
       for i in range(5):
           file.write("Change change change")
       file.close()
       #touch the the dir, for the real behavior of
-      os.utime("/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/unitTestFiles/jewel")
+      os.utime(f"{self.workingDirectory}/unitTestFiles/jewel")
 
     
       time.sleep(10)
@@ -158,7 +158,7 @@ class TestRestore(unittest.TestCase):
 
     def test_f_restore_File_diff_backup(self):
         restoreDay = date.today()
-        file = self.daten.get_restore_File(restoreDay, "testCases/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/unitTestFiles/jewel/test1.txt")
+        file = self.daten.get_restore_File(restoreDay, f"testCases{self.workingDirectory}/unitTestFiles/jewel/test1.txt")
         self.assertTrue(file!= None,"An answer is None")
         self.assertTrue(file[3] == 2, f"Version Number ist wrong, should be 2, is {file[3]}")
 

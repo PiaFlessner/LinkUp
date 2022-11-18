@@ -93,8 +93,6 @@ class TestRestore(unittest.TestCase):
             jewel_list[i] = cls.workingDirectory + element
             i= i+ 1
 
-        print(jewel_list)
-
         cls.backup = Backup(jewel_list, cls.workingDirectory + "/" + cls.config["destination"][device_name], True)
         cls.backup.initialize_backup()
         time.sleep(15)

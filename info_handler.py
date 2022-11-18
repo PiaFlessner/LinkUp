@@ -42,12 +42,14 @@ def check_destination_path_exists(config, purpose:str, property:str, device_name
     try:
         destination = check_str_info_from_config(property, device_name,config,device_name)
 
-        print("creating "+ purpose +" in: "+destination)
+        #print("creating "+ purpose +" in: "+destination)
         os.makedirs(destination, exist_ok=True)
         if not(os.path.exists(destination)):
-           print("Creating " + purpose +"-destination directory failed")
+           #print("Creating " + purpose +"-destination directory failed")
+            pass
         if not(destination.startswith("/")):
-            print("Created "+ purpose +"-destination directory is realtive")
+            #print("Created "+ purpose +"-destination directory is realtive")
+            pass
  
     except PermissionError:
         print("You do not have the necessary permission to create the "+ purpose +" folder "+ get_json_info()[property][device_name]+".")

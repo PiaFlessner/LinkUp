@@ -33,49 +33,65 @@ def are_dir_trees_equal(dir1, dir2):
             return False
     return True
     
-#class TestBackup(unittest.TestCase):
-#
-#    @classmethod
-#    def setUpClass(cls):
-#        cls.daten = datenbank.Datenbank()
-#        cls.config = ih.get_json_info(device_name)
-#        cls.backup = Backup(cls.config["jewel_sources"][device_name], cls.config["destination"][device_name], True)
-#        cls.backup.initialize_backup()
-# 
-#         
-#    def test_a_fullbackup_jewel(self):
-#        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel"),
-#                                                    os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel")))
-#    
-#    def test_b_fullbackup_jewel2(self):
-#        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2"),
-#                                             os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel2")))
-#   
-#  
-#    def test_c_diffBackup_jewel(self):
-#        file = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel/test1.txt"), "a")
-#        file2 = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2/test2.txt"), "a")
-#        
-#        for i in range(5):
-#            file.write("Hello World in test1.txt\n")
-#            file2.write("Hello World in test2.txt\n")
-#        file.close()
-#        file2.close()
-#        self.backup.initialize_backup() 
-#        
-#        
-#        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel")
-#                        ,os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel")))
-#        
-#    def test_d_diffBackup_jewel2(self):
-#
-#        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2")
-#                        , os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel2")))
-#
-#    @classmethod
-#    def tearDownClass(cls):
-#        time.sleep(20)
-#        os.remove("datenbank.db")
-#        shutil.rmtree(cls.config["destination"][device_name])
-#        shutil.rmtree(cls.config["restore_destination"][device_name])
-#
+class TestBackup(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        
+        cls.daten = datenbank.Datenbank()
+        cls.config = ih.get_json_info(device_name)
+        cls.workingDirectory = str(pathlib.Path(__file__).parent.resolve())
+        jewel_list = cls.config["jewel_sources"][device_name]
+        i = 0
+        for element in jewel_list:
+            jewel_list[i] = cls.workingDirectory + element
+            i= i+ 1
+        
+        cls.backup = Backup(jewel_list, cls.workingDirectory + '/' + cls.config["destination"][device_name], True)
+        cls.backup.initialize_backup()
+        time.sleep(1)
+
+    
+        
+    def test_a_fullbackup_jewel(self):
+        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel"),
+                                                    os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel")))
+    
+    def test_b_fullbackup_jewel2(self):
+        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2"),
+                                                os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel2")))
+    
+    
+    def test_c_diffBackup_jewel(self):
+        file = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel/test1.txt"), "a")
+        file2 = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2/test2.txt"), "a")
+        
+        for i in range(5):
+            file.write("Hello World in test1.txt\n")
+            file2.write("Hello World in test2.txt\n")
+        file.close()
+        file2.close()
+        os.utime(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel"))
+        os.utime(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2"))
+        
+        time.sleep(1)
+        self.backup.initialize_backup() 
+        time.sleep(1)
+        
+        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel")
+                        ,os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel")))
+        
+    def test_d_diffBackup_jewel2(self):
+        self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2")
+                        , os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel2")))
+
+    @classmethod
+    def tearDownClass(cls):
+        
+        os.remove("datenbank.db")
+        shutil.rmtree(cls.config["destination"][device_name])
+        shutil.rmtree(cls.config["restore_destination"][device_name])
+
+   
+if __name__ == "__main__":
+    unittest.main()

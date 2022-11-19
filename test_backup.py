@@ -132,12 +132,12 @@ def suite():
 
  
 
-  #suite.addTest(TestRestore.test_a_restore_Jewel_only_Fullbackup)
-  #suite.addTest(TestRestore.test_b_restore_Jewel_date_in_past)
-  #suite.addTest(TestRestore.test_c_restore_File_only_Fullbackup)
-  #suite.addTest(TestRestore.test_d_restore_jewel_diff_backup_change_file)
+  suite.addTest(TestRestore.test_a_restore_Jewel_only_Fullbackup)
+  suite.addTest(TestRestore.test_b_restore_Jewel_date_in_past)
+  suite.addTest(TestRestore.test_c_restore_File_only_Fullbackup)
+  suite.addTest(TestRestore.test_d_restore_jewel_diff_backup_change_file)
   suite.addTest(TestRestore.test_e_restore_Jewel_diff_backup_new_file)
-  #suite.addTest(TestRestore.test_f_restore_File_diff_backup)
+  suite.addTest(TestRestore.test_f_restore_File_diff_backup)
   return suite
 
         

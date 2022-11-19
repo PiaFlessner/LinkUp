@@ -27,8 +27,9 @@ before_script:
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
-  - python --version
   - pip install -r requirements.txt
+  - apt-get -y update
+  - apt-get -y install rsync
 
 test:
   script:

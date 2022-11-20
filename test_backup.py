@@ -117,12 +117,12 @@ class TestRestore(unittest.TestCase):
 
     def test_c_restore_File_only_Fullbackup(self):
         restoreDay = date.today()
-        file = self.daten.get_restore_File(restoreDay, f"testCases{self.workingDirectory}/unitTestFiles/jewel/test1.txt")
-        self.assertTrue(file!= None,"An answer is None")
+        jewel = self.daten.get_restore_File(restoreDay, f"testCases{self.workingDirectory}/unitTestFiles/jewel/test1.txt")
+        self.assertTrue(jewel!= None,"An answer is None")
 
-        self.assertTrue(file[0] == 'test1.txt', 'Name is wrong')
-        self.assertTrue(file[1] == f'{self.workingDirectory}/unitTestFiles/jewel/test1.txt', f'jewel path is wrong: {file[1]}')
-        self.assertTrue(file[2] == f'{self.workingDirectory}/unitTestFiles/backupLocation/fullBackuptestCases/jewel/test1.txt', 'backup location is wrong')
+        self.assertTrue(jewel[1][0][0] == 'test1.txt', f'Name is wrong, it returns {jewel[1][0][0]}')
+        self.assertTrue(jewel[1][0][1] == f'{self.workingDirectory}/unitTestFiles/jewel/test1.txt', f'jewel path is wrong: {jewel[1][0][1]}')
+        self.assertTrue(jewel[1][0][2] == f'{self.workingDirectory}/unitTestFiles/backupLocation/fullBackuptestCases/jewel/test1.txt', 'backup location is wrong')
 
     def test_d_restore_jewel_diff_backup_change_file(self):
       restoreDay = date.today()
@@ -158,9 +158,9 @@ class TestRestore(unittest.TestCase):
 
     def test_f_restore_File_diff_backup(self):
         restoreDay = date.today()
-        file = self.daten.get_restore_File(restoreDay, f"testCases{self.workingDirectory}/unitTestFiles/jewel/test1.txt")
-        self.assertTrue(file!= None,"An answer is None")
-        self.assertTrue(file[3] == 2, f"Version Number ist wrong, should be 2, is {file[3]}")
+        jewel = self.daten.get_restore_File(restoreDay, f"testCases{self.workingDirectory}/unitTestFiles/jewel/test1.txt")
+        self.assertTrue(jewel!= None,"An answer is None")
+        self.assertTrue(jewel[1][0][3] == 2, f"Version Number ist wrong, should be 2, is {jewel[1][0][3]}")
 
 
     @classmethod

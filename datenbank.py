@@ -169,6 +169,7 @@ class Datenbank:
                     self.insert_File(file, cur,conn)
                     self.insert_first_Blob(file,cur,conn)
                     self.addJewelFileAssignment(jewel.id,file.id)
+                    conn.close()
                     return True
                 # no uri but existing hash
                 else:
@@ -178,6 +179,7 @@ class Datenbank:
                         if blob.hash == file.blobs[0].hash:
                             self.addJewelFileAssignment(jewel.id, old_file.id)
                             self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
+                            conn.close()
                             return blob.store_destination
             #uri  
             else:
@@ -187,10 +189,12 @@ class Datenbank:
                     if blob.hash == file.blobs[0].hash:
                         self.addJewelFileAssignment(jewel.id, old_file.id)
                         self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
+                        conn.close()
                         return blob.store_destination
                 #if no hash exists then add new blob
                 self.insert_new_blob_to_existing_file(file,cur,conn,old_file)
                 self.addJewelFileAssignment(jewel.id,old_file.id)
+                conn.close()
                 return True
         else:
             raise ValueError('No Connection to Database')
@@ -297,11 +301,12 @@ class Datenbank:
             try:
                 cur.execute(sqlite_insert_with_param, data_tuple)
                 conn.commit()
+                conn.close()
             except sqlite3.IntegrityError:
                 #sowohl jewel, als auch File existieren bereits in der Kombination in der Datenbank.
                 # -> User hat Jewel bereits angelegt, und auch die Datei hat zu dem Zeitpunkt schon existiert.
+                conn.close()
                 return False
-            conn.close()
 
     
      def check_which_jewel_sources_exist(self, jewel_source_arr, device_name):
@@ -321,6 +326,7 @@ class Datenbank:
 
             cur.execute(command, params)
             tmp = cur.fetchall()
+            conn.close()
             answer = []
             for row in tmp:
                 answer.append(self._decode_base64(row[0]))
@@ -531,6 +537,7 @@ class Datenbank:
 
             cur.execute(command, params)
             tmp = cur.fetchall()
+            conn.close()
             for row in tmp:
                 answer.append(Jewel(row[0],self._decode_base64(row[1]),row[2],self._decode_base64(row[3]),self._decode_base64(row[4]),self._decode_base64(row[5])))
             return answer
@@ -556,6 +563,7 @@ class Datenbank:
             params = (jewel_id,until_date)
             cur.execute(command,params)
             tmp = cur.fetchall()
+            conn.close()
 
             if tmp:
                 for row in tmp:
@@ -587,7 +595,8 @@ class Datenbank:
             params = (self._encode_base64(file_id),until_date)
             cur.execute(command,params)
             row = cur.fetchone()
-
+            conn.close()   
+        
             if row:
                 files.append((self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
                 jewel = (row[0], files, self._decode_base64(row[3]))

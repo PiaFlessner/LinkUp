@@ -16,16 +16,15 @@ class Backup:
     device_name = platform.node()
     fullbackup_name = None
 
-
     def __init__(self, jewel_path_list, destination, testcase=False):
         self.jewel_path_list = jewel_path_list
         self.destination = destination
         self.db = Datenbank()
-        if(testcase):
+        if (testcase):
             self.device_name = "testCases"
         self.fullbackup_name = "fullBackup" + self.device_name
 
-    def initialize_backup(self):        
+    def initialize_backup(self):
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
@@ -40,7 +39,6 @@ class Backup:
         # execute, when not empty
         if full_backup_sources:
             self.execute_fullbackup(full_backup_sources)
-
 
     def execute_backup(self, jewel_sources):
         print("Creating differential backup")
@@ -60,24 +58,22 @@ class Backup:
         output = output.decode('utf-8')
         output_array = output.splitlines()
         insert_results = self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
-                                                    f"{self.destination}/{differential_backup_name}",
-                                                    self.destination + "/" + self.fullbackup_name)
-        
-        for result in insert_results:
-                leave_out_sources.append(result[2])
+                                                                     f"{self.destination}/{differential_backup_name}",
+                                                                     self.destination + "/" + self.fullbackup_name)
 
-        
+        for result in insert_results:
+            leave_out_sources.append(result[2])
+
         subprocess_Pointer = subprocess.Popen(f"rsync -aAX {self.excluding_data(self.device_name)} --out-format='%n' "
-                                             f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
-                                             f"{self.destination}/{differential_backup_name}",
-                                             shell=True,
-                                             stdout=subprocess.PIPE)
+                                              f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
+                                              f"{self.destination}/{differential_backup_name}",
+                                              shell=True,
+                                              stdout=subprocess.PIPE)
         subprocess_Pointer.wait()
         subprocess_Pointer.stdout.close()
 
         for result in insert_results:
-                self.set_hardlink(result[0], result[1])
-
+            self.set_hardlink(result[0], result[1])
 
     def execute_fullbackup(self, jewel_sources):
         print("Creating full backup")
@@ -101,16 +97,14 @@ class Backup:
         formatted_string = " ".join(string_list)
         return formatted_string
 
-
     def filter_non_existing_paths(self, paths) -> list[str]:
         for jewel_path in paths:
             if not (os.path.exists(jewel_path)):
                 paths.remove(jewel_path)
         return paths
 
-
     def read_files_and_jewel_from_rsync_output(self, output_array, jewel_sources, store_destination_body,
-                                               fullbackup_store_destination_body) -> list[str|bool]:
+                                               fullbackup_store_destination_body) -> list[str | bool]:
         result = []
         if output_array == []:
             print("result ist leer")
@@ -148,9 +142,8 @@ class Backup:
                 db_answer = datenbank.add_to_database(jewel, file, self.device_name)
 
                 if db_answer is not True:
-                    result.append((db_answer,blob.store_destination,working_dir + "/" + line))
+                    result.append((db_answer, blob.store_destination, working_dir + "/" + line))
         return result
-
 
     def excluding_data(self, device_name):
         config = info_handler.get_json_info(device_name)
@@ -161,8 +154,7 @@ class Backup:
             return_list.append(f'--exclude \'*{extension}\'')
         return ' '.join(return_list)
 
-
-    def set_hardlink(self, source_path, destination_path):        
+    def set_hardlink(self, source_path, destination_path):
         d_path = os.path.dirname(os.path.abspath(destination_path))
         subprocess.run(f"ls {d_path}", shell=True)
         os.remove(destination_path)

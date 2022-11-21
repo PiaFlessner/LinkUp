@@ -567,7 +567,7 @@ class Datenbank:
             if tmp:
                 for row in tmp:
                     files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
-                jewel = (row[0], files, self._decode_base64(row[3]))
+                jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
                 return jewel
             else:
                 return None
@@ -595,9 +595,8 @@ class Datenbank:
             conn.close()   
         
             if row:
-                files.append(
-                    (self._decode_base64(row[6]), self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
-                jewel = (row[0], files, self._decode_base64(row[3]))
+                files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
+                jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
                 return jewel
             else:
                 return None

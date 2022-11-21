@@ -1,8 +1,10 @@
+import resFile
 class resJewel:
-    def __init__(self, restore_destination, jewel_id, res_file):
+    def __init__(self, restore_destination:str, jewel_id:int, res_file:resFile, jewel_source:str):
         self.restore_destination = restore_destination
         self.jewel_id = jewel_id
         self.res_file = res_file
+        self.jewel_source
 
     # getter and setter methods for class properties
     @property
@@ -28,3 +30,11 @@ class resJewel:
     @res_file.setter
     def res_file(self, value):
         self.res_file = value
+
+    @property
+    def jewel_source(self):
+        return self.jewel_source
+
+    @res_file.setter
+    def res_file(self, value):
+        self.jewel_source = value

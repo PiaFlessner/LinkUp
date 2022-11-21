@@ -4,7 +4,7 @@ class resJewel:
         self.restore_destination = restore_destination
         self.jewel_id = jewel_id
         self.res_file = res_file
-        self.jewel_source
+        self.jewel_source = jewel_source
 
     # getter and setter methods for class properties
     @property

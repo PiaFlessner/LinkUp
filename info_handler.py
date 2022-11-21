@@ -59,17 +59,22 @@ def check_destination_path_exists(config, purpose:str, property:str, device_name
         sys.exit()
     
 
-
 # Description:  Generate a SHA-1 Hash based on the content of a file.
 # Input:        Total path of a file as a String. Example: "home/user/directory/file.txt"
 # Output:       20 bytes (40 characters) large SHA-1 Hash as a String. Example: "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 def get_hash(total_file_path: str):
-    file_name = total_file_path.split('/')[-1]
-    file_path = '/'.join(total_file_path.split('/')[:-1])
-    bash_output = subprocess.run(f'openssl dgst -sha1 {file_name}', shell=True, cwd=file_path, stdout=subprocess.PIPE)
-    hash = str(bash_output.stdout.decode()).split('= ')[1]
-    hash = hash.replace("\n","")
-    return hash
+    try:
+        file_name = total_file_path.split('/')[-1]
+        file_path = '/'.join(total_file_path.split('/')[:-1])
+        bash_output = subprocess.run(f'openssl dgst -sha1 "{file_name}"', shell=True, cwd=file_path, stdout=subprocess.PIPE)
+        hash = str(bash_output.stdout.decode()).replace("\n","")[-40:]
+        return hash
+    except:
+        print(f'\nError in function "get_hash": Hash couldn\'t be generated\n'
+              f'Input of the function: {total_file_path}\n'
+              f'Extracted file path: {file_path}\n'
+              f'Extracted file name: {file_name}')
+        sys.exit()
 
 
 def check_str_info_from_config(property:str, key:str,config,device_name:str, ):

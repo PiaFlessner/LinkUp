@@ -145,14 +145,20 @@ class Backup:
                     result.append((db_answer, blob.store_destination, working_dir + "/" + line))
         return result
 
+
+    # Description:  Generate a String of excluded files which are handed over to the rsync command.
+    # Input:        Device name for the "get_json_info()" function.
+    # Output:       String containing the rsync option "--exclude" and the name of the excluded 
+    #               files. Example: "--exclude "file1" --exclude "file2" ... --exclude "fileN""
     def excluding_data(self, device_name):
         config = info_handler.get_json_info(device_name)
         return_list = []
         for element in config['blacklist']['directories'] + config['blacklist']['files']:
-            return_list.append(f'--exclude \'{element}\'')
+            return_list.append(f'--exclude "{element}"')
         for extension in config['blacklist']['extensions']:
-            return_list.append(f'--exclude \'*{extension}\'')
+            return_list.append(f'--exclude *"{extension}"')
         return ' '.join(return_list)
+
 
     def set_hardlink(self, source_path, destination_path):
         d_path = os.path.dirname(os.path.abspath(destination_path))

@@ -7,8 +7,8 @@ import uuid
 import base64
 import datetime
 import platform
-import resFile
-import resJewel
+from resFile import resFile
+from resJewel import resJewel
 
 
 class Jewel:

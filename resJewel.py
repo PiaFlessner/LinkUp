@@ -35,6 +35,6 @@ class resJewel:
     def jewel_source(self):
         return self.jewel_source
 
-    @res_file.setter
-    def res_file(self, value):
+    @jewel_source.setter
+    def jewel_source(self, value):
         self.jewel_source = value

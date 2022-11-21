@@ -7,6 +7,8 @@ import uuid
 import base64
 import datetime
 import platform
+import resFile
+import resJewel
 
 
 class Jewel:
@@ -564,8 +566,7 @@ class Datenbank:
 
             if tmp:
                 for row in tmp:
-                    files.append(
-                        (self._decode_base64(row[6]), self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
+                    files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
                 jewel = (row[0], files, self._decode_base64(row[3]))
                 return jewel
             else:

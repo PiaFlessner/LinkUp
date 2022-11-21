@@ -1,6 +1,6 @@
 import resFile
 class resJewel:
-    def __init__(self, restore_destination:str, jewel_id:int, res_file:resFile, jewel_source:str):
+    def __init__(self, restore_destination:str, jewel_id:int, res_file:list(resFile), jewel_source:str):
         self.restore_destination = restore_destination
         self.jewel_id = jewel_id
         self.res_file = res_file

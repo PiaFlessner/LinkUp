@@ -16,7 +16,6 @@ if __name__ == "__main__":
     # command: python3 execute.py show (user enters display of tables section)
     subparser = parser.add_subparsers(dest='command')
     showTables = subparser.add_parser('show', help="Get into show section of program. Eg. show File Table.")
-    backup = subparser.add_parser('backup', help="Get into backup section of program.")
 
     # user can choose either of one commands now
     group = showTables.add_mutually_exclusive_group()

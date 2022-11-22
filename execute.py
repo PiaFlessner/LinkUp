@@ -1,6 +1,4 @@
 import argparse
-from json import JSONDecodeError
-import sys
 from backup import Backup
 from show_tables import ShowTables
 from restore import Restore
@@ -36,7 +34,7 @@ if __name__ == "__main__":
     showTables.add_argument('-vv', '--verboseverbose', action='store_true')
     paths = parser.add_mutually_exclusive_group()
 
-    ##idea collection
+    # idea collection
     # command: python3 execute.py restore
     restoreSection = subparser.add_parser('restore', help="Get into restore section of program.")
     group = restoreSection.add_mutually_exclusive_group()
@@ -51,10 +49,10 @@ if __name__ == "__main__":
     # makes args accessable
     args = parser.parse_args()
 
-    ######################user chooses the show section
+    # user chooses the show section
     if args.command == "show":
 
-        ##########user chooses show jewel
+        # user chooses show jewel
         if args.showJewel:
             verbose_level = 0
             if args.verbose:
@@ -66,8 +64,7 @@ if __name__ == "__main__":
             else:
                 sT.show_all_jewels(verbose_level)
 
-
-        ##########user chooses show File
+        # user chooses show File
         elif args.showFile:
             verbose_level = 0
             if args.verbose:
@@ -79,8 +76,7 @@ if __name__ == "__main__":
             else:
                 sT.show_all_files(verbose_level)
 
-
-        ##########user chooses show skipped File
+        # user chooses show skipped File
         elif args.showSkippedFile:
             verbose_level = 0
             if args.verbose:
@@ -92,8 +88,7 @@ if __name__ == "__main__":
             else:
                 sT.show_all_skipped_Files(verbose_level)
 
-
-        ##########user chooses show Blob
+        # user chooses show Blob
         elif args.showBlob:
             verbose_level = 0
             if args.verbose:
@@ -105,19 +100,18 @@ if __name__ == "__main__":
             else:
                 sT.show_all_blobs(verbose_level)
 
-
-        ##########user chooses nothing
+        # user chooses nothing
         else:
-            print("No action choosed.")
+            print("No action selected.")
+
     elif args.command == "restore":
+        restore_object = Restore()
         if args.restoreFile:
-            restore_object = Restore()
             restore_object.restore_file(args.id, args.datetime)
-            #print(args.id)
-            #print(args.datetime)
             pass
         elif args.restoreJewel:
-            pass
+            restore_object.restore_jewel(args.id, args.datetime)
+
     if args.command == "backup":
         config = ih.get_json_info()
         backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])

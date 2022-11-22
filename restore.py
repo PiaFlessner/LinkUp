@@ -1,6 +1,4 @@
 import os
-from resFile import resFile
-from resJewel import resJewel
 from datenbank import Datenbank
 import subprocess
 from datetime import datetime as date
@@ -8,11 +6,7 @@ import info_handler
 import platform
 
 
-
-
 class Restore:
-
-    
     config = info_handler.get_json_info()
 
     def restore_directory_structure(self, jewel):
@@ -31,6 +25,7 @@ class Restore:
         # the String paths for jewel and file are converted to a list
         jewel_origin_path = os.path.normpath(jewel_origin_path)
         jewel_origin_path = jewel_origin_path.split(os.sep)
+        restore_directory_list = []
 
         for file in jewel.res_file:
             relative_file_path = "/"
@@ -57,21 +52,25 @@ class Restore:
             # these are a few asserts for testing
             # assert True == os.path.exists(restore_destination)
             # assert True == os.path.exists(restore_destination+relative_file_path)
-            return restore_destination + relative_file_path
+            restore_directory_list.append(restore_destination + relative_file_path)
 
-    def restore_jewel(self):
-        pass
+        return restore_directory_list
 
-    def restore_file(self, file_id:str, date_time:str):
+    def restore_jewel(self, jewel_id: int, date_time: str):
+        count = 0
+        db_object = Datenbank()
+        date_time = date.fromisoformat(date_time)
+        jewel = db_object.get_restore_Jewel(date_time, jewel_id)
+        restore_destination_paths = self.restore_directory_structure(jewel)
+        for file in jewel.res_file:
+            subprocess.run(f'rsync -aAXv {file.backup_location} {restore_destination_paths[count]} ',
+                           shell=True)
+            count += 1
 
-        #print(self.config['restore_destination'][platform.node()])
+    def restore_file(self, file_id: str, date_time: str):
         db_object = Datenbank()
         date_time = date.fromisoformat(date_time)
         jewel = db_object.get_restore_File(date_time, file_id)
-        restore_destination_path = self.restore_directory_structure(jewel)
-        #print(jewel.res_file[0].backup_location)
-        #print("RESTOREDEST_PATH: ", restore_destination_path)
-        
-        subprocess.run(f'rsync -aAXv {jewel.res_file[0].backup_location} {restore_destination_path} ', shell=True)
-
-        
+        restore_destination_paths = self.restore_directory_structure(jewel)
+        print(restore_destination_paths[0])
+        subprocess.run(f'rsync -aAXv {jewel.res_file[0].backup_location} {restore_destination_paths[0]} ', shell=True)

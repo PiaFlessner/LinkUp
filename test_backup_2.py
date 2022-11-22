@@ -49,7 +49,7 @@ class TestBackup(unittest.TestCase):
 
         
         cls.backup = Backup(jewel_list, cls.workingDirectory + '/' + cls.config["destination"][device_name], True)
-        cls.backup.initialize_backup()
+        cls.backup.initialize_backup(0)
         #time.sleep(1)
 
     
@@ -100,7 +100,7 @@ class TestBackup(unittest.TestCase):
             print("File or Directory not Found")
             
        # time.sleep(1)
-        self.backup.initialize_backup() 
+        self.backup.initialize_backup(0) 
         #time.sleep(1)
         try:
             self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel")

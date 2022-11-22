@@ -12,31 +12,7 @@ import datenbank
 import shutil
 
 device_name = "testCases"
-<<<<<<< HEAD
 
-def are_dir_trees_equal(dir1, dir2):
-    
-    dirs_cmp = dircmp(dir1, dir2) 
-    
-    if len(dirs_cmp.left_only) > 0 or len(dirs_cmp.right_only) > 0 or len(dirs_cmp.funny_files) > 0: # überprüfen, ob unterschiedliche Files oder Dirs vom Namen her
-                                                                                                     #existieren 
-        return False                                                                                 
-    
-    (match, mismatch, errors) =  cmpfiles(dir1, dir2, dirs_cmp.common_files, shallow=False)
-    
-    if len(mismatch) > 0 or len(errors) > 0:    # nach in halt überprüfen
-        return False
-    
-    for common_dir in dirs_cmp.common_dirs:
-        new_dir1 = os.path.join(dir1, common_dir)
-        new_dir2 = os.path.join(dir2, common_dir)
-        if not are_dir_trees_equal(new_dir1, new_dir2):
-            return False
-    return True
-
-
-=======
->>>>>>> 50e2fc88de40f8147256936dce466876ccb925ae
 class TestRestore(unittest.TestCase):
 
     @classmethod
@@ -52,13 +28,9 @@ class TestRestore(unittest.TestCase):
             i= i+ 1
 
         cls.backup = Backup(jewel_list, cls.workingDirectory + "/" + cls.config["destination"][device_name], True)
-<<<<<<< HEAD
-        cls.backup.initialize_backup()
-        #time.sleep(1)
-=======
         cls.backup.initialize_backup(0)
         time.sleep(15)
->>>>>>> 50e2fc88de40f8147256936dce466876ccb925ae
+
 
     def test_a_restore_Jewel_only_Fullbackup(self):
         restoreDay = date.today()
@@ -97,15 +69,11 @@ class TestRestore(unittest.TestCase):
       os.utime(f"{self.workingDirectory}/unitTestFiles/jewel")
 
     
-<<<<<<< HEAD
+
       time.sleep(1)
       self.backup.initialize_backup()
       time.sleep(1)
-=======
-      time.sleep(10)
-      self.backup.initialize_backup(0)
-      time.sleep(30)
->>>>>>> 50e2fc88de40f8147256936dce466876ccb925ae
+
       jewel = self.daten.get_restore_Jewel(restoreDay,1)
       self.assertTrue(jewel.res_file[0].version_number == 2, f'Version Number is wrong. Should be 2, but is {jewel.res_file[0].version_number}')
 
@@ -118,13 +86,11 @@ class TestRestore(unittest.TestCase):
         for i in range(5):
             file.write("Hello World in test_new.txt\n")
         file.close()
-<<<<<<< HEAD
-        self.backup.initialize_backup()
-        time.sleep(1)
-=======
+
+
         self.backup.initialize_backup(0)
         time.sleep(45)
->>>>>>> 50e2fc88de40f8147256936dce466876ccb925ae
+
         jewel = self.daten.get_restore_Jewel(restoreDay,1)
         self.assertTrue(jewel!= None,"An answer is None")
         self.assertTrue(len(jewel.res_file) == 2,"The lenght is incorrect")

@@ -35,7 +35,6 @@ if __name__ == "__main__":
     showTables.add_argument('-vv', '--verboseverbose', action='store_true')
     paths = parser.add_mutually_exclusive_group()
 
-    ##idea collection
     # command: python3 execute.py restore
     restoreSection = subparser.add_parser('restore', help="Get into restore section of program.")
     group = restoreSection.add_mutually_exclusive_group()
@@ -45,6 +44,12 @@ if __name__ == "__main__":
     group.add_argument('-J', '--restoreJewel', action='store_true', help='Restore certain Jewel')
     # needed Id to restore
     restoreSection.add_argument('id', type=str)
+
+    # command: python3 execute.py backup
+    backupSection = subparser.add_parser('backup', help="Get into backup section of program.")
+    group = backupSection.add_mutually_exclusive_group()
+    # command: python3 execute.py backup -v
+    group.add_argument('-v', '--verbose', action='store_true', help='Backup with detailed information')
 
     # makes args accessable
     args = parser.parse_args()
@@ -107,9 +112,14 @@ if __name__ == "__main__":
         ##########user chooses nothing
         else:
             print("No action choosed.")
+    
     elif args.command == "restore":
         pass
+    
     if args.command == "backup":
+        verbose_level = 0
+        if args.verbose == 1:
+            verbose_level = 1
         config = ih.get_json_info()
         backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
-        backup.initialize_backup()
+        backup.initialize_backup(verbose_level)

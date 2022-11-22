@@ -5,18 +5,23 @@ class Data:
         self.f_size = f_size
         self.birth = birth
         self.modify = modify
-    #Filename
+
+    # Filename
     def get_f_name(self):
         return self.name
-    #checksum
+
+    # checksum
     def get_f_hash(self):
         return self.f_hash
-    #filesize
+
+    # filesize
     def get_f_size(self):
         return self.f_size
-    #birth of file
+
+    # birth of file
     def get_birth(self):
         return self.birth
-    #timestamp of filecontent modify
+
+    # timestamp of filecontent modify
     def get_modify(self):
         return self.modify

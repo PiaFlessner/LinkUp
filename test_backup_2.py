@@ -75,7 +75,7 @@ class TestBackup(unittest.TestCase):
             print("File or Directory not Found")
         else:
             print("Test B:")
-            print("everything is fine in")    
+            print("everything is fine")    
             
     def test_c_diffBackup_jewel(self):
         try:

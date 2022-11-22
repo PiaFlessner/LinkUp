@@ -125,7 +125,7 @@ class ShowTables:
 
         if jewels is not None:
             table = PrettyTable()
-            table.field_names = ["Jewel ID","Comment","Monitoring startdate","Source of the jewel", "Device Name", "Fullbackup source"]
+            table.field_names = ["Jewel ID","Comment","Monitoring startdate","Source of the jewel", "Device name", "Fullbackup source"]
 
             for jewel in jewels:
                 j_list = self._verbose_jewel_to_string(jewel, verbose_level)
@@ -163,7 +163,7 @@ class ShowTables:
         if blobs is not None:
             table = PrettyTable()
 
-            table.field_names = ["Blob ID", "File version", "Hash", "Name", "File size","Creationdate", "Modify", 
+            table.field_names = ["Blob ID", "File version", "Hash", "BackUp name", "File size","Creationdate", "Modifydate", 
              "File ID", "Origin name","Source path", "Store destination"]
 
             for blob in blobs:
@@ -182,12 +182,12 @@ class ShowTables:
     
         if jewel is not None:
             table = PrettyTable()
-            table.field_names = ["Jewel ID", "Comment","Monitoring startdate","Source of the jewel", "Device Name", "Fullbackup source"]
+            table.field_names = ["Jewel ID", "Comment","Monitoring startdate","Source of the jewel", "Device name", "Fullbackup source"]
             j_list = self._verbose_jewel_to_string(jewel, verbose_level)
             table.add_row([j_list[0], j_list[1], j_list[2], j_list[3],  j_list[4], j_list[5]])
             filetable = PrettyTable()
             files = daten.get_Files_via_jewel_id(id)
-            filetable.field_names = ["File ID","Number of BackUps","File birth"]
+            filetable.field_names = ["File ID","File versions","File birth"]
        
             for file in files:
                 f_list = self._verbose_files_to_string(file, verbose_level)
@@ -206,13 +206,13 @@ class ShowTables:
 
         if file is not None:
             table = PrettyTable()
-            table.field_names = ["File ID","Number of BackUps","File birth"]
+            table.field_names = ["File ID","File versions","File birth"]
             f_list = self._verbose_files_to_string(file, verbose_level)
             table.add_row([f_list[0], f_list[1], f_list[2]])
             print(table)
 
             blobtable = PrettyTable()
-            blobtable.field_names = ["Blob ID","File version","Hash","Name","File size","Creationdate","Modify","File ID","Origin name","Source path", "Store destination"]
+            blobtable.field_names = ["Blob ID","File version","Hash","BackUp name","File size","Creationdate","Modifydate","File ID","Origin name","Source path", "Store destination"]
 
             for blob in file.blobs:
                 b_list = self._verbose_blob_to_string(blob, verbose_level)
@@ -229,7 +229,7 @@ class ShowTables:
 
         if blob is not None:
             table =  PrettyTable()
-            table.field_names = ["Blob ID", "File version", "Hash", "Name", "File size","Creationdate", "Modify", 
+            table.field_names = ["Blob ID", "File version", "Hash", "BackUp name", "File size","Creationdate", "Modifydate", 
             "File ID", "Origin name","Source path", "Store destination"]
             b_list = self._verbose_blob_to_string(blob, verbose_level)
             table.add_row([b_list[0], b_list[1], b_list[2], b_list[3], b_list[4], b_list[5], b_list[6], b_list[7], b_list[8], b_list[9],
@@ -245,7 +245,7 @@ class ShowTables:
  
         if files is not None:
             table =  PrettyTable()
-            table.field_names = ["File id", "Jewel id", "UUID", "Occurance_Date", "Hash", "Reason", "Additional information", "Connected file to jewel"]
+            table.field_names = ["File id", "Jewel id", "UUID", "Occurance date", "Hash", "Reason", "Additional information", "Connected file to jewel"]
             for fi in files:
                 file = self._verbose_skipped_files_to_string(fi, verbose_level)
                 table.add_row([str(file[0]), str(file[1]),str(file[2]), str(file[3]), str(file[4]), str(file[5]), str(file[6]), str(file[7])])
@@ -259,7 +259,7 @@ class ShowTables:
         
         if fi is not None:
             table =  PrettyTable()
-            table.field_names = ["File id", "Jewel id", "UUID", "Occurance_Date", "Hash", "Reason", "Additional information", "Connected file to jewel"]
+            table.field_names = ["File id", "Jewel id", "UUID", "Occurance date", "Hash", "Reason", "Additional information", "Connected file to jewel"]
             file = self._verbose_skipped_files_to_string(fi, verbose_level)
             table.add_row([str(file[0]), str(file[1]),str(file[2]), str(file[3]), str(file[4]), str(file[5]), str(file[6]),str(file[7])])
             print(table)

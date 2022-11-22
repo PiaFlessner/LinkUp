@@ -15,7 +15,6 @@ if __name__ == "__main__":
     # command: python3 execute.py show (user enters display of tables section)
     subparser = parser.add_subparsers(dest='command')
     showTables = subparser.add_parser('show', help="Get into show section of program. Eg. show File Table.")
-    backup = subparser.add_parser('backup', help="Get into backup section of program.")
 
     # user can choose either of one commands now
     group = showTables.add_mutually_exclusive_group()
@@ -34,7 +33,6 @@ if __name__ == "__main__":
     showTables.add_argument('-vv', '--verboseverbose', action='store_true')
     paths = parser.add_mutually_exclusive_group()
 
-    # idea collection
     # command: python3 execute.py restore
     restoreSection = subparser.add_parser('restore', help="Get into restore section of program.")
     group = restoreSection.add_mutually_exclusive_group()
@@ -45,6 +43,12 @@ if __name__ == "__main__":
     # needed Id to restore
     restoreSection.add_argument('id', type=str)
     restoreSection.add_argument('datetime', type=str)
+
+    # command: python3 execute.py backup
+    backupSection = subparser.add_parser('backup', help="Get into backup section of program.")
+    group = backupSection.add_mutually_exclusive_group()
+    # command: python3 execute.py backup -v
+    group.add_argument('-v', '--verbose', action='store_true', help='Backup with detailed information')
 
     # makes args accessable
     args = parser.parse_args()
@@ -113,6 +117,9 @@ if __name__ == "__main__":
             restore_object.restore_jewel(args.id, args.datetime)
 
     if args.command == "backup":
+        verbose_level = 0
+        if args.verbose == 1:
+            verbose_level = 1
         config = ih.get_json_info()
         backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
-        backup.initialize_backup()
+        backup.initialize_backup(verbose_level)

@@ -3,6 +3,7 @@ from json import JSONDecodeError
 import sys
 from backup import Backup
 from show_tables import ShowTables
+from restore import Restore
 import info_handler as ih
 import platform
 
@@ -45,6 +46,7 @@ if __name__ == "__main__":
     group.add_argument('-J', '--restoreJewel', action='store_true', help='Restore certain Jewel')
     # needed Id to restore
     restoreSection.add_argument('id', type=str)
+    restoreSection.add_argument('datetime', type=str)
 
     # makes args accessable
     args = parser.parse_args()
@@ -109,6 +111,10 @@ if __name__ == "__main__":
             print("No action choosed.")
     elif args.command == "restore":
         if args.restoreFile:
+            restore_object = Restore()
+            restore_object.restore_file(args.id, args.datetime)
+            #print(args.id)
+            #print(args.datetime)
             pass
         elif args.restoreJewel:
             pass

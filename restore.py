@@ -1,9 +1,19 @@
 import os
 from resFile import resFile
 from resJewel import resJewel
+from datenbank import Datenbank
+import subprocess
+from datetime import datetime as date
+import info_handler
+import platform
+
+
 
 
 class Restore:
+
+    
+    config = info_handler.get_json_info()
 
     def restore_directory_structure(self, jewel):
         # creates the path, where the restored file is going to be
@@ -16,7 +26,7 @@ class Restore:
         relative_file_path = ""
         file_origin_path = ""
         jewel_origin_path = jewel.jewel_source
-        restore_destination = jewel.restore_destination
+        restore_destination = self.config['restore_destination'][platform.node()]
 
         # the String paths for jewel and file are converted to a list
         jewel_origin_path = os.path.normpath(jewel_origin_path)
@@ -47,6 +57,21 @@ class Restore:
             # these are a few asserts for testing
             # assert True == os.path.exists(restore_destination)
             # assert True == os.path.exists(restore_destination+relative_file_path)
+            return restore_destination + relative_file_path
 
     def restore_jewel(self):
         pass
+
+    def restore_file(self, file_id:str, date_time:str):
+
+        #print(self.config['restore_destination'][platform.node()])
+        db_object = Datenbank()
+        date_time = date.fromisoformat(date_time)
+        jewel = db_object.get_restore_File(date_time, file_id)
+        restore_destination_path = self.restore_directory_structure(jewel)
+        #print(jewel.res_file[0].backup_location)
+        #print("RESTOREDEST_PATH: ", restore_destination_path)
+        
+        subprocess.run(f'rsync -aAXv {jewel.res_file[0].backup_location} {restore_destination_path} ', shell=True)
+
+        

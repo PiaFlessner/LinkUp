@@ -28,7 +28,7 @@
   {
     "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/Restore",
     "kali": "/home/kali/Restore",
-    "mirco-ThinkPad-T495": "/home/mirco/Backuptest",
+    "mirco-ThinkPad-T495": "/home/mirco/Backuprestore",
     "testCases": "unitTestFiles/restoreLocation",
     "fedora": "/home/ole/restoreDestination"
   }

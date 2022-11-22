@@ -493,20 +493,23 @@ class Datenbank:
         cur.execute(command, params)
         conn.commit()
 
-    def get_all_skipped_files(self):
-        row = []
+    def get_all_skipped_files (self):
+        result = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Skipped_Files")
-            row = cur.fetchall()
+            record = cur.fetchall()
             conn.commit()
             conn.close()
-            row[2] = self._decode_base64(row[2])
-            row[7] = self._decode_base64(row[7])
-        return row
+            if record:
+                for row in record: 
+                    result.append((row[0], row[1], self._decode_base64(row[2]), row[3], row[4], row[5], row[6], self._decode_base64(row[7])))
 
-    def get_skipped_file_via_id(self, id):
+        return result
+
+
+    def get_skipped_file_via_id (self, id):
         row = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -515,8 +518,7 @@ class Datenbank:
             row = cur.fetchone()
             conn.commit()
             conn.close()
-            row[2] = self._decode_base64(row[2])
-            row[7] = self._decode_base64(row[7])
+            if row: row = (row[0], row[1], self._decode_base64(row[2]), row[3], row[4], row[5], row[6], self._decode_base64(row[7]))
         return row
 
     def get_fullbackup_paths(self, jewel_source_arr):

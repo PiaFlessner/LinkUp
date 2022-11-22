@@ -108,7 +108,10 @@ if __name__ == "__main__":
         else:
             print("No action choosed.")
     elif args.command == "restore":
-        pass
+        if args.restoreFile:
+            pass
+        elif args.restoreJewel:
+            pass
     if args.command == "backup":
         config = ih.get_json_info()
         backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])

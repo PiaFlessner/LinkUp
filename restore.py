@@ -31,20 +31,22 @@ class Restore:
 
             # the file path is reduced to the point, where the jewel starts
             # the remaining file path is collected in relative_file_path for creating/checking the path
-            for i in (range(len(jewel_origin_path)-1)):
+            for i in (range(len(jewel_origin_path) - 1)):
                 file_origin_path.remove(file_origin_path[0])
             for i in range(len(file_origin_path)):
                 relative_file_path = relative_file_path + file_origin_path[i] + "/"
 
             # print to see the relative path for the path, this path will be created in the restore destination directory
-            #print(relative_file_path)
+            # print(relative_file_path)
 
             # check if the restore destination directory for this file already exists
             # create restore destination directory for this file, if it doesn't exists
-            if not os.path.exists(restore_destination+relative_file_path):
-                os.makedirs(restore_destination+relative_file_path)
-        
+            if not os.path.exists(restore_destination + relative_file_path):
+                os.makedirs(restore_destination + relative_file_path)
+
             # these are a few asserts for testing
-            #assert True == os.path.exists(restore_destination)
-            #assert True == os.path.exists(restore_destination+relative_file_path)
-            
+            # assert True == os.path.exists(restore_destination)
+            # assert True == os.path.exists(restore_destination+relative_file_path)
+
+    def restore_jewel(self):
+        pass

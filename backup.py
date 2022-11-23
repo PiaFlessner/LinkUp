@@ -4,6 +4,7 @@ import subprocess
 import platform
 from datetime import datetime as date
 import sys
+from hardlink_info import HardlinkInfo
 import info_handler
 from datenbank import Blob, Datenbank, File, Jewel
 from pathlib import Path
@@ -62,8 +63,8 @@ class Backup:
 
         self.call_rsync_differential('aAX', backup_sources_for_r_sync, differential_backup_name)
 
-        for result in insert_results:
-            self.set_hardlink(result[0], result[1])
+        for hardlink_info in insert_results:
+            self.set_hardlink(hardlink_info)
 
         self.print_feedback(verbose_level, differential_backup_name, 'differential', subprocess_return_verbose, start_time)
 
@@ -79,8 +80,8 @@ class Backup:
         
         subprocess_return_verbose = self.call_rsync_full('aAXnvv', jewel_path_list_string)
 
-        for result in insert_results:
-            self.set_hardlink(result[0], result[1])
+        for hardlink_info in insert_results:
+            self.set_hardlink(hardlink_info)
 
         self.print_feedback(verbose_level, self.fullbackup_name, 'full', subprocess_return_verbose, start_time)
 
@@ -143,7 +144,8 @@ class Backup:
                 db_answer = datenbank.add_to_database(jewel, file, self.device_name)
 
                 if db_answer is not True:
-                    result.append((db_answer, blob.store_destination, working_dir + "/" + line))
+                    #result.append((db_answer, blob.store_destination, working_dir + "/" + line))
+                    result.append(HardlinkInfo(db_answer.id, db_answer.store_destination, blob.store_destination, self.current_date_time))
             index = index +1
         return result
 
@@ -162,11 +164,12 @@ class Backup:
         return ' '.join(return_list)
 
 
-    def set_hardlink(self, source_path, destination_path):
-        d_path = os.path.dirname(os.path.abspath(destination_path))
+    def set_hardlink(self, hl_info:HardlinkInfo):
+        d_path = os.path.dirname(os.path.abspath(hl_info.destination_path))
         subprocess.run(f"ls {d_path}", shell=True)
-        os.remove(destination_path)
-        subprocess.run(f'ln {source_path} {destination_path}', shell=True)
+        os.remove(hl_info.destination_path)
+        subprocess.run(f'ln {hl_info.source_path} {hl_info.destination_path}', shell=True)
+        self.db.protocol_hardlink(hl_info)
 
 
     def print_feedback(self, verbose_level: int, backup_name: str, backup_type: str, subprocess_return_verbose: str, start_time: time):
@@ -266,3 +269,5 @@ class Backup:
         subprocess_output.stdout.close()
         output = output.decode('utf-8')
         return output
+
+

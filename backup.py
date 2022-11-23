@@ -67,8 +67,8 @@ class Backup:
 
         self.call_rsync_differential('aAX', backup_sources_for_r_sync, differential_backup_name)
 
-        #for result in insert_results:
-        #    self.set_hardlink(result[0], result[1])
+        for result in insert_results:
+            self.set_hardlink(result[0], result[1])
 
         self.print_feedback(verbose_level, differential_backup_name, 'differential', subprocess_return_verbose, start_time)
 
@@ -78,11 +78,15 @@ class Backup:
         jewel_path_list_string = self.list_to_string(jewel_sources)
         output = self.call_rsync_full('aAX', jewel_path_list_string)
         output_array = output.splitlines()
-        self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
+        insert_results = self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
                                                     f"{self.destination}/{self.fullbackup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
         
         subprocess_return_verbose = self.call_rsync_full('aAXnvv', jewel_path_list_string)
+
+        for result in insert_results:
+            self.set_hardlink(result[0], result[1])
+
         self.print_feedback(verbose_level, self.fullbackup_name, 'full', subprocess_return_verbose, start_time)
 
 

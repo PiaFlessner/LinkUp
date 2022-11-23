@@ -7,6 +7,7 @@ import uuid
 import base64
 import datetime
 import platform
+from hardlink_info import HardlinkInfo
 from resFile import resFile
 from resJewel import resJewel
 
@@ -130,6 +131,14 @@ class Datenbank:
                     Connected_File_to_Jewel TEXT
                 );""")
 
+                cur.execute("""CREATE TABLE "Hardlinks" (
+	                            "ID_Blob"	INTEGER NOT NULL,
+	                            "destination_path"	TEXT NOT NULL,
+	                            "insert_date"	NUMERIC NOT NULL,
+	                            PRIMARY KEY("ID_Blob","destination_path"),
+	                            FOREIGN KEY("ID_Blob") REFERENCES "Blob"("ID")
+                            );""")
+
                 # Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination
 
                 conn.commit()
@@ -179,7 +188,7 @@ class Datenbank:
                             self.addJewelFileAssignment(jewel.id, old_file.id)
                             self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
                             conn.close()
-                            return blob.store_destination
+                            return blob
             # uri
             else:
                 ##has old_file a blob with same hash?
@@ -189,7 +198,7 @@ class Datenbank:
                         self.addJewelFileAssignment(jewel.id, old_file.id)
                         self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
                         conn.close()
-                        return blob.store_destination
+                        return blob
                 #if no hash exists then add new blob
                 self.insert_new_blob_to_existing_file(file,cur,conn,old_file)
                 self.addJewelFileAssignment(jewel.id,old_file.id)
@@ -602,3 +611,17 @@ class Datenbank:
                 return jewel
             else:
                 return None
+
+    def protocol_hardlink(self, hardlink_info:HardlinkInfo) -> None:
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()   
+            command = """INSERT INTO "main"."Hardlinks"
+                        ("ID_Blob", "destination_path", "insert_date")
+                        VALUES (?, ?, ?);"""
+            params = (hardlink_info.id, self._encode_base64(hardlink_info.destination_path), hardlink_info.insert_date)
+            cur.execute(command,params)
+            conn.commit()
+            conn.close()
+
+        

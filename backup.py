@@ -4,6 +4,7 @@ import subprocess
 import platform
 from datetime import datetime as date
 import sys
+from hardlink_info import HardlinkInfo
 import info_handler
 from datenbank import Blob, Datenbank, File, Jewel
 from pathlib import Path
@@ -48,9 +49,7 @@ class Backup:
 
     def execute_backup(self, jewel_sources, verbose_level, start_time):
         
-        leave_out_sources = []
         differential_backup_name = f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
-        old_jewels = self.db.get_fullbackup_paths(jewel_sources)
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
         subprocess_return_verbose = self.call_rsync_differential('aAXnvv', backup_sources_for_r_sync, differential_backup_name)
@@ -62,13 +61,10 @@ class Backup:
                                                                      f"{self.destination}/{differential_backup_name}",
                                                                      self.destination + "/" + self.fullbackup_name)
 
-        for result in insert_results:
-            leave_out_sources.append(result[2])
-
         self.call_rsync_differential('aAX', backup_sources_for_r_sync, differential_backup_name)
 
-        #for result in insert_results:
-        #    self.set_hardlink(result[0], result[1])
+        for hardlink_info in insert_results:
+            self.set_hardlink(hardlink_info)
 
         self.print_feedback(verbose_level, differential_backup_name, 'differential', subprocess_return_verbose, start_time)
 
@@ -78,11 +74,15 @@ class Backup:
         jewel_path_list_string = self.list_to_string(jewel_sources)
         output = self.call_rsync_full('aAX', jewel_path_list_string)
         output_array = output.splitlines()
-        self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
+        insert_results = self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
                                                     f"{self.destination}/{self.fullbackup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
         
         subprocess_return_verbose = self.call_rsync_full('aAXnvv', jewel_path_list_string)
+
+        for hardlink_info in insert_results:
+            self.set_hardlink(hardlink_info)
+
         self.print_feedback(verbose_level, self.fullbackup_name, 'full', subprocess_return_verbose, start_time)
 
 
@@ -104,13 +104,20 @@ class Backup:
         if output_array == []:
             print("result ist leer")
             exit
+        index = 0
         for line in output_array:
-            if line.endswith('/'):
-                self.current_source_path = line
+            # needed, since sometimes the first line ist not the jewel path,
+            #happens only, if subfolder content changed
+            if index == 0 or line.endswith('/'):
+                # better solution? the for is needed in both cases, but each case need another prep work
+                if index == 0:
+                    self.current_source_path = os.path.dirname(line)+ "/"
+                if line.endswith('/'):
+                    self.current_source_path = line
 
                 # check wether path is now the jewel
                 for jewel_path in jewel_sources:
-
+                 
                     # stripping and splitting is needed, since comparison does not work otherwise
                     if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
                         jewel = Jewel(0, None, date.today(), jewel_path, self.device_name,
@@ -137,7 +144,9 @@ class Backup:
                 db_answer = datenbank.add_to_database(jewel, file, self.device_name)
 
                 if db_answer is not True:
-                    result.append((db_answer, blob.store_destination, working_dir + "/" + line))
+                    #result.append((db_answer, blob.store_destination, working_dir + "/" + line))
+                    result.append(HardlinkInfo(db_answer.id, db_answer.store_destination, blob.store_destination, self.current_date_time))
+            index = index +1
         return result
 
 
@@ -155,11 +164,12 @@ class Backup:
         return ' '.join(return_list)
 
 
-    def set_hardlink(self, source_path, destination_path):
-        d_path = os.path.dirname(os.path.abspath(destination_path))
+    def set_hardlink(self, hl_info:HardlinkInfo):
+        d_path = os.path.dirname(os.path.abspath(hl_info.destination_path))
         subprocess.run(f"ls {d_path}", shell=True)
-        os.remove(destination_path)
-        subprocess.run(f'ln {source_path} {destination_path}', shell=True)
+        os.remove(hl_info.destination_path)
+        subprocess.run(f'ln {hl_info.source_path} {hl_info.destination_path}', shell=True)
+        self.db.protocol_hardlink(hl_info)
 
 
     def print_feedback(self, verbose_level: int, backup_name: str, backup_type: str, subprocess_return_verbose: str, start_time: time):
@@ -259,3 +269,5 @@ class Backup:
         subprocess_output.stdout.close()
         output = output.decode('utf-8')
         return output
+
+

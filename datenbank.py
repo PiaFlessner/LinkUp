@@ -643,7 +643,7 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
             cur.execute(command, params)
             row_files = cur.fetchone() 
 
-            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlink.insert_date FROM File
+            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date FROM File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
 						INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File

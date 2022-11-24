@@ -3,13 +3,14 @@ from datetime import datetime
 
 class HardlinkInfo:
 
-    def __init__(self, id:int, link_path:str, destination_path:str, insert_date:datetime.date, origin_name:str, source_path:str ):
+    def __init__(self, id:int, link_path:str, destination_path:str, insert_date:datetime.date, origin_name:str, source_path:str, jewel_id:int ):
         self._id = id
         self._source_path = source_path
         self._destination_path = destination_path
         self._insert_date = insert_date
         self._origin_name = origin_name
         self._link_path = link_path
+        self._jewel_id = jewel_id
 
     @property
     def id(self):
@@ -58,3 +59,11 @@ class HardlinkInfo:
     @link_path.setter
     def link_path(self, value):
         self._link_path = value
+
+    @property
+    def jewel_id(self):
+        return self._jewel_id
+
+    @jewel_id.setter
+    def jewel_id(self, value):
+        self._jewel_id = value

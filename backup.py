@@ -145,7 +145,7 @@ class Backup:
 
                 if db_answer is not True:
                     #result.append((db_answer, blob.store_destination, working_dir + "/" + line))
-                    result.append(HardlinkInfo(db_answer.id, db_answer.store_destination, blob.store_destination, self.current_date_time,blob.origin_name, working_dir + "/" + line))
+                    result.append(HardlinkInfo(db_answer.id, db_answer.store_destination, blob.store_destination, self.current_date_time,blob.origin_name, working_dir + "/" + line, jewel.id))
             index = index +1
         return result
 
@@ -169,7 +169,7 @@ class Backup:
         subprocess.run(f"ls {d_path}", shell=True)
         os.remove(hl_info.destination_path)
         subprocess.run(f'ln {hl_info.link_path} {hl_info.destination_path}', shell=True)
-        self.db.protocol_hardlink(hl_info)
+        self.db.protocol_hardlink(hl_info, self.device_name)
 
 
     def print_feedback(self, verbose_level: int, backup_name: str, backup_type: str, subprocess_return_verbose: str, start_time: time):

@@ -162,6 +162,7 @@ class Datenbank:
         # uri = uuid.uuid3(uuid.NAMESPACE_OID, device_name + file_path + file_name)
         uri = device_name + file_path
         file.id = uri
+        return uri
 
     def add_to_database(self, jewel, file, device_name):
 
@@ -567,22 +568,21 @@ class Datenbank:
 
         if conn != None:
             cur = conn.cursor()
-            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination FROM File
+            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination FROM File
+                        INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
+                        INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
+						INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File
+						INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
+                        WHERE Jewel.ID = ?
+                        AND Hardlinks.insert_date <= ?
+UNION
+SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination FROM File
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
                         WHERE Jewel.ID = ?
                         AND Blob.CreationDate <= ?
-                        GROUP BY Blob.ID_File
-                        UNION		
-						SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, bl.ID_File, Max(bl.Number) as Number,  bl.Source_Path, bl.Origin_Name, Hardlinks.destination_path as Store_Destination FROM File
-                        INNER JOIN Blob bl on File.ID = bl.ID_File
-                        INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
-                        INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
-						INNER JOIN Hardlinks on bl.ID = Hardlinks.ID_Blob
-                        WHERE Jewel.ID = ?
-                        AND Hardlinks.insert_date <= ?
-                        GROUP BY bl.ID_File;"""
+                        GROUP BY Blob.ID_File;"""
             params = (jewel_id, until_date, jewel_id, until_date)
             cur.execute(command, params)
             tmp = cur.fetchall()
@@ -626,22 +626,22 @@ class Datenbank:
             else:
                 return None
 
-    def protocol_hardlink(self, hardlink_info:HardlinkInfo) -> None:
+    def protocol_hardlink(self, hardlink_info:HardlinkInfo, device_name:str) -> None:
         conn = self.create_connection('datenbank.db')
         if conn != None:
+            uri = self.set_uri(File(None,None,None), device_name, hardlink_info.source_path,hardlink_info.origin_name)
             cur = conn.cursor()   
             command = "INSERT INTO FILE (ID, Birth) VALUES (?, ?);"
-            params = (self._encode_base64("testestest"), hardlink_info.insert_date)
+            params = (self._encode_base64(uri), hardlink_info.insert_date)
             cur.execute(command, params)
-            id_file = cur.lastrowid
             conn.commit()
 
-            self.addJewelFileAssignment(1, "testestest")
+            self.addJewelFileAssignment(hardlink_info.jewel_id, uri)
 
             command = """INSERT INTO "main"."Hardlinks"
                         ("ID_File", "ID_Blob", "destination_path", "source_path", "insert_date", "origin_name")
                         VALUES (?, ?, ?, ?, ?, ?);"""
-            params = (self._encode_base64("testestest"),hardlink_info.id, self._encode_base64(hardlink_info.destination_path), self._encode_base64(hardlink_info.source_path), hardlink_info.insert_date, hardlink_info.origin_name)
+            params = (self._encode_base64(uri),hardlink_info.id, self._encode_base64(hardlink_info.destination_path), self._encode_base64(hardlink_info.source_path), hardlink_info.insert_date, self._encode_base64(hardlink_info.origin_name))
             cur.execute(command,params)
             conn.commit()
             conn.close()

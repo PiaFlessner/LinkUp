@@ -655,7 +655,7 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
             conn.close()
 
             if row_files:
-                files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row[7]), row[4]))
+                files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row_files[7]), row_files[4]))
                 jewel = resJewel(None, row_files[0], files, self._decode_base64(row_files[2]))        
 
             if row_hardlink:
@@ -663,7 +663,7 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
                 jewel_hardlink = resJewel(None, row_hardlink[0], files_hardlink, self._decode_base64(row_hardlink[2]))
 
             ##if both have solutions, take the one which is newer, since it is closer to the date, the user wants
-            if row_hardlink and row_files and row_hardlink[8]> row_files[8]:
+            if row_hardlink and row_files and row_hardlink[8] > row_files[8]:
                 return jewel_hardlink
             #else if the user gave an id wich is non existent
             elif not row_files and not row_hardlink:

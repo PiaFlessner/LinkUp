@@ -219,18 +219,25 @@ class Datenbank:
         params = (self._encode_base64(file.id),)
         cur.execute(command, params)
         data = cur.fetchall()
+        choosed_data = data
 
-        ##data from an actual file not there, maybe its an hardlink
-        if len(data) == 0:
-            command = """select File.ID, File.Birth, Blob.ID, BLob.Number, Blob.Hash, Blob.name, Blob.FileSize, Hardlinks.insert_date, Blob.Modify, Blob.ID_File, Hardlinks.origin_name, Hardlinks.source_path, Hardlinks.destination_path from File INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
+        ## maybe there is also an hardlink existing
+        command = """select File.ID, File.Birth, Blob.ID, BLob.Number, Blob.Hash, Blob.name, Blob.FileSize, Hardlinks.insert_date, Blob.Modify, Blob.ID_File, Hardlinks.origin_name, Hardlinks.source_path, Hardlinks.destination_path from File INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
                          WHERE File.ID = ?"""
-            cur.execute(command,params)
-            data = cur.fetchall()
-            is_hardlink = True
+        cur.execute(command,params)
+        data_hardlink = cur.fetchall()
+        #is_hardlink = True
 
-            if(len(data))==0:
-                return None
-            
+    ## just note, if there was an hardlink, if only hardlink data exists, take hardlink data, but also just choose the "normal" data, because 
+    ## the matching hash could be also in there
+        if len(data_hardlink)!=0:
+            is_hardlink = True
+            if len(data) != 0:
+                choosed_data = data
+            else:
+                choosed_data = data_hardlink
+        elif len(data) == 0:
+            return None
 
         ##create file from data
         blobs = []
@@ -238,7 +245,13 @@ class Datenbank:
             blobs.append(Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
                               self._decode_base64(row[12])))
-        file = File(self._decode_base64(data[0][0]), blobs, data[0][1], is_hardlink)
+        for row in data_hardlink:
+            blobs.append(Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
+                              self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
+                              self._decode_base64(row[12])))
+
+             
+        file = File(self._decode_base64(choosed_data[0][0]), blobs, choosed_data[0][1], is_hardlink)
         return file
 
     def insert_new_blob_to_existing_file(self, new_file, cur, conn, old_file):
@@ -615,10 +628,11 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
         conn = self.create_connection('datenbank.db')
         # temporär, da objekt struktur noch nicht existiert
         files = []
+        files_hardlink = []
 
         if conn != None:
             cur = conn.cursor()
-            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination FROM File
+            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination, Blob.creation_date FROM File
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
@@ -627,32 +641,36 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
                         GROUP BY Blob.ID_File;"""
             params = (self._encode_base64(file_id), until_date)
             cur.execute(command, params)
-            row = cur.fetchone() 
-        
-            #first search in the "normal files" for the id
-            if row:
-                files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
-                jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
-                conn.close()
-                return jewel
-            #if then there is nothing, then look into the hardlinks
-            else:
-                command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination FROM File
+            row_files = cur.fetchone() 
+
+            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlink.insert_date FROM File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
 						INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File
 						INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
                         WHERE File.ID = ?
                         AND Hardlinks.insert_date <= ?;"""
-                cur.execute(command,params)
-                row = cur.fetchone()
-                conn.close()
-                if row:
-                    files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
-                    jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
-                    return jewel
-                #else the user gave an id wich is non existent
-                else: return None
+            cur.execute(command,params)
+            row_hardlink = cur.fetchone()
+            conn.close()
+
+            if row_files:
+                files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row[7]), row[4]))
+                jewel = resJewel(None, row_files[0], files, self._decode_base64(row_files[2]))        
+
+            if row_hardlink:
+                files_hardlink.append(resFile(self._decode_base64(row_hardlink[6]),self._decode_base64(row_hardlink[5]), self._decode_base64(row_hardlink[7]), row_hardlink[4]))
+                jewel_hardlink = resJewel(None, row_hardlink[0], files_hardlink, self._decode_base64(row_hardlink[2]))
+
+            ##if both have solutions, take the one which is newer, since it is closer to the date, the user wants
+            if row_hardlink and row_files and row_hardlink[8]> row_files[8]:
+                return jewel_hardlink
+            #else if the user gave an id wich is non existent
+            elif not row_files and not row_hardlink:
+                return None
+            #otherwise the normal file is the desired file
+            else: return jewel
+
 
     def protocol_hardlink(self, hardlink_info:HardlinkInfo, device_name:str) -> None:
         conn = self.create_connection('datenbank.db')

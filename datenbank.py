@@ -137,7 +137,7 @@ class Datenbank:
 	                            "ID_Blob"	INTEGER NOT NULL,
 	                            "destination_path"	TEXT NOT NULL,
                                 "source_path" TEXT NOT NULL,
-	                            "insert_date"	NUMERIC NOT NULL,
+	                            "insert_date"	TIMESTAMP NOT NULL,
                                 "origin_name" TEXT NOT NULL,
 	                            PRIMARY KEY("ID_Blob", "ID_File"),
 	                            FOREIGN KEY("ID_Blob") REFERENCES "Blob"("ID")
@@ -649,7 +649,8 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
 						INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File
 						INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
                         WHERE File.ID = ?
-                        AND Hardlinks.insert_date <= ?;"""
+                        AND Hardlinks.insert_date <= ?
+                        ORDER BY Hardlinks.insert_date DESC;"""
             cur.execute(command,params)
             row_hardlink = cur.fetchone()
             conn.close()
@@ -677,8 +678,11 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
         if conn != None:
             uri = self.set_uri(File(None,None,None), device_name, hardlink_info.source_path,hardlink_info.origin_name)
             cur = conn.cursor()   
-            command = "INSERT INTO FILE (ID, Birth) VALUES (?, ?);"
-            params = (self._encode_base64(uri), hardlink_info.insert_date)
+
+            command = """INSERT INTO FILE(ID, Birth) SELECT ?, ?
+            WHERE NOT EXISTS(SELECT 1 FROM FILE WHERE ID = ?);"""
+
+            params = (self._encode_base64(uri), hardlink_info.insert_date, self._encode_base64(uri))
             cur.execute(command, params)
             conn.commit()
 
@@ -686,8 +690,9 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
 
             command = """INSERT INTO "main"."Hardlinks"
                         ("ID_File", "ID_Blob", "destination_path", "source_path", "insert_date", "origin_name")
-                        VALUES (?, ?, ?, ?, ?, ?);"""
-            params = (self._encode_base64(uri),hardlink_info.id, self._encode_base64(hardlink_info.destination_path), self._encode_base64(hardlink_info.source_path), hardlink_info.insert_date, self._encode_base64(hardlink_info.origin_name))
+                        SELECT ?, ?, ?, ?, ?, ?
+                        WHERE NOT EXISTS(SELECT 1 FROM Hardlinks WHERE ID_File = ? AND ID_Blob = ?);"""
+            params = (self._encode_base64(uri),hardlink_info.id, self._encode_base64(hardlink_info.destination_path), self._encode_base64(hardlink_info.source_path), hardlink_info.insert_date, self._encode_base64(hardlink_info.origin_name), self._encode_base64(uri),hardlink_info.id)
             cur.execute(command,params)
             conn.commit()
             conn.close()

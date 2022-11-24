@@ -575,6 +575,16 @@ class Datenbank:
             tmp = cur.fetchall()
             conn.close()
 
+            ### wip for hardlinks
+            """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, bl.ID_File, Max(bl.Number) as Number,  bl.Source_Path, bl.Origin_Name, Hardlinks.destination_path FROM File
+                        INNER JOIN Blob bl on File.ID = bl.ID_File
+                        INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
+                        INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
+						INNER JOIN Hardlinks on bl.ID = Hardlinks.ID_Blob
+                        WHERE Jewel.ID = 1
+                        AND Hardlinks.insert_date <= "2022-11-25"
+                        GROUP BY bl.ID_File;"""
+
             if tmp:
                 for row in tmp:
                     files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))

@@ -132,11 +132,15 @@ class Datenbank:
                 );""")
 
                 cur.execute("""CREATE TABLE "Hardlinks" (
+                                "ID_File" TEXT NOT NULL,
 	                            "ID_Blob"	INTEGER NOT NULL,
 	                            "destination_path"	TEXT NOT NULL,
+                                "source_path" TEXT NOT NULL,
 	                            "insert_date"	NUMERIC NOT NULL,
-	                            PRIMARY KEY("ID_Blob","destination_path"),
+                                "origin_name" TEXT NOT NULL,
+	                            PRIMARY KEY("ID_Blob", "ID_File"),
 	                            FOREIGN KEY("ID_Blob") REFERENCES "Blob"("ID")
+
                             );""")
 
                 # Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination
@@ -185,7 +189,7 @@ class Datenbank:
                     for blob in old_file.blobs:
                         ## asa blob is same, we need the path to this file
                         if blob.hash == file.blobs[0].hash:
-                            self.addJewelFileAssignment(jewel.id, old_file.id)
+                            #self.addJewelFileAssignment(jewel.id, old_file.id)
                             self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
                             conn.close()
                             return blob
@@ -195,7 +199,7 @@ class Datenbank:
                 for blob in old_file.blobs:
                     ## asa blob is same,  we need the path to this file
                     if blob.hash == file.blobs[0].hash:
-                        self.addJewelFileAssignment(jewel.id, old_file.id)
+                        #self.addJewelFileAssignment(jewel.id, old_file.id)
                         self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
                         conn.close()
                         return blob
@@ -569,21 +573,21 @@ class Datenbank:
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
                         WHERE Jewel.ID = ?
                         AND Blob.CreationDate <= ?
-                        GROUP BY Blob.ID_File;"""
-            params = (jewel_id, until_date)
-            cur.execute(command, params)
-            tmp = cur.fetchall()
-            conn.close()
-
-            ### wip for hardlinks
-            """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, bl.ID_File, Max(bl.Number) as Number,  bl.Source_Path, bl.Origin_Name, Hardlinks.destination_path FROM File
+                        GROUP BY Blob.ID_File
+                        UNION		
+						SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, bl.ID_File, Max(bl.Number) as Number,  bl.Source_Path, bl.Origin_Name, Hardlinks.destination_path as Store_Destination FROM File
                         INNER JOIN Blob bl on File.ID = bl.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
 						INNER JOIN Hardlinks on bl.ID = Hardlinks.ID_Blob
-                        WHERE Jewel.ID = 1
-                        AND Hardlinks.insert_date <= "2022-11-25"
+                        WHERE Jewel.ID = ?
+                        AND Hardlinks.insert_date <= ?
                         GROUP BY bl.ID_File;"""
+            params = (jewel_id, until_date, jewel_id, until_date)
+            cur.execute(command, params)
+            tmp = cur.fetchall()
+            conn.close()
+
 
             if tmp:
                 for row in tmp:
@@ -626,10 +630,18 @@ class Datenbank:
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()   
+            command = "INSERT INTO FILE (ID, Birth) VALUES (?, ?);"
+            params = (self._encode_base64("testestest"), hardlink_info.insert_date)
+            cur.execute(command, params)
+            id_file = cur.lastrowid
+            conn.commit()
+
+            self.addJewelFileAssignment(1, "testestest")
+
             command = """INSERT INTO "main"."Hardlinks"
-                        ("ID_Blob", "destination_path", "insert_date")
-                        VALUES (?, ?, ?);"""
-            params = (hardlink_info.id, self._encode_base64(hardlink_info.destination_path), hardlink_info.insert_date)
+                        ("ID_File", "ID_Blob", "destination_path", "source_path", "insert_date", "origin_name")
+                        VALUES (?, ?, ?, ?, ?, ?);"""
+            params = (self._encode_base64("testestest"),hardlink_info.id, self._encode_base64(hardlink_info.destination_path), self._encode_base64(hardlink_info.source_path), hardlink_info.insert_date, hardlink_info.origin_name)
             cur.execute(command,params)
             conn.commit()
             conn.close()

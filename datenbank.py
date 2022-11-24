@@ -616,15 +616,32 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
                         GROUP BY Blob.ID_File;"""
             params = (self._encode_base64(file_id), until_date)
             cur.execute(command, params)
-            row = cur.fetchone()
-            conn.close()   
+            row = cur.fetchone() 
         
+            #first search in the "normal files" for the id
             if row:
                 files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
                 jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
+                conn.close()
                 return jewel
+            #if then there is nothing, then look into the hardlinks
             else:
-                return None
+                command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination FROM File
+                        INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
+                        INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
+						INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File
+						INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
+                        WHERE File.ID = ?
+                        AND Hardlinks.insert_date <= ?;"""
+                cur.execute(command,params)
+                row = cur.fetchone()
+                conn.close()
+                if row:
+                    files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
+                    jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
+                    return jewel
+                #else the user gave an id wich is non existent
+                else: return None
 
     def protocol_hardlink(self, hardlink_info:HardlinkInfo, device_name:str) -> None:
         conn = self.create_connection('datenbank.db')

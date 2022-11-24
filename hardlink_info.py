@@ -3,7 +3,7 @@ from datetime import datetime
 
 class HardlinkInfo:
 
-    def __init__(self, id:int, link_path:str, destination_path:str, insert_date:datetime.date, origin_name:str, source_path:str, jewel_id:int ):
+    def __init__(self, id:int, link_path:str, destination_path:str, insert_date:datetime.date, origin_name:str, source_path:str, jewel_id:int, old_hardlink_existing:bool ):
         self._id = id
         self._source_path = source_path
         self._destination_path = destination_path
@@ -11,6 +11,7 @@ class HardlinkInfo:
         self._origin_name = origin_name
         self._link_path = link_path
         self._jewel_id = jewel_id
+        self._old_hardlink_existing = old_hardlink_existing
 
     @property
     def id(self):
@@ -67,3 +68,11 @@ class HardlinkInfo:
     @jewel_id.setter
     def jewel_id(self, value):
         self._jewel_id = value
+
+    @property
+    def old_hardlink_existing(self):
+        return self._old_hardlink_existing
+
+    @old_hardlink_existing.setter
+    def old_hardlink_existing(self,value):
+        self._old_hardlink_existing = value

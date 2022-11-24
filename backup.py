@@ -145,12 +145,12 @@ class Backup:
 
                 if db_answer is not True:
                     #result.append((db_answer, blob.store_destination, working_dir + "/" + line))
-                    result.append(HardlinkInfo(db_answer.id, db_answer.store_destination, blob.store_destination, self.current_date_time,blob.origin_name, working_dir + "/" + line, jewel.id))
+                    result.append(HardlinkInfo(db_answer[0].id, db_answer[0].store_destination, blob.store_destination, self.current_date_time,blob.origin_name, working_dir + "/" + line, jewel.id, db_answer[1]))
             index = index +1
         return result
 
 
-    # Description:  Generate a String of excluded files which are handed over to the rsync command.
+    # Description:  Generate a String of excluded files which are handed over ,to the rsync command.
     # Input:        None
     # Output:       String containing the rsync option "--exclude" and the name of the excluded 
     #               files. Example: "--exclude "file1" --exclude "file2" ... --exclude "fileN""
@@ -164,12 +164,13 @@ class Backup:
         return ' '.join(return_list)
 
 
-    def set_hardlink(self, hl_info:HardlinkInfo):
+    def set_hardlink(self, hl_info:HardlinkInfo ):
         d_path = os.path.dirname(os.path.abspath(hl_info.destination_path))
         subprocess.run(f"ls {d_path}", shell=True)
         os.remove(hl_info.destination_path)
         subprocess.run(f'ln {hl_info.link_path} {hl_info.destination_path}', shell=True)
-        self.db.protocol_hardlink(hl_info, self.device_name)
+        if not hl_info.old_hardlink_existing:
+            self.db.protocol_hardlink(hl_info, self.device_name)
 
 
     def print_feedback(self, verbose_level: int, backup_name: str, backup_type: str, subprocess_return_verbose: str, start_time: time):

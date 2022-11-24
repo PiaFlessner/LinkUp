@@ -25,10 +25,11 @@ class Jewel:
 
 class File:
 
-    def __init__(self, id, blobs, birth):
+    def __init__(self, id, blobs, birth, is_hardlink = False):
         self.id = id
         self.blobs = blobs
         self.birth = birth
+        self.is_hardlink = is_hardlink
 
     def get_last_blob(self):
         return self.blobs[len(self.blobs) - 1]
@@ -193,7 +194,7 @@ class Datenbank:
                             #self.addJewelFileAssignment(jewel.id, old_file.id)
                             self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
                             conn.close()
-                            return blob
+                            return [blob, old_file.is_hardlink]
             # uri
             else:
                 ##has old_file a blob with same hash?
@@ -203,7 +204,7 @@ class Datenbank:
                         #self.addJewelFileAssignment(jewel.id, old_file.id)
                         self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
                         conn.close()
-                        return blob
+                        return [blob, old_file.is_hardlink]
                 #if no hash exists then add new blob
                 self.insert_new_blob_to_existing_file(file,cur,conn,old_file)
                 self.addJewelFileAssignment(jewel.id,old_file.id)
@@ -213,13 +214,23 @@ class Datenbank:
             raise ValueError('No Connection to Database')
 
     def check_if_uri_exists(self, file, cur):
+        is_hardlink = False
         command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID = ?"""
         params = (self._encode_base64(file.id),)
         cur.execute(command, params)
         data = cur.fetchall()
 
+        ##data from an actual file not there, maybe its an hardlink
         if len(data) == 0:
-            return None
+            command = """select File.ID, File.Birth, Blob.ID, BLob.Number, Blob.Hash, Blob.name, Blob.FileSize, Hardlinks.insert_date, Blob.Modify, Blob.ID_File, Hardlinks.origin_name, Hardlinks.source_path, Hardlinks.destination_path from File INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
+                         WHERE File.ID = ?"""
+            cur.execute(command,params)
+            data = cur.fetchall()
+            is_hardlink = True
+
+            if(len(data))==0:
+                return None
+            
 
         ##create file from data
         blobs = []
@@ -227,7 +238,7 @@ class Datenbank:
             blobs.append(Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
                               self._decode_base64(row[12])))
-        file = File(self._decode_base64(data[0][0]), blobs, data[0][1])
+        file = File(self._decode_base64(data[0][0]), blobs, data[0][1], is_hardlink)
         return file
 
     def insert_new_blob_to_existing_file(self, new_file, cur, conn, old_file):

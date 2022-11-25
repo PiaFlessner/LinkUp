@@ -421,7 +421,7 @@ class Datenbank:
                 file = File(self._decode_base64(b_tuple[0]), blobs, b_tuple[1])
         return file
 
-    def get_all_Files(self)-> list(File):
+    def get_all_Files(self)-> list[File]:
         files = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -536,7 +536,7 @@ class Datenbank:
         cur.execute(command, params)
         conn.commit()
 
-    def get_all_skipped_files (self)-> list[tuple(str)]:
+    def get_all_skipped_files (self)-> list[tuple[str]]:
         result = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -564,7 +564,7 @@ class Datenbank:
             if row: row = (row[0], row[1], self._decode_base64(row[2]), row[3], row[4], row[5], row[6], self._decode_base64(row[7]))
         return row
 
-    def get_fullbackup_paths(self, jewel_source_arr:str)->list(Jewel):
+    def get_fullbackup_paths(self, jewel_source_arr:str)->list[Jewel]:
         conn = self.create_connection('datenbank.db')
         params = []
         answer = []

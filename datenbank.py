@@ -34,12 +34,7 @@ class File:
 
 ##need to be searched because auf hardlinks and real blobs
     def get_last_blob(self):
-        last_blob = self.blobs[0]
-        for blob in self.blobs:
-            if blob.number > last_blob.number:
-                last_blob = blob.number
-        obj = max(self.blobs, key=attrgetter('number'))
-        print(obj)
+        last_blob = max(self.blobs, key=attrgetter('number'))
         return last_blob
 
 

@@ -33,7 +33,7 @@ class File:
         self.is_hardlink = is_hardlink
 
 ##need to be searched because auf hardlinks and real blobs
-    def get_last_blob(self):
+    def get_last_blob(self) -> "Blob":
         last_blob = max(self.blobs, key=attrgetter('number'))
         return last_blob
 
@@ -66,7 +66,7 @@ class Blob:
 
 class Datenbank:
 
-    def create_connection(self, db_file):
+    def create_connection(self, db_file:str) -> sqlite3.Connection:
         conn = None
         try:
             conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
@@ -152,23 +152,23 @@ class Datenbank:
                 conn.commit()
                 conn.close()
 
-    def _encode_base64(self, name):
+    def _encode_base64(self, name:str) -> str:
         name = str(name)
         name_bytes = bytes(name, 'UTF-8')
         return base64.b64encode(name_bytes).decode("UTF-8")
 
-    def _decode_base64(self, name):
+    def _decode_base64(self, name:str)-> str:
         name = str(name)
         name_bytes = bytes(name, 'UTF-8')
         return base64.b64decode(name_bytes).decode("UTF-8")
 
-    def set_uri(self, file, device_name, file_path, file_name):
+    def set_uri(self, file:"File", device_name:str, file_path:str, file_name:str)-> str:
         # uri = uuid.uuid3(uuid.NAMESPACE_OID, device_name + file_path + file_name)
         uri = device_name + file_path
         file.id = uri
         return uri
 
-    def add_to_database(self, jewel, file, device_name):
+    def add_to_database(self, jewel:"Jewel", file:"File", device_name:str)-> Blob | bool:
 ##TODO when file was created with hardlink, and then changed, and then changed again: version number does not increase
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
         jewel.id = self.addJewel(jewel)
@@ -216,7 +216,7 @@ class Datenbank:
         else:
             raise ValueError('No Connection to Database')
 
-    def check_if_uri_exists(self, file, cur):
+    def check_if_uri_exists(self, file:"File", cur:sqlite3.Cursor)-> File | None:
         is_hardlink = False
         command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID = ? ORDER BY Blob.Number ASC;"""
         params = (self._encode_base64(file.id),)
@@ -270,7 +270,7 @@ class Datenbank:
         cur.execute(command, params)
         conn.commit()
 
-    def insert_first_Blob(self, file, cur, conn):
+    def insert_first_Blob(self, file:File, cur: sqlite3.Cursor, conn:sqlite3.Connection) -> None:
         command = """INSERT INTO Blob
                               (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
@@ -282,13 +282,13 @@ class Datenbank:
         cur.execute(command, params)
         conn.commit()
 
-    def insert_File(self, file, cur, con):
+    def insert_File(self, file: File, cur: sqlite3.Cursor, con:sqlite3.Connection)-> None:
         command = "INSERT INTO FILE (ID, Birth) VALUES (?, ?);"
         params = (self._encode_base64(file.id), file.birth,)
         cur.execute(command, params)
         con.commit()
 
-    def check_if_hash_exists(self, file, cur, device_name):
+    def check_if_hash_exists(self, file:File, cur:sqlite3.Cursor, device_name:str) -> File | None:
         command = """SELECT File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.Name,Blob.FileSize, Blob.CreationDate, Blob.Modify, Blob.ID_File, Blob.Origin_Name, Blob.Source_Path, Blob.Store_Destination  FROM File 
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
@@ -311,7 +311,7 @@ class Datenbank:
         file = File(self._decode_base64(data[0][0]), blobs, data[0][1])
         return file
 
-    def addJewel(self, jewel):
+    def addJewel(self, jewel:Jewel)-> int | None:
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
@@ -336,7 +336,7 @@ class Datenbank:
                 return cur.lastrowid
         conn.close()
 
-    def addJewelFileAssignment(self, id_jewel, id_file):
+    def addJewelFileAssignment(self, id_jewel:int, id_file:str)-> None | bool:
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
@@ -354,7 +354,7 @@ class Datenbank:
                 conn.close()
                 return False
 
-    def check_which_jewel_sources_exist(self, jewel_source_arr, device_name):
+    def check_which_jewel_sources_exist(self, jewel_source_arr: list[str], device_name:str)-> list[str]:
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
@@ -375,7 +375,7 @@ class Datenbank:
                 answer.append(self._decode_base64(row[0]))
             return answer
 
-    def get_Jewel_via_id(self, id):
+    def get_Jewel_via_id(self, id:int)-> Jewel:
         jewel = None
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -390,7 +390,7 @@ class Datenbank:
             conn.close()
         return jewel
 
-    def get_File_via_id(self, id):
+    def get_File_via_id(self, id:str)-> File:
         file = None
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -405,7 +405,7 @@ class Datenbank:
                 file = File(self._decode_base64(b_tuple[0]), blobs, b_tuple[1])
         return file
 
-    def get_File_via_hash(self, hash):
+    def get_File_via_hash(self, hash:str)-> File:
         file = None
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -421,7 +421,7 @@ class Datenbank:
                 file = File(self._decode_base64(b_tuple[0]), blobs, b_tuple[1])
         return file
 
-    def get_all_Files(self):
+    def get_all_Files(self)-> list(File):
         files = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -437,7 +437,7 @@ class Datenbank:
                     files.append(file)
         return files
 
-    def get_Files_via_jewel_id(self, jewel_id):
+    def get_Files_via_jewel_id(self, jewel_id:int)-> list[File]:
         files = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -457,7 +457,7 @@ class Datenbank:
                     files.append(file)
         return files
 
-    def get_all_Jewels(self):
+    def get_all_Jewels(self)->list[Jewel]:
         jewels = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -475,7 +475,7 @@ class Datenbank:
             conn.close()
         return jewels
 
-    def get_all_Blobs(self):
+    def get_all_Blobs(self)-> list[Blob]:
         blobs = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -494,7 +494,7 @@ class Datenbank:
             conn.close()
         return blobs
 
-    def get_Blobs_via_file_id(self, file_id):
+    def get_Blobs_via_file_id(self, file_id:str)-> list[Blob]:
         blobs = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -513,7 +513,7 @@ class Datenbank:
             conn.close()
         return blobs
 
-    def get_Blob_via_id(self, id):
+    def get_Blob_via_id(self, id:str)-> Blob:
         blob = None
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -529,14 +529,14 @@ class Datenbank:
 
         return blob
 
-    def protocol_skipped_file(self, jewel, file, reason, additional_information, connected_file, conn, cur):
+    def protocol_skipped_file(self, jewel:Jewel, file:File, reason:str, additional_information:str, connected_file:str, conn:sqlite3.Connection, cur:sqlite3.Cursor)-> None:
         command = "INSERT INTO Skipped_Files (ID_Jewel, UUID, Occurance_Date, Hash, Reason, Additional_Information, Connected_File_to_Jewel) VALUES (?, ?, ?, ?, ?, ?, ? );"
         params = (jewel.id, self._encode_base64(file.id), datetime.datetime.today(), file.blobs[0].hash, reason,
                   additional_information, self._encode_base64(connected_file))
         cur.execute(command, params)
         conn.commit()
 
-    def get_all_skipped_files (self):
+    def get_all_skipped_files (self)-> list[tuple(str)]:
         result = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -552,7 +552,7 @@ class Datenbank:
         return result
 
 
-    def get_skipped_file_via_id (self, id):
+    def get_skipped_file_via_id (self, id:str)-> list[str]:
         row = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -564,7 +564,7 @@ class Datenbank:
             if row: row = (row[0], row[1], self._decode_base64(row[2]), row[3], row[4], row[5], row[6], self._decode_base64(row[7]))
         return row
 
-    def get_fullbackup_paths(self, jewel_source_arr):
+    def get_fullbackup_paths(self, jewel_source_arr:str)->list(Jewel):
         conn = self.create_connection('datenbank.db')
         params = []
         answer = []
@@ -584,7 +584,7 @@ class Datenbank:
                                     self._decode_base64(row[4]), self._decode_base64(row[5])))
             return answer
 
-    def get_restore_Jewel(self, until_date: datetime.datetime, jewel_id: int):
+    def get_restore_Jewel(self, until_date: datetime.datetime, jewel_id: int)->resJewel|None:
         # the database shall look in every value of this day
         until_date = until_date.replace(hour=23, minute=59, second=59)
         assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
@@ -624,7 +624,7 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
             else:
                 return None
 
-    def get_restore_File(self, until_date: datetime, file_id: str):
+    def get_restore_File(self, until_date: datetime, file_id: str)-> resJewel:
         # the database shall look in every value of this day
         until_date = until_date.replace(hour=23, minute=59, second=59)
         assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)

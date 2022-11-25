@@ -1,5 +1,6 @@
 from ast import And
 import itertools
+from operator import attrgetter
 import sqlite3
 from os.path import exists as file_exists
 from unicodedata import numeric
@@ -31,8 +32,15 @@ class File:
         self.birth = birth
         self.is_hardlink = is_hardlink
 
+##need to be searched because auf hardlinks and real blobs
     def get_last_blob(self):
-        return self.blobs[len(self.blobs) - 1]
+        last_blob = self.blobs[0]
+        for blob in self.blobs:
+            if blob.number > last_blob.number:
+                last_blob = blob.number
+        obj = max(self.blobs, key=attrgetter('number'))
+        print(obj)
+        return last_blob
 
 
 class Blob:
@@ -166,7 +174,7 @@ class Datenbank:
         return uri
 
     def add_to_database(self, jewel, file, device_name):
-
+##TODO when file was created with hardlink, and then changed, and then changed again: version number does not increase
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
         jewel.id = self.addJewel(jewel)
 
@@ -215,15 +223,15 @@ class Datenbank:
 
     def check_if_uri_exists(self, file, cur):
         is_hardlink = False
-        command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID = ?"""
+        command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID = ? ORDER BY Blob.Number ASC;"""
         params = (self._encode_base64(file.id),)
         cur.execute(command, params)
         data = cur.fetchall()
         choosed_data = data
 
         ## maybe there is also an hardlink existing
-        command = """select File.ID, File.Birth, Blob.ID, BLob.Number, Blob.Hash, Blob.name, Blob.FileSize, Hardlinks.insert_date, Blob.Modify, Blob.ID_File, Hardlinks.origin_name, Hardlinks.source_path, Hardlinks.destination_path from File INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
-                         WHERE File.ID = ?"""
+        command = """select File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.name, Blob.FileSize, Hardlinks.insert_date, Blob.Modify, Blob.ID_File, Hardlinks.origin_name, Hardlinks.source_path, Hardlinks.destination_path from File INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
+                         WHERE File.ID = ? ORDER BY Blob.Number ASC;"""
         cur.execute(command,params)
         data_hardlink = cur.fetchall()
         #is_hardlink = True

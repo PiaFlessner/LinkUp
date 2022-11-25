@@ -12,7 +12,7 @@
   {
     "directories": ["folderToIgnore1", "folderToIgnore2"],
     "extensions": [".tmp", ".html"],
-    "files": ["fileToIgnore1.png", "fileToIgnore2.jpg", "fileToIgnore.txt"]
+    "files": ["fileToIgnore1.png", "fileToIgnore2.jpg", "fileToIgnore.txt", ".*"]
   },
 
   "destination":

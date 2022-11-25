@@ -669,6 +669,8 @@ SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Bl
             ##if both have solutions, take the one which is newer, since it is closer to the date, the user wants
             if row_hardlink and row_files and row_hardlink[8] > row_files[8]:
                 return jewel_hardlink
+            elif row_hardlink and not row_files:
+                return jewel_hardlink
             #else if the user gave an id wich is non existent
             elif not row_files and not row_hardlink:
                 return None

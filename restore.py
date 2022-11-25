@@ -9,6 +9,9 @@ import platform
 class Restore:
     config = info_handler.get_json_info()
 
+    def __init__(self, platform_node=platform.node()):
+        self.platform_node = platform_node
+
     def restore_directory_structure(self, jewel):
         # creates the path, where the restored file is going to be
         # relative_path --> String ; contains the relative path, for this file, which will be restored in restore_destination
@@ -20,7 +23,7 @@ class Restore:
         relative_file_path = ""
         file_origin_path = ""
         jewel_origin_path = jewel.jewel_source
-        restore_destination = self.config['restore_destination'][platform.node()]
+        restore_destination = self.config['restore_destination'][self.platform_node]
 
         # the String paths for jewel and file are converted to a list
         jewel_origin_path = os.path.normpath(jewel_origin_path)

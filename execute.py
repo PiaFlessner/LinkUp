@@ -2,6 +2,7 @@ import argparse
 from backup import Backup
 from show_tables import ShowTables
 from restore import Restore
+from datetime import datetime
 import info_handler as ih
 import platform
 
@@ -50,8 +51,19 @@ if __name__ == "__main__":
     # command: python3 execute.py backup -v
     group.add_argument('-v', '--verbose', action='store_true', help='Backup with detailed information')
 
+    helpSection = subparser.add_parser('help', help="info for all commands")
+    group = helpSection.add_mutually_exclusive_group()
+
     # makes args accessable
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except:
+        print("unknown command, use help for more information")
+        exit(0)
+
+    # user chooses the help section
+    if args.command == "help":
+        print("helping right now")
 
     # user chooses the show section
     if args.command == "show":
@@ -106,15 +118,23 @@ if __name__ == "__main__":
 
         # user chooses nothing
         else:
-            print("No action selected.")
+            print("No action selected, use show -h for more information.")
 
-    elif args.command == "restore":
+    if args.command == "restore":
         restore_object = Restore()
+        if args.datetime == "today":
+            args.datetime = str(datetime.today())
+        try:
+            datetime.fromisoformat(args.datetime)
+        except:
+            print("datetime format is incorrect, use year-month-day XXXX-XX-XX")
+            exit(0)
         if args.restoreFile:
             restore_object.restore_file(args.id, args.datetime)
-            pass
         elif args.restoreJewel:
             restore_object.restore_jewel(args.id, args.datetime)
+        else:
+            print("No restore action selected")
 
     if args.command == "backup":
         verbose_level = 0
@@ -123,3 +143,6 @@ if __name__ == "__main__":
         config = ih.get_json_info()
         backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
         backup.initialize_backup(verbose_level)
+
+    if args.command == None:
+        print("no command given, use help for more information")

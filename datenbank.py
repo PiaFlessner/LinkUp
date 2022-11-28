@@ -15,6 +15,25 @@ from resJewel import resJewel
 
 
 class Jewel:
+    """Class Jewel. Contains many Files
+    
+    A Jewel is a starting point of a backup. All Files which are in the Jewel will be also be backupped
+    
+    Attributes
+    ----------
+    
+    id:int
+        Database id of Jewel
+    comment:str
+        comment to the Jewel
+    monitoring_Startdate:datetime
+        date, when Jewel was inserted in database
+    jewel_Source:str
+        Path to the actual Jewel
+    device_name:str
+        name of the device, where jewel is found
+    fullbackup_source:str
+        path where the fullbackup of Jewel is located"""
 
     def __init__(self, id, comment, monitoring_Startdate, jewelSource, device_name, fullbackup_source):
         self.id = id
@@ -26,7 +45,22 @@ class Jewel:
 
 
 class File:
+    """Class File Contains many Blobs
 
+    A File contains mainly the blobs to a File. One File can contain many Blobs.
+    The is_hardlink property is set to True, if the File was a Hardlink in the past or is a hardlink in the present.
+    
+    Attributes
+    ----------
+    
+    id:str
+        Id of the File
+    blobs:list(Blobs)
+        List of Blobs
+    birth:datetime
+        date when File was created
+    is_hardlink:boolean
+        represents if the file was or is a hardlink"""
     def __init__(self, id, blobs, birth, is_hardlink = False):
         self.id = id
         self.blobs = blobs
@@ -35,11 +69,40 @@ class File:
 
 ##need to be searched because auf hardlinks and real blobs
     def get_last_blob(self) -> "Blob":
+        """Returns the Blob with the highes Version Number"""
         last_blob = max(self.blobs, key=attrgetter('number'))
         return last_blob
 
 
 class Blob:
+    """Blob Class which represents the Blob (Versions) of a whole File
+    
+    A Blob contains the main infos to a File Version. Such as Hash, number origin_name etc.
+    
+    Attributes
+    ---------
+    
+    id:int
+        a database id of a Blob
+    number:int
+        Version number
+    hash:str
+        Hash
+    name:str
+        alternative name of file
+    fileSize:numeric
+        size of the file in bytes
+    creationDate:datetime
+        insert date of this specific blob
+    modify:datetime
+        date, when file was last modified
+    iD_File:str
+        Reference to a File ID
+    origin_name:str
+        the actual name of the file
+    source_path:str
+        Path to where the actual File is located"""
+    
 
     def __init__(self, id, number, hash, name, fileSize, creationDate, modify, iD_File, origin_name, source_path,
                  store_destination):

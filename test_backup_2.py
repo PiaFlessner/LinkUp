@@ -1,16 +1,16 @@
 import pathlib
-import time
+
 import unittest
 from backup import Backup
 import info_handler as ih
-import platform
+
 import os
 from filecmp import dircmp
 from filecmp import cmpfiles
 from datetime import datetime as date
 import datenbank
 import shutil
-
+import subprocess
 device_name = "testCases"
 
 def are_dir_trees_equal(dir1, dir2):
@@ -37,7 +37,7 @@ class TestBackup(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        
+      
         cls.daten = datenbank.Datenbank()
         cls.config = ih.get_json_info(device_name)
         cls.workingDirectory = str(pathlib.Path(__file__).parent.resolve())
@@ -46,90 +46,94 @@ class TestBackup(unittest.TestCase):
 
         for (index, element) in enumerate(jewel_list):
             jewel_list[index] = cls.workingDirectory + element
-
+        
+        with open("./test_Files_Backup/init.sh", 'rb') as file:
+             script = file.read()
+        subprocess.call(script, shell=True)  
+        
+        os.utime(f"{cls.workingDirectory}/test_Files_Backup/jewel")
+        os.utime(f"{cls.workingDirectory}/test_Files_Backup/jewel2")
         
         cls.backup = Backup(jewel_list, cls.workingDirectory + '/' + cls.config["destination"][device_name], True)
         cls.backup.initialize_backup(0)
-        #time.sleep(1)
+        
 
     
-        
     def test_a_fullbackup_jewel(self):
+        print("print: ", str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/backup_Location/fullBackup"f"{device_name}/jewel")
         try:
-            self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel"),
-                                                    os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel")))
+            self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel",
+                                                    str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/backup_Location/fullBackup"f"{device_name}/jewel"))
         except FileNotFoundError:
             print("Test A:")
             print("File or Directory not Found")
-        else:
-            print("Test A:")
-            print("everything is fine in Test A")  
-            
+            self.assertTrue(False)
             
     def test_b_fullbackup_jewel2(self):
         try:
-            self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2"),
-                                                os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/fullBackup"f"{device_name}/jewel2")))
+            self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel2",
+                                                str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/backup_Location/fullBackup"f"{device_name}/jewel2"))
         except FileNotFoundError:
             print("Test B:")
             print("File or Directory not Found")
-        else:
-            print("Test B:")
-            print("everything is fine")    
+            self.assertTrue(False)
             
     def test_c_diffBackup_jewel(self):
-        try:
-            file = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel/test1.txt"), "a")
-            file2 = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2/test2.txt"), "a")
-            try:            
-                for i in range(5):
-                    file.write("Hello World in test1.txt\n")
-                    file2.write("Hello World in test2.txt\n")
-                os.utime(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel"))
-                os.utime(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2"))        
-            except:
-                print("Something with writing or touching")
-            else:
-                print("Writing and touching managed")
-            finally:
-                file.close()
-                file2.close()
-            
-        except FileNotFoundError:
-            print("Test C:")
-            print("File or Directory not Found")
-            
+        with open('./test_Files_Backup/execScripts.sh', 'rb') as file:
+             script = file.read()
+        subprocess.call(script, shell=True)  
+        
+        os.utime(f"{str(pathlib.Path(__file__).parent.resolve())}/test_Files_Backup/jewel")
+        os.utime(f"{str(pathlib.Path(__file__).parent.resolve())}/test_Files_Backup/jewel2")
+        
        # time.sleep(1)
+        global date_Format
+        date_Format = date.now().strftime('%d-%m-%Y-%H-%M')
         self.backup.initialize_backup(0) 
+        
         #time.sleep(1)
         try:
-            self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel")
-                            ,os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel")))
+            self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel/make_Data_Dir"
+                   ,str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/backup_Location/"f"diff-{date_Format}/jewel/make_Data_Dir"))
         except FileNotFoundError:
             print("Test C:")
             print("File or Directory not Found")
+            self.assertTrue(False)
             
-        else:
-            print("Test C:")
-            print("everything is fine")    
             
     def test_d_diffBackup_jewel2(self):
         try:
-            self.assertTrue(are_dir_trees_equal(os.path.join(os.path.dirname(__file__), "unitTestFiles/jewel2")
-                            , os.path.join(os.path.dirname(__file__),"unitTestFiles/backupLocation/"f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}/jewel2")))
+            self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel2/data_And_Link_Dir"
+                            , str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/backup_Location/"f"diff-{date_Format}/jewel2/data_And_Link_Dir"))
         except FileNotFoundError:
             print("Test D")
             print("File or Directory not Found")
+            self.assertTrue(False)
             
-        else:
-            print("Test C:")
-            print("everything is fine")    
-        
     @classmethod
     def tearDownClass(cls):
         os.remove("datenbank.db")
-        shutil.rmtree(cls.config["destination"][device_name])
+        
+        rel_path = cls.config["destination"][device_name]
+        
+        for root, dirs, files in os.walk(cls.workingDirectory + '/' + rel_path, topdown=False):
+            for name in dirs:
+                shutil.rmtree(os.path.join(root, name))
+    
         shutil.rmtree(cls.config["restore_destination"][device_name])
+        
+        
+        
+        jewel_list = cls.config["jewel_sources"][device_name]
+
+        for element in jewel_list:    
+            for root, dirs, files in os.walk(element, topdown=False):
+                for name in dirs:
+                    shutil.rmtree(os.path.join(root, name))
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                    
+            
 
    
 if __name__ == "__main__":

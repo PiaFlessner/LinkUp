@@ -10,6 +10,7 @@ import random
 import string
 import datetime
 import info_handler
+from datenbank import Jewel
 
 device_name = "testCases"
 
@@ -129,9 +130,23 @@ class TestDatabase(unittest.TestCase):
         decoded = daten._decode_base64(encoded)
         self.assertEqual(to_test, decoded)
 
-    def set_uri(self, file, device_name, file_path, file_name):
-        
-        pass
+    def test_7_set_uri(self):
+        daten = datenbank.Datenbank()
+        my_file =datenbank.File( "id", "blobs", "birth")
+        daten.set_uri(my_file, device_name, "file_path", "file_name")
+        self.assertEqual(device_name+"file_path",my_file.id)
+
+    def test_8_addJewel(self):
+        daten = datenbank.Datenbank()
+        jewel = Jewel(0, None, datetime.date.today(), "jewel_path", device_name,"fullbackup_source")
+        print(jewel)
+        conn = self.create_connection('datenbank.db')
+        if conn != None:
+            cur = conn.cursor()
+            # check if the jewel already exists in the database
+            command = "SELECT ID FROM Jewel WHERE JewelSource = ? AND DeviceName = ?"
+        "SELECT ID FROM Jewel WHERE JewelSource = ? AND DeviceName = ?"
+        daten.addJewel(jewel)
 
     def add_to_database(self, jewel, file, device_name):
         pass
@@ -151,8 +166,7 @@ class TestDatabase(unittest.TestCase):
     def check_if_hash_exists(self, file, cur, device_name):
         pass
 
-    def addJewel(self, jewel):
-        pass
+   
 
     def addJewelFileAssignment(self, id_jewel, id_file):
         pass
@@ -206,7 +220,7 @@ class TestDatabase(unittest.TestCase):
         pass
 
     @classmethod
-    def tearDown(self):
+    def tearDown():
         config = info_handler.get_json_info(device_name)
         if path_exists("datenbank.db"):
             os.remove("datenbank.db")

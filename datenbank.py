@@ -274,15 +274,15 @@ class Datenbank:
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
-
+            # check if the jewel already exists in the database
             command = "SELECT ID FROM Jewel WHERE JewelSource = ? AND DeviceName = ?"
             data_tuple = (self._encode_base64(jewel.jewelSource), self._encode_base64(jewel.device_name))
             cur.execute(command, data_tuple)
             id = cur.fetchone()
 
-            if id is not None:
+            if id is not None: #if it exists, return the id
                 return id[0]
-            else:
+            else: #else add it to the database
                 command = """INSERT INTO 'Jewel'
                               ('Comment', 'Monitoring_Startdate', 'JewelSource', 'DeviceName', 'FullbackupSource') 
                               VALUES (?, ?, ?, ?, ?);"""

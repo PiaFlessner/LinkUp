@@ -1,5 +1,5 @@
 class resFile:
-    def __init__(self, file_name:str, origin_location:str, backup_location:str, version_number:int):
+    def __init__(self, file_name: str, origin_location: str, backup_location: str, version_number: int):
         self._file_name = file_name
         self._origin_location = origin_location
         self._backup_location = backup_location
@@ -29,7 +29,7 @@ class resFile:
     @backup_location.setter
     def backup_location(self, value):
         self._backup_location = value
-    
+
     @property
     def version_number(self):
         return self._version_number

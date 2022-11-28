@@ -10,6 +10,7 @@ import random
 import string
 import datetime
 import info_handler
+from datenbank import Jewel
 
 device_name = "testCases"
 
@@ -18,7 +19,7 @@ def are_dir_trees_equal(dir1, dir2):
 
     pass
 
-
+database_path='datenbank.db'
 class TestDatabase(unittest.TestCase):
     
     @classmethod
@@ -26,14 +27,14 @@ class TestDatabase(unittest.TestCase):
         pass
 
     def test_a_init_database_exists(self):
-        daten = datenbank.Datenbank()
-        self.assertTrue(path_exists('datenbank.db'))
+        daten = datenbank.Datenbank() #debating whether or not the assignment to daten makes sense because it's the same in the next method
+        self.assertTrue(path_exists(database_path))
 
     def test_b_init_same_tables_exist(self):
         table_names = ["Jewel", "sqlite_sequence", "File", "Jewel_File_Assignment",
                        "Blob", "Skipped_Files"]  # correct list of table names. sqlite_sequence is an automatically created table that could be excluded from this list
         daten = datenbank.Datenbank()
-        conn = daten.create_connection('datenbank.db')
+        conn = daten.create_connection(database_path)
         if conn != None:
             cur = conn.cursor()
             cur.execute(
@@ -44,6 +45,7 @@ class TestDatabase(unittest.TestCase):
                 list.append(row[0])
             # assert that all 6 tablenames are equal
             self.assertTrue(set(table_names).intersection(list).__len__() == 6)
+            conn.close()
 
     # we look into the sqlite_master table and compare it to our table-creating-commands, to make sure that everything is as expected https://www.sqlite.org/schematab.html
     def test_c_init_all_columns_are_as_expected(self):
@@ -93,7 +95,7 @@ class TestDatabase(unittest.TestCase):
                     Connected_File_to_Jewel TEXT
                 )"""]
         daten = datenbank.Datenbank()
-        conn = daten.create_connection('datenbank.db')
+        conn = daten.create_connection(database_path)
         if conn != None:
             cur = conn.cursor()
             cur.execute(
@@ -110,6 +112,7 @@ class TestDatabase(unittest.TestCase):
                 for columnname in data2:
                     mylist.append(columnname[0])
             self.assertTrue(set(sql_befehle).intersection(mylist).__len__(), 5)
+            conn.close()
 
     def test_d_something(self):
         pass
@@ -129,15 +132,66 @@ class TestDatabase(unittest.TestCase):
         decoded = daten._decode_base64(encoded)
         self.assertEqual(to_test, decoded)
 
-    def set_uri(self, file, device_name, file_path, file_name):
-        
+    def test_7_set_uri(self):
+        daten = datenbank.Datenbank()
+        my_file =datenbank.File( "id", "blobs", "birth")
+        daten.set_uri(my_file, device_name, "file_path", "file_name")
+        self.assertEqual(device_name+"file_path",my_file.id)
+
+    def test_8_addJewel(self):
+        daten = datenbank.Datenbank()
+        jewel = Jewel(0, None, datetime.date.today(), "jewel_path", device_name,"fullbackup_source")
+        jewel2 = Jewel(0, "meepツ", datetime.date.today(), "jewdel_path", device_name,"fullbackup_source")
+        self.assertTrue(daten.addJewel(jewel)==1)
+        self.assertTrue(daten.addJewel(jewel2)==2)
+        conn = daten.create_connection(database_path)
+        if conn != None:
+            cur = conn.cursor()
+            # check if the jewel already exists in the database
+            command = "SELECT MAX(ID) FROM Jewel"
+            cur.execute(command)
+            data = cur.fetchone()
+            cur.execute("SELECT * FROM Jewel")
+            data = cur.fetchall()
+            mylist = []
+            for entry in data:
+                mylist.append(entry)
+            self.d_r_y(1,jewel,daten,mylist[0])
+            self.d_r_y(2,jewel2,daten,mylist[1])
+            conn.close() 
+
+    def d_r_y(self, id, jewel:Jewel, daten, jewel_from_database):
+        if(jewel.comment==None):
+            jewel.comment="None" #TODO fix the fact that the database returns "None" instead of None or decide the bug doesn't matter
+        self.assertEqual(id, jewel_from_database[0])
+        self.assertEqual(jewel.comment, daten._decode_base64(jewel_from_database[1]))
+        self.assertEqual(jewel.monitoring_Startdate.isoformat(), jewel_from_database[2])
+        self.assertEqual(jewel.jewelSource, daten._decode_base64(jewel_from_database[3]))
+        self.assertEqual(jewel.device_name, daten._decode_base64(jewel_from_database[4]))
+        self.assertEqual(jewel.fullbackup_source, daten._decode_base64(jewel_from_database[5]))
+    
+    
+    def test_9_check_if_uri_exists(self):
+        db = datenbank.Datenbank()
+        blob= datenbank.Blob("id","number","hash","name","fileSize",datetime.datetime.now(),"modify","iD_File","origin_name","source_path","store_destination")
+        file = datenbank.File("id", blob, "birth", False)
+        conn = db.create_connection(database_path)
+        self.assertTrue(conn != None)
+        if conn != None:
+            cur = conn.cursor()
+            db.insert_File(file,cur,conn)
+            file = db.get_File_via_id("id")
+        print(file)
+        conn.close
+        conn.close
+        pass
+
+    def addJewelFileAssignment(self, id_jewel, id_file):
         pass
 
     def add_to_database(self, jewel, file, device_name):
         pass
 
-    def check_if_uri_exists(self, file, cur):
-        pass
 
     def insert_new_blob_to_existing_file(self, new_file, cur, conn, old_file):
         pass
@@ -151,11 +205,9 @@ class TestDatabase(unittest.TestCase):
     def check_if_hash_exists(self, file, cur, device_name):
         pass
 
-    def addJewel(self, jewel):
-        pass
+   
 
-    def addJewelFileAssignment(self, id_jewel, id_file):
-        pass
+   
 
     def check_which_jewel_sources_exist(self, jewel_source_arr, device_name):
         pass
@@ -199,14 +251,9 @@ class TestDatabase(unittest.TestCase):
     def get_fullbackup_paths(self, jewel_source_arr):
         pass
 
-    def get_restore_Jewel(self, until_date: datetime.datetime, jewel_id: int):
-        pass
-
-    def get_restore_File(self, until_date: datetime, file_id: str):
-        pass
 
     @classmethod
-    def tearDown(self):
+    def tearDown(foobar):
         config = info_handler.get_json_info(device_name)
         if path_exists("datenbank.db"):
             os.remove("datenbank.db")

@@ -213,14 +213,9 @@ class TestDatabase(unittest.TestCase):
     def get_fullbackup_paths(self, jewel_source_arr):
         pass
 
-    def get_restore_Jewel(self, until_date: datetime.datetime, jewel_id: int):
-        pass
-
-    def get_restore_File(self, until_date: datetime, file_id: str):
-        pass
 
     @classmethod
-    def tearDown():
+    def tearDown(foobar):
         config = info_handler.get_json_info(device_name)
         if path_exists("datenbank.db"):
             os.remove("datenbank.db")

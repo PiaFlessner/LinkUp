@@ -234,7 +234,19 @@ class Datenbank:
 
 
     def add_to_database(self, jewel:"Jewel", file:"File", device_name:str)-> Blob | bool:
-        """A function which validates, if a File get inserted into the Database or not. If not, it returns the affected Blob to which a Hardlink must be set"""
+        """Function which handles the insertion from files and jewels to the database
+
+        Args:
+            jewel (Jewel): Jewel which should be inserted
+            file (File): File shich Should be inserted
+            device_name (str): name of the current device
+
+        Raises:
+            ValueError: No DB Connection
+
+        Returns:
+            Blob | bool: Blob -> Blob which should be a Hardlink | Bool -> True means, no further steps needed after Insertion
+        """
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
         jewel.id = self.addJewel(jewel)
 

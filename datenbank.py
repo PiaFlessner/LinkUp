@@ -19,23 +19,22 @@ class Jewel:
     
     A Jewel is a starting point of a backup. All Files which are in the Jewel will be also be backupped
     
-    Attributes
-    ----------
-    
-    id:int
-        Database id of Jewel
-    comment:str
-        comment to the Jewel
-    monitoring_Startdate:datetime
-        date, when Jewel was inserted in database
-    jewel_Source:str
-        Path to the actual Jewel
-    device_name:str
-        name of the device, where jewel is found
-    fullbackup_source:str
-        path where the fullbackup of Jewel is located"""
+    """
 
-    def __init__(self, id, comment, monitoring_Startdate, jewelSource, device_name, fullbackup_source):
+    def __init__(self, id:int, comment:str|None, monitoring_Startdate:datetime.date, jewelSource:str, device_name:str, fullbackup_source:str) -> "Jewel":
+        """Constructor
+
+        Args:
+            id (int): Database id of Jewel
+            comment (str | None): comment to the Jewel
+            monitoring_Startdate (datetime.date): date, when Jewel was inserted in database
+            jewelSource (str): Path to the actual Jewel
+            device_name (str): name of the device, where jewel is found
+            fullbackup_source (str): path where the fullbackup of Jewel is located
+
+        Returns:
+            Jewel: Instance of Jewel
+        """
         self.id = id
         self.comment = comment
         self.monitoring_Startdate = monitoring_Startdate
@@ -48,27 +47,25 @@ class File:
     """Class File Contains many Blobs
 
     A File contains mainly the blobs to a File. One File can contain many Blobs.
-    The is_hardlink property is set to True, if the File was a Hardlink in the past or is a hardlink in the present.
-    
-    Attributes
-    ----------
-    
-    id:str
-        Id of the File
-    blobs:list(Blobs)
-        List of Blobs
-    birth:datetime
-        date when File was created
-    is_hardlink:boolean
-        represents if the file was or is a hardlink"""
-    def __init__(self, id, blobs, birth, is_hardlink = False):
+    The is_hardlink property is set to True, if the File was a Hardlink in the past or is a hardlink in the present."""
+    def __init__(self, id:str, blobs:list("Blob"), birth:datetime.datetime, is_hardlink:bool = False)->"File":
+        """Constructor
+
+        Args:
+            id (str): DB ID of FIle
+            blobs (list): Blobs(Versions) of File
+            birth (datetime.datetime): Date when actual File were created
+            is_hardlink (bool, optional): States if File was or is an Hardlink. Defaults to False.
+
+        Returns:
+        File: Instance of File
+        """
         self.id = id
         self.blobs = blobs
         self.birth = birth
         self.is_hardlink = is_hardlink
 
-##need to be searched because auf hardlinks and real blobs
-    def get_last_blob(self) -> "Blob":
+    def get_last_blob(self) -> "Blob":#
         """Returns the Blob with the highes Version Number"""
         last_blob = max(self.blobs, key=attrgetter('number'))
         return last_blob
@@ -77,35 +74,29 @@ class File:
 class Blob:
     """Blob Class which represents the Blob (Versions) of a whole File
     
-    A Blob contains the main infos to a File Version. Such as Hash, number origin_name etc.
-    
-    Attributes
-    ---------
-    
-    id:int
-        a database id of a Blob
-    number:int
-        Version number
-    hash:str
-        Hash
-    name:str
-        alternative name of file
-    fileSize:numeric
-        size of the file in bytes
-    creationDate:datetime
-        insert date of this specific blob
-    modify:datetime
-        date, when file was last modified
-    iD_File:str
-        Reference to a File ID
-    origin_name:str
-        the actual name of the file
-    source_path:str
-        Path to where the actual File is located"""
+    A Blob contains the main infos to a File Version. Such as Hash, number origin_name etc."""
     
 
-    def __init__(self, id, number, hash, name, fileSize, creationDate, modify, iD_File, origin_name, source_path,
-                 store_destination):
+    def __init__(self, id:int, number:int, hash:str, name:str, fileSize:numeric, creationDate:datetime, modify:datetime.datetime, iD_File:str, origin_name:str, source_path:str,
+                 store_destination:str)->"Blob":
+        """Constructor
+
+        Args:
+            id (int): Database ID
+            number (int): Version number
+            hash (str): Hash
+            name (str): alternative name of file
+            fileSize (numeric): size of the file in bytes
+            creationDate (datetime): insert date of this specific blob
+            modify (datetime.datetime): date, when file was last modified
+            iD_File (str): Reference to a File ID
+            origin_name (str): the actual name of the file
+            source_path (str): Path to where the actual File is located
+            store_destination (str): Path to where the backup file is located
+
+        Returns:
+            Blob: Instance of Blob
+        """
         self.id = id
         self.number = number
         self.hash = str(hash)
@@ -129,8 +120,17 @@ class Blob:
 
 
 class Datenbank:
-
+    """Created a DB Connections and provied all Methods for DB connection
+    """
     def create_connection(self, db_file:str) -> sqlite3.Connection:
+        """Created Connection
+
+        Args:
+            db_file (str): Takes location of DB
+
+        Returns:
+            sqlite3.Connection: Connection to DB
+        """
         conn = None
         try:
             conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)

@@ -595,21 +595,26 @@ class Datenbank:
 
         if conn != None:
             cur = conn.cursor()
-            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination FROM File
+            command = """SELECT Id, FullbackupSource, JewelSource, ID_File, Number, source_path, Origin_Name, Store_Destination, max(insert_date) as insert_date FROM 
+                        (SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path,
+                        Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date FROM File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
 						INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File
 						INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
                         WHERE Jewel.ID = ?
                         AND Hardlinks.insert_date <= ?
-UNION
-SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination FROM File
+                        UNION
+                        SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  
+                        Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination, Blob.CreationDate as insert_date FROM File
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
                         WHERE Jewel.ID = ?
                         AND Blob.CreationDate <= ?
-                        GROUP BY Blob.ID_File;"""
+                        GROUP BY Blob.ID_File)
+                        GROUP BY ID_File"""
+                        
             params = (jewel_id, until_date, jewel_id, until_date)
             cur.execute(command, params)
             tmp = cur.fetchall()

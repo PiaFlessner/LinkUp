@@ -20,13 +20,13 @@ class TestRestore(unittest.TestCase):
         cls.config = ih.get_json_info(device_name)
         cls.workingDirectory = str(pathlib.Path(__file__).parent.resolve())
 
-        jewel_list = cls.config["jewel_sources"][device_name]
+        cls.jewel_list = cls.config["jewel_sources"][device_name]
         i = 0
-        for element in jewel_list:
-            jewel_list[i] = cls.workingDirectory + element
+        for element in cls.jewel_list:
+            cls.jewel_list[i] = cls.workingDirectory + element
             i= i+ 1
 
-        cls.backup = Backup(jewel_list, cls.workingDirectory + "/" + cls.config["destination"][device_name], True)
+        cls.backup = Backup(cls.jewel_list, cls.workingDirectory + "/" + cls.config["destination"][device_name], True)
         cls.backup.initialize_backup(0)
         time.sleep(15)
 
@@ -68,7 +68,8 @@ class TestRestore(unittest.TestCase):
 
     
       time.sleep(10)
-      self.backup.initialize_backup(0)
+      backup_d = Backup(self.jewel_list, self.workingDirectory + "/" + self.config["destination"][device_name], True)
+      backup_d.initialize_backup(0)
       time.sleep(30)
       jewel = self.daten.get_restore_Jewel(restoreDay,1)
       self.assertTrue(jewel.res_file[0].version_number == 2, f'Version Number is wrong. Should be 2, but is {jewel.res_file[0].version_number}')
@@ -82,7 +83,8 @@ class TestRestore(unittest.TestCase):
         for i in range(5):
             file.write("Hello World in test_new.txt\n")
         file.close()
-        self.backup.initialize_backup(0)
+        backup_e = Backup(self.jewel_list, self.workingDirectory + "/" + self.config["destination"][device_name], True)
+        backup_e.initialize_backup(0)
         time.sleep(45)
         jewel = self.daten.get_restore_Jewel(restoreDay,1)
         self.assertTrue(jewel!= None,"An answer is None")

@@ -12,12 +12,8 @@ import time
 
 
 class Backup:
-    current_source_path = None
-    current_date_time = date.now()
-    current_date_time_formatted = current_date_time.strftime("%Y-%m-%d-%H-%M")
-    new_backup_location = f"backup-{current_date_time_formatted}"
+    
     device_name = platform.node()
-    fullbackup_name = None
 
     def __init__(self, jewel_path_list, destination, testcase=False):
         self.jewel_path_list = jewel_path_list
@@ -26,6 +22,10 @@ class Backup:
         if (testcase):
             self.device_name = "testCases"
         self.fullbackup_name = "fullBackup" + self.device_name
+        self.current_date_time = date.now()
+        self.current_date_time_formatted = self.current_date_time.strftime("%Y-%m-%d-%H-%M")
+        self.new_backup_location = f"backup-{self.current_date_time_formatted}"
+        self.current_source_path = None
 
     def initialize_backup(self, verbose_level):
 

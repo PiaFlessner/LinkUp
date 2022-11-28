@@ -169,7 +169,6 @@ class Datenbank:
         return uri
 
     def add_to_database(self, jewel:"Jewel", file:"File", device_name:str)-> Blob | bool:
-##TODO when file was created with hardlink, and then changed, and then changed again: version number does not increase
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
         jewel.id = self.addJewel(jewel)
 
@@ -243,17 +242,15 @@ class Datenbank:
             return None
 
         ##create file from data
-        blobs = []
-        for row in data:
-            blobs.append(Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
+        blobs_files = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12])))
-        for row in data_hardlink:
-            blobs.append(Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
+                              self._decode_base64(row[12])) for row in data]
+       
+        blobs_hardlink = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12])))
+                              self._decode_base64(row[12])) for row in data_hardlink]
 
-             
+        blobs = blobs_files + blobs_hardlink       
         file = File(self._decode_base64(choosed_data[0][0]), blobs, choosed_data[0][1], is_hardlink)
         return file
 
@@ -261,7 +258,7 @@ class Datenbank:
         command = """INSERT INTO Blob
                               (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
-        #         
+          
         params = (
         old_file.get_last_blob().number + 1, new_file.blobs[0].hash, self._encode_base64(new_file.blobs[0].name),
         new_file.blobs[0].fileSize, new_file.blobs[0].creationDate, new_file.blobs[0].modify,
@@ -304,10 +301,11 @@ class Datenbank:
 
         ##create file from data
         blobs = []
-        for row in data:
-            blobs.append(Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
+
+        blobs = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12])))
+                              self._decode_base64(row[12])) for row in data]
+                              
         file = File(self._decode_base64(data[0][0]), blobs, data[0][1])
         return file
 
@@ -614,7 +612,7 @@ class Datenbank:
                         AND Blob.CreationDate <= ?
                         GROUP BY Blob.ID_File)
                         GROUP BY ID_File"""
-                        
+
             params = (jewel_id, until_date, jewel_id, until_date)
             cur.execute(command, params)
             tmp = cur.fetchall()

@@ -3,6 +3,7 @@ import itertools
 from operator import attrgetter
 import sqlite3
 from os.path import exists as file_exists
+import time
 from unicodedata import numeric
 import uuid
 import base64
@@ -168,14 +169,15 @@ class Datenbank:
         file.id = uri
         return uri
 
+
     def add_to_database(self, jewel:"Jewel", file:"File", device_name:str)-> Blob | bool:
+        """A function which validates, if a File get inserted into the Database or not. If not, it returns the affected Blob to which a Hardlink must be set"""
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
         jewel.id = self.addJewel(jewel)
 
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
-
             old_file = self.check_if_uri_exists(file, cur)
             ## no uri 
             if old_file is None:
@@ -189,24 +191,23 @@ class Datenbank:
                     return True
                 # no uri but existing hash
                 else:
-                    ##find the same hash
-                    for blob in old_file.blobs:
-                        ## asa blob is same, we need the path to this file
-                        if blob.hash == file.blobs[0].hash:
-                            #self.addJewelFileAssignment(jewel.id, old_file.id)
-                            self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
-                            conn.close()
-                            return [blob, old_file.is_hardlink]
+                    #find the same hash
+                    ##asa blob is same, we need the path to this file
+                    same_blob = next((blob for blob in old_file.blobs if blob.hash == file.blobs[0].hash), None)
+                    if same_blob != None:
+                        self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(same_blob.number) + " Blob ID: " + str(same_blob.id), old_file.id, conn, cur )
+                        conn.close()
+                        return [same_blob, old_file.is_hardlink]
             # uri
             else:
                 ##has old_file a blob with same hash?
-                for blob in old_file.blobs:
-                    ## asa blob is same,  we need the path to this file
-                    if blob.hash == file.blobs[0].hash:
-                        #self.addJewelFileAssignment(jewel.id, old_file.id)
-                        self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
-                        conn.close()
-                        return [blob, old_file.is_hardlink]
+                ##asa blob is same,  we need the blob to this file
+                same_blob = next((blob for blob in old_file.blobs if blob.hash == file.blobs[0].hash), None)                
+                if same_blob != None:
+                    self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(same_blob.number) + " Blob ID: " + str(same_blob.id), old_file.id, conn, cur )
+                    conn.close()
+                    return [same_blob, old_file.is_hardlink]
+
                 #if no hash exists then add new blob
                 self.insert_new_blob_to_existing_file(file,cur,conn,old_file)
                 self.addJewelFileAssignment(jewel.id,old_file.id)

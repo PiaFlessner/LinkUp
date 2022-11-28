@@ -228,7 +228,6 @@ class Datenbank:
                          WHERE File.ID = ? ORDER BY Blob.Number ASC;"""
         cur.execute(command,params)
         data_hardlink = cur.fetchall()
-        #is_hardlink = True
 
     ## just note, if there was an hardlink, if only hardlink data exists, take hardlink data, but also just choose the "normal" data, because 
     ## the matching hash could be also in there
@@ -305,7 +304,7 @@ class Datenbank:
         blobs = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
                               self._decode_base64(row[12])) for row in data]
-                              
+
         file = File(self._decode_base64(data[0][0]), blobs, data[0][1])
         return file
 

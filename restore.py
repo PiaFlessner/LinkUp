@@ -4,6 +4,7 @@ import subprocess
 from datetime import datetime as date
 import info_handler
 import platform
+import datetime
 
 
 class Restore:
@@ -67,9 +68,9 @@ class Restore:
                            shell=True)
             count += 1
 
-    def restore_file(self, file_id: str, date_time: str):
+    def restore_file(self, file_id: str, date_time: datetime):
         db_object = Datenbank()
-        date_time = date.fromisoformat(date_time)
+        #date_time = date.fromisoformat(date_time)
         jewel = db_object.get_restore_File(date_time, file_id)
         restore_destination_paths = self.restore_directory_structure(jewel)
         print(restore_destination_paths[0])

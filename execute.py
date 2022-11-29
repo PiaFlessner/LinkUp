@@ -4,6 +4,7 @@ from show_tables import ShowTables
 from restore import Restore
 import info_handler as ih
 import platform
+import datetime
 
 # Hier startet das Programm
 if __name__ == "__main__":
@@ -41,8 +42,8 @@ if __name__ == "__main__":
     # command: python3 execute.py restore -J 12hi
     group.add_argument('-J', '--restoreJewel', action='store_true', help='Restore certain Jewel')
     # needed Id to restore
-    restoreSection.add_argument('id', type=str)
-    restoreSection.add_argument('datetime', type=str)
+    restoreSection.add_argument('id', type=str, help="File ID in Table File")
+    restoreSection.add_argument('datetime', type=str, help="Date in Format: Y-m-D-H-M-S")
 
     # command: python3 execute.py backup
     backupSection = subparser.add_parser('backup', help="Get into backup section of program.")
@@ -111,10 +112,19 @@ if __name__ == "__main__":
     elif args.command == "restore":
         restore_object = Restore()
         if args.restoreFile:
-            restore_object.restore_file(args.id, args.datetime)
+
+            try:
+                date_var = datetime.datetime.strptime(args.datetime, "%Y-%m-%d-%H-%M-%S")
+
+                restore_object.restore_file(args.id, date_var)
+            except:
+                print("")
+            
             pass
         elif args.restoreJewel:
             restore_object.restore_jewel(args.id, args.datetime)
+        else:
+            print("Please enter appropriate flag (-F or -J) ")
 
     if args.command == "backup":
         verbose_level = 0

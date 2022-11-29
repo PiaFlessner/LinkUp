@@ -8,7 +8,7 @@ touch ./jewel2/test.txt
 echo "test" >> ./jewel2/test.txt
 
 tar -xf Bad_Names.tar.gz -C ./jewel/Bad_Names_Dir
-#tar -xf c++_lib.tar.gz -C ./jewel/c++_Dir
+#tar -xf C++_lib.tar.gz -C ./jewel/c++_Dir
 #tar -xf JDK.tar.gz -C ./jewel2/JDK_Dir
 
 #find ./jewel -exec touch {} \;

@@ -4,9 +4,9 @@
     "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2"],
     "kali": ["/home/kali/folderToBackup"],
     "mirco-ThinkPad-T495": ["/home/mirco/Backuptest"],
-    "testCases" : ["/unitTestFiles/jewel", "/unitTestFiles/jewel2"],
+    "__Comment__testCases" : ["/unitTestFiles/jewel", "/unitTestFiles/jewel2"],
     "fedora": ["/home/ole/importantDocuments"],
-    "__Comment__testCases" : ["/test_Files_Backup/jewel", "/test_Files_Backup/jewel2" ]
+    "testCases" : ["/test_Files_Backup/jewel", "/test_Files_Backup/jewel2" ]
   },
 
   "blacklist" :
@@ -21,9 +21,9 @@
     "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation",
     "kali": "/home/kali/backupLocation",
     "mirco-ThinkPad-T495": "/home/mirco/backuptarget",
-    "testCases" : "unitTestFiles/backupLocation",
+    "__Comment__testCases" : "unitTestFiles/backupLocation",
     "fedora": "/home/ole/backupLocation",
-    "__Comment__testCases" : "test_Files_Backup/backup_Location"
+    "testCases" : "test_Files_Backup/backup_Location"
   },
 
   "restore_destination":
@@ -31,8 +31,8 @@
     "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/Restore",
     "kali": "/home/kali/Restore",
     "mirco-ThinkPad-T495": "/home/mirco/Backuprestore",
-    "testCases": "unitTestFiles/restoreLocation",
+    "__Comment__testCases": "unitTestFiles/restoreLocation",
     "fedora": "/home/ole/restoreDestination",
-    "__Comment__testCases" : "test_Files_Backup/restore_Location"
+    "testCases" : "test_Files_Backup/restore_Location"
   }
 }

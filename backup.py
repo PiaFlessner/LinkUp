@@ -3,7 +3,6 @@ import os
 import subprocess
 import platform
 from datetime import datetime as date
-import sys
 from hardlink_info import HardlinkInfo
 import info_handler
 from datenbank import Blob, Datenbank, File, Jewel
@@ -30,6 +29,8 @@ class Backup:
     def initialize_backup(self, verbose_level):
 
         start_time = time.time()
+
+        self.check_packages(['rsync', 'openssl'])
 
         #Checks and deletes the first backup when it runned not through and start from scratch again. (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
         #if os.path.exists("db.log"):
@@ -187,9 +188,20 @@ class Backup:
 
     def set_hardlink(self, hl_info:HardlinkInfo ):
         d_path = os.path.dirname(os.path.abspath(hl_info.destination_path))
-        subprocess.run(f"ls {d_path}", shell=True)
+        try:
+            subprocess.run(f'ls "{d_path}"', shell=True)
+        except:
+            print(f'Error: ls couldn\'t be executed\n'
+                  f'path: {d_path}\n')
+            exit()
         os.remove(hl_info.destination_path)
-        subprocess.run(f'ln {hl_info.link_path} {hl_info.destination_path}', shell=True)
+        try:
+            subprocess.run(f'ln "{hl_info.link_path}" "{hl_info.destination_path}"', shell=True)
+        except:
+            print(f'Error: ln couldn\'t be executed\n'
+                  f'origin path: {hl_info.link_path}\n'
+                  f'destination path: {hl_info.destination_path}\n')
+            exit()
         if not hl_info.old_hardlink_existing:
             self.db.protocol_hardlink(hl_info, self.device_name)
 
@@ -205,20 +217,34 @@ class Backup:
         
         backup_version = len(next(os.walk(self.destination))[1])
 
+        config = info_handler.get_json_info(self.device_name)
+        input_paths = config['jewel_sources'][self.device_name]
         excluded_amount = 0
         excluded_size = 0
         for line in subprocess_return_verbose.splitlines():
             if '[sender] hiding file' in line:
-                excluded_file = line.split(' ')[3]
+                excluded_file = line.split(' ')[3].split('/')[-1]
                 excluded_amount += 1
-                excluded_size += os.stat(f'/home/{self.device_name}/{excluded_file}').st_size
+                for input_path in reversed(input_paths):
+                    try:
+                        excluded_size += os.stat(f'{input_path}/{excluded_file}').st_size
+                    except:
+                        pass
             elif '[sender] hiding directory' in line:
-                excluded_directory = line.split(' ')[3]
-                excluded_amount += sum([len(files) for r, d, files in os.walk(f'/home/{self.device_name}/{excluded_directory}')])
-                for path, dirs, files in os.walk(f'/home/{self.device_name}/{excluded_directory}'):
-                    for f in files:
-                        fp = os.path.join(path, f)
-                        excluded_size += os.path.getsize(fp)
+                excluded_directory = ''.join(line.split(' ')[3].split('/')[1:])
+                for input_path in reversed(input_paths):
+                    try:
+                        excluded_amount += sum([len(files) for r, d, files in os.walk(f'{input_path}/{excluded_directory}')])
+                    except:
+                        pass
+                for input_path in reversed(input_paths):
+                    try:
+                        for path, dirs, files in os.walk(f'{input_path}/{excluded_directory}'):
+                            for f in files:
+                                fp = os.path.join(path, f)
+                                excluded_size += os.path.getsize(fp)
+                    except:
+                        pass
 
         total_amount = sum([len(files) for r, d, files in os.walk(self.destination)])
         total_size = sum(f.stat().st_size for f in Path(self.destination).glob('**/*') if f.is_file())
@@ -268,21 +294,38 @@ class Backup:
 
 
     def call_rsync_differential(self, options: str, backup_sources_for_r_sync: str, backup_name: str):
-        subprocess_output = subprocess.Popen(f"rsync -{options} {self.excluding_data()} --out-format='%n' "
-                                             f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
-                                             f"{self.destination}/{backup_name}",
-                                             shell=True,
-                                             stdout=subprocess.PIPE)
-        return self.wait_decode_subprocess(subprocess_output)
+        try:
+            subprocess_output = subprocess.Popen(f"rsync -{options} {self.excluding_data()} --out-format='%n' "
+                                                f"--compare-dest={self.destination}/{self.fullbackup_name} {backup_sources_for_r_sync} "
+                                                f"{self.destination}/{backup_name}",
+                                                shell=True,
+                                                stdout=subprocess.PIPE)
+            return_value = self.wait_decode_subprocess(subprocess_output)
+            return return_value
+        except:
+            print(f'Error: rsync couldn\'t be executed\n'
+                  f'used option: {options}\n'
+                  f'fullbackup path: {self.destination}/{self.fullbackup_name}\n'
+                  f'destination path: {self.destination}/{backup_name}\n')
+            exit()
 
 
     def call_rsync_full(self, options: str, jewel_path_list_string: str):
-        subprocess_output = subprocess.Popen(f'rsync -{options} {self.excluding_data()} --out-format="%n" '
-                                             f'{jewel_path_list_string} '
-                                             f'{self.destination}/{self.fullbackup_name}',
-                                             shell=True,
-                                             stdout=subprocess.PIPE)
-        return self.wait_decode_subprocess(subprocess_output)
+        return_value = ''
+        try:
+            subprocess_output = subprocess.Popen(f'rsync -{options} {self.excluding_data()} --out-format="%n" '
+                                                f'{jewel_path_list_string} '
+                                                f'{self.destination}/{self.fullbackup_name}',
+                                                shell=True,
+                                                stdout=subprocess.PIPE)
+            return_value = self.wait_decode_subprocess(subprocess_output)
+            return return_value
+        except:
+            print(f'Error: rsync couldn\'t be executed\n'
+                  f'used option: {options}\n'
+                  f'jewel path: {jewel_path_list_string}\n'
+                  f'destination path: {self.destination}/{self.fullbackup_name}\n')
+            exit()
 
     
     def wait_decode_subprocess(self, subprocess_output: str):
@@ -291,3 +334,16 @@ class Backup:
         subprocess_output.stdout.close()
         output = output.decode('utf-8')
         return output
+
+
+    def check_packages(self, required_packages: list):
+        subprocess_output = ''
+        for package in required_packages:
+            try:
+                subprocess_output = subprocess.Popen(f'dpkg -s {package}', shell=True, stdout=subprocess.PIPE)
+                if 'Status: install ok installed' not in self.wait_decode_subprocess(subprocess_output):
+                    print(f'Error: package "{package}" not installed')
+                    exit()
+            except:
+                pass
+

@@ -12,6 +12,7 @@ import platform
 from hardlink_info import HardlinkInfo
 from resFile import resFile
 from resJewel import resJewel
+from info_handler import get_json_info
 
 
 class Jewel:
@@ -120,6 +121,9 @@ class Blob:
 
 
 class Datenbank:
+
+    device_name = platform.node()
+
     """Created a DB Connections and provied all Methods for DB connection
     """
     def create_connection(self, db_file:str) -> sqlite3.Connection:
@@ -139,10 +143,14 @@ class Datenbank:
 
         return conn
 
-    def __init__(self):
+    def __init__(self, testcase=False):
+        if (testcase):
+            self.device_name = "testCases"
+        self.config = get_json_info(self.device_name)
+        self.database_path = self.config['destination'][self.device_name] + '/datenbank.db'
         # Datenbank.create_connection = classmethod(Datenbank.create_connection)
-        if not file_exists('datenbank.db'):
-            conn = self.create_connection('datenbank.db')
+        if not file_exists(self.database_path):
+            conn = self.create_connection(self.database_path)
             if conn != None:
                 cur = conn.cursor()
                 cur.execute("""CREATE TABLE Jewel (
@@ -250,7 +258,7 @@ class Datenbank:
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
         jewel.id = self.addJewel(jewel)
 
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             old_file = self.check_if_uri_exists(file, cur)
@@ -435,7 +443,7 @@ class Datenbank:
         Returns:
             int : id of Jewel
         """
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
 
@@ -468,7 +476,7 @@ class Datenbank:
 
         Returns:
             None | bool: False means something went wrong, None means everything is finde"""
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             sqlite_insert_with_param = """INSERT INTO 'Jewel_File_Assignment'
@@ -495,7 +503,7 @@ class Datenbank:
         Returns:
             list[str]: all sources which are already existing in db
         """
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             command = "SELECT JewelSource FROM Jewel WHERE (JewelSource = ? AND DeviceName = ?)"
@@ -517,7 +525,7 @@ class Datenbank:
 
     def get_Jewel_via_id(self, id:int)-> Jewel:
         jewel = None
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             sqlite_insert_with_param = "SELECT * FROM Jewel WHERE ID= ?"
@@ -532,7 +540,7 @@ class Datenbank:
 
     def get_File_via_id(self, id:str)-> File:
         file = None
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             sqlite_insert_with_param = "SELECT * FROM File WHERE ID= ?"
@@ -547,7 +555,7 @@ class Datenbank:
 
     def get_File_via_hash(self, hash:str)-> File:
         file = None
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             sqlite_insert_with_param = """SELECT DISTINCT File.ID, File.Birth 
@@ -563,7 +571,7 @@ class Datenbank:
 
     def get_all_Files(self)-> list[File]:
         files = []
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             cur.execute("SELECT * FROM File")
@@ -579,7 +587,7 @@ class Datenbank:
 
     def get_Files_via_jewel_id(self, jewel_id:int)-> list[File]:
         files = []
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             # Alle Files, die zu einem Jewel gehören, werden aus der Datenbank geholt. 
@@ -599,7 +607,7 @@ class Datenbank:
 
     def get_all_Jewels(self)->list[Jewel]:
         jewels = []
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Jewel")
@@ -617,7 +625,7 @@ class Datenbank:
 
     def get_all_Blobs(self)-> list[Blob]:
         blobs = []
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Blob")
@@ -636,7 +644,7 @@ class Datenbank:
 
     def get_Blobs_via_file_id(self, file_id:str)-> list[Blob]:
         blobs = []
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Blob WHERE ID_File= ?", [self._encode_base64(file_id)])
@@ -655,7 +663,7 @@ class Datenbank:
 
     def get_Blob_via_id(self, id:str)-> Blob:
         blob = None
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Blob WHERE ID= ?", [id])
@@ -694,7 +702,7 @@ class Datenbank:
             list[tuple[str]]: files which should be displayed
         """
         result = []
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Skipped_Files")
@@ -710,7 +718,7 @@ class Datenbank:
 
     def get_skipped_file_via_id (self, id:str)-> list[str]:
         row = []
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
             cur.execute("SELECT * FROM Skipped_Files WHERE ID= ?", [id])
@@ -733,7 +741,7 @@ class Datenbank:
         # the database shall look in every value of this day
         until_date = until_date.replace(hour=23, minute=59, second=59)
         assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         # temporär, da objekt struktur noch nicht existiert
         files = []
         jewel = None
@@ -786,7 +794,7 @@ class Datenbank:
         # the database shall look in every value of this day
         until_date = until_date.replace(hour=23, minute=59, second=59)
         assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         # temporär, da objekt struktur noch nicht existiert
         files = []
         files_hardlink = []
@@ -842,7 +850,7 @@ class Datenbank:
             Args:
                 hardlink_info(HardlinkInfo): all infos provided for hardlink
                 device_name: name of current device"""
-        conn = self.create_connection('datenbank.db')
+        conn = self.create_connection(self.database_path)
         if conn != None:
             uri = self.set_uri(File(None,None,None), device_name, hardlink_info.source_path,hardlink_info.origin_name)
             cur = conn.cursor()   

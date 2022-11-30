@@ -122,7 +122,7 @@ class Blob:
 
 class Datenbank:
 
-    device_name = str(platform.node())
+    device_name = platform.node()
     config = get_json_info(device_name)
     database_path = config['destination'][device_name] + '/datenbank.db'
 

@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # command: python3 execute.py show -B
     group.add_argument('-B', '--showBlob', action='store_true', help='Show Blobs')
     # command: python3 execute.py show -[J F sf B] 123hi
-    showTables.add_argument('id', type=str, nargs='+')
+    showTables.add_argument('id', type=str, nargs='?')
     # command: python3 execute.py show -[J F sf B] ? -[v vv]
     showTables.add_argument('-v', '--verbose', action='store_true', help="more detail")
     showTables.add_argument('-vv', '--verboseverbose', action='store_true', help="all of the detail")

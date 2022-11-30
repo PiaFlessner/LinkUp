@@ -79,7 +79,7 @@ class Blob:
     
 
     def __init__(self, id:int, number:int, hash:str, name:str, fileSize:numeric, creationDate:datetime, modify:datetime.datetime, iD_File:str, origin_name:str, source_path:str,
-                 store_destination:str)->"Blob":
+                 store_destination:str, reed_solomon_path:str = None)->"Blob":
         """Constructor
 
         Args:
@@ -94,6 +94,7 @@ class Blob:
             origin_name (str): the actual name of the file
             source_path (str): Path to where the actual File is located
             store_destination (str): Path to where the backup file is located
+            reed_solomon_path (str): Path to possible Reed Solomon File Default=None
 
         Returns:
             Blob: Instance of Blob
@@ -109,6 +110,7 @@ class Blob:
         self.origin_name = str(origin_name)
         self.store_destination = str(store_destination)
         self.source_path = str(source_path)
+        self.reed_solomon_path = str(reed_solomon_path)
 
     def __eq__(self, other):
         """Overrides the default implementation"""
@@ -191,6 +193,7 @@ class Datenbank:
                                     Origin_Name TEXT NOT NULL,
                                     Source_Path TEXT NOT NULL,
                                     Store_Destination TEXT NOT NULL,
+                                    Reed_Solomon_Path TEXT,
                                     constraint file_blob_fk
                                     FOREIGN KEY (ID_File)
                                         REFERENCES File(ID)
@@ -318,7 +321,7 @@ class Datenbank:
         choosed_data = data
 
         ## maybe there is also an hardlink existing
-        command = """select File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.name, Blob.FileSize, Hardlinks.insert_date, Blob.Modify, Blob.ID_File, Hardlinks.origin_name, Hardlinks.source_path, Hardlinks.destination_path from File INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
+        command = """select File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.name, Blob.FileSize, Hardlinks.insert_date, Blob.Modify, Blob.ID_File, Hardlinks.origin_name, Hardlinks.source_path, Hardlinks.destination_path, Blob.Reed_Solomon_Path from File INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
                          WHERE File.ID = ? ORDER BY Blob.Number ASC;"""
         cur.execute(command,params)
         data_hardlink = cur.fetchall()
@@ -337,11 +340,11 @@ class Datenbank:
         ##create file from data
         blobs_files = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12])) for row in data]
+                              self._decode_base64(row[12]), self._decode_base64(row[13])) for row in data]
        
         blobs_hardlink = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12])) for row in data_hardlink]
+                              self._decode_base64(row[12]), self._decode_base64(row[13])) for row in data_hardlink]
 
         blobs = blobs_files + blobs_hardlink       
         file = File(self._decode_base64(choosed_data[0][0]), blobs, choosed_data[0][1], is_hardlink)
@@ -357,14 +360,14 @@ class Datenbank:
             old_file (File): the file, to which the new fil(blob) should be appended"""
 
         command = """INSERT INTO Blob
-                              (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
-                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+                              (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination, Reed_Solomon_Path) 
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
           
         params = (
         old_file.get_last_blob().number + 1, new_file.blobs[0].hash, self._encode_base64(new_file.blobs[0].name),
         new_file.blobs[0].fileSize, new_file.blobs[0].creationDate, new_file.blobs[0].modify,
         self._encode_base64(old_file.id), self._encode_base64(new_file.blobs[0].origin_name),
-        self._encode_base64(new_file.blobs[0].source_path), self._encode_base64(new_file.blobs[0].store_destination))
+        self._encode_base64(new_file.blobs[0].source_path), self._encode_base64(new_file.blobs[0].store_destination), self._encode_base64(new_file.blobs[0].reed_solomon_path))
         cur.execute(command, params)
         conn.commit()
 
@@ -378,13 +381,13 @@ class Datenbank:
         """
 
         command = """INSERT INTO Blob
-                              (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
-                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+                              (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination, Reed_Solomon_Path) 
+                              VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
 
         params = (1, file.blobs[0].hash, self._encode_base64(file.blobs[0].name), file.blobs[0].fileSize,
                   file.blobs[0].creationDate, file.blobs[0].modify, self._encode_base64(file.id),
                   self._encode_base64(file.blobs[0].origin_name), self._encode_base64(file.blobs[0].source_path),
-                  self._encode_base64(file.blobs[0].store_destination))
+                  self._encode_base64(file.blobs[0].store_destination), self._encode_base64(file.blobs[0].reed_solomon_path))
         cur.execute(command, params)
         conn.commit()
 
@@ -412,7 +415,7 @@ class Datenbank:
             device_name (str): tname of the current device
         """
 
-        command = """SELECT File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.Name,Blob.FileSize, Blob.CreationDate, Blob.Modify, Blob.ID_File, Blob.Origin_Name, Blob.Source_Path, Blob.Store_Destination  FROM File 
+        command = """SELECT File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.Name,Blob.FileSize, Blob.CreationDate, Blob.Modify, Blob.ID_File, Blob.Origin_Name, Blob.Source_Path, Blob.Store_Destination, Blob.Reed_Solomon_Path FROM File 
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
@@ -430,7 +433,7 @@ class Datenbank:
 
         blobs = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12])) for row in data]
+                              self._decode_base64(row[12]), self._decode_base64(row[13])) for row in data]
 
         file = File(self._decode_base64(data[0][0]), blobs, data[0][1])
         return file

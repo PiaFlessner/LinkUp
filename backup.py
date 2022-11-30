@@ -164,7 +164,10 @@ class Backup:
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
 
                 file = File(0, [blob], file_object.birth)
-                datenbank = Datenbank()
+                if self.device_name == 'testCases':
+                    datenbank = Datenbank(testcase=True)
+                else:
+                    ddatenbank = Datenbank()
                 db_answer = datenbank.add_to_database(jewel, file, self.device_name)
 
                 if db_answer is not True:

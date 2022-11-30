@@ -147,6 +147,8 @@ class Datenbank:
         if (testcase):
             print('Testcase: True')
             self.device_name = "testCases"
+        else:
+            print('Testcase: False')
         self.config = get_json_info(self.device_name)
         self.database_path = self.config['destination'][self.device_name] + '/datenbank.db'
         print(f'Databasepath: {self.database_path}')

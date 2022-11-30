@@ -24,13 +24,14 @@ class TestDatabase(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
+        #gonna use this in the future maybe
         pass
 
-    def test_a_init_database_exists(self):
+    def test_1_init_database_exists(self):
         daten = datenbank.Datenbank() #debating whether or not the assignment to daten makes sense because it's the same in the next method
         self.assertTrue(path_exists(database_path))
 
-    def test_b_init_same_tables_exist(self):
+    def test_2_init_same_tables_exist(self):
         table_names = ["Jewel", "sqlite_sequence", "File", "Jewel_File_Assignment",
                        "Blob", "Skipped_Files"]  # correct list of table names. sqlite_sequence is an automatically created table that could be excluded from this list
         daten = datenbank.Datenbank()
@@ -40,15 +41,15 @@ class TestDatabase(unittest.TestCase):
             cur.execute(
                 """SELECT name FROM sqlite_master WHERE type='table'""")
             data = cur.fetchall()
-            list = []  # table names extracted from database
+            mylist = []  # table names extracted from database
             for row in data:
-                list.append(row[0])
+                mylist.append(row[0])
             # assert that all 6 tablenames are equal
-            self.assertTrue(set(table_names).intersection(list).__len__() == 6)
+            self.assertTrue(set(table_names).intersection(mylist).__len__() == 6)
             conn.close()
 
     # we look into the sqlite_master table and compare it to our table-creating-commands, to make sure that everything is as expected https://www.sqlite.org/schematab.html
-    def test_c_init_all_columns_are_as_expected(self):
+    def test_3_init_all_columns_are_as_expected(self):
         sql_befehle = ["""CREATE TABLE Jewel (
                                     ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                     Comment TEXT,
@@ -114,7 +115,7 @@ class TestDatabase(unittest.TestCase):
             self.assertTrue(set(sql_befehle).intersection(mylist).__len__(), 5)
             conn.close()
 
-    def test_d_something(self):
+    def test_4_something(self):
         pass
 
     def test_5_encode_base64(self):

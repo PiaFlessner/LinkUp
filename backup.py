@@ -164,7 +164,7 @@ class Backup:
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
 
                 file = File(0, [blob], file_object.birth)
-                db_answer = datenbank.add_to_database(jewel, file, self.device_name)
+                db_answer = self.db.add_to_database(jewel, file, self.device_name)
 
                 if db_answer is not True:
                     result.append(HardlinkInfo(db_answer[0].id, db_answer[0].store_destination, blob.store_destination, self.current_date_time,blob.origin_name, working_dir + "/" + line, jewel.id, db_answer[1]))

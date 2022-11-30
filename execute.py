@@ -15,8 +15,8 @@ if __name__ == "__main__":
                                      epilog="Dies ist der Epilog")
     # command: python3 execute.py show (user enters display of tables section)
     subparser = parser.add_subparsers(dest='command')
+    
     showTables = subparser.add_parser('show', help="Get into show section of program. Eg. show File Table.")
-
     # user can choose either of one commands now
     group = showTables.add_mutually_exclusive_group()
     # command: python3 execute.py show -J
@@ -28,10 +28,10 @@ if __name__ == "__main__":
     # command: python3 execute.py show -B
     group.add_argument('-B', '--showBlob', action='store_true', help='Show Blobs')
     # command: python3 execute.py show -[J F sf B] 123hi
-    showTables.add_argument('id', type=str, nargs='?')
+    showTables.add_argument('id', type=str, nargs='+')
     # command: python3 execute.py show -[J F sf B] ? -[v vv]
-    showTables.add_argument('-v', '--verbose', action='store_true')
-    showTables.add_argument('-vv', '--verboseverbose', action='store_true')
+    showTables.add_argument('-v', '--verbose', action='store_true', help="more detail")
+    showTables.add_argument('-vv', '--verboseverbose', action='store_true', help="all of the detail")
     paths = parser.add_mutually_exclusive_group()
 
     # command: python3 execute.py restore
@@ -115,10 +115,6 @@ if __name__ == "__main__":
                 sT.show_blob_via_id(args.id, verbose_level)
             else:
                 sT.show_all_blobs(verbose_level)
-
-        # user chooses nothing
-        else:
-            print("No action selected, use show -h for more information.")
 
     if args.command == "restore":
         restore_object = Restore()

@@ -20,8 +20,6 @@ class Backup:
         self.db = Datenbank(testcase)
         if (testcase):
             self.device_name = "testCases"
-        else:
-            self.db = Datenbank()
         self.fullbackup_name = "fullBackup" + self.device_name
         self.current_date_time = date.now()
         self.current_date_time_formatted = self.current_date_time.strftime("%Y-%m-%d-%H-%M-%s")

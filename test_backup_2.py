@@ -37,7 +37,7 @@ class TestBackup(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        os.makedirs("jewel",exist_ok=True)
+        #os.makedirs("unitTestFiles/jewel",exist_ok=True)
         cls.daten = datenbank.Datenbank()
         cls.config = ih.get_json_info(device_name)
         cls.workingDirectory = str(pathlib.Path(__file__).parent.resolve())

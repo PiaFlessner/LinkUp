@@ -145,13 +145,9 @@ class Datenbank:
 
     def __init__(self, testcase=False):
         if (testcase):
-            print('Testcase: True')
             self.device_name = "testCases"
-        else:
-            print('Testcase: False')
         self.config = get_json_info(self.device_name)
         self.database_path = self.config['destination'][self.device_name] + '/datenbank.db'
-        print(f'Databasepath: {self.database_path}')
         # Datenbank.create_connection = classmethod(Datenbank.create_connection)
         if not file_exists(self.database_path):
             conn = self.create_connection(self.database_path)

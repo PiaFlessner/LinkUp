@@ -100,7 +100,6 @@ class TestRestore(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        print(f'Remove: {cls.config["destination"][device_name]}/datenbank.db')
         os.remove(cls.config["destination"][device_name] + '/datenbank.db')
         shutil.rmtree(cls.config["destination"][device_name])
         shutil.rmtree(cls.config["restore_destination"][device_name])

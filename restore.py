@@ -9,18 +9,20 @@ import platform
 class Restore:
     config = info_handler.get_json_info()
 
+    def __init__(self, platform_node=platform.node()):
+        self.platform_node = platform_node
+
     def restore_directory_structure(self, jewel):
         # creates the path, where the restored file is going to be
-        # relative_path --> String ; contains the relative path, for this file, which will be restored in restore_destination
-        #                            the relative path starts from the jewel directory
+        # relative_path --> String ;    contains the relative path, for this file,
+        #                               which will be restored in restore_destination
+        #                               the relative path starts from the jewel directory
         # jewel_origin_path --> String, List ; absolute path for the jewel which contains this file
         # file_origin_path --> String, List ; absolute path for this file
         # restore_destination --> String ; restore destination directory from the JSON config file
 
-        relative_file_path = ""
-        file_origin_path = ""
         jewel_origin_path = jewel.jewel_source
-        restore_destination = self.config['restore_destination'][platform.node()]
+        restore_destination = self.config['restore_destination'][self.platform_node]
 
         # the String paths for jewel and file are converted to a list
         jewel_origin_path = os.path.normpath(jewel_origin_path)
@@ -32,7 +34,8 @@ class Restore:
 
             file_origin_path = os.path.normpath(file.origin_location)
             file_origin_path = file_origin_path.split(os.sep)
-            file_origin_path.pop()  # the last element from the file path list, is the file itself. pop() removes the last element
+            file_origin_path.pop()  # the last element from the file path list, is the file itself. pop() removes
+            # the last element
 
             # the file path is reduced to the point, where the jewel starts
             # the remaining file path is collected in relative_file_path for creating/checking the path
@@ -41,7 +44,8 @@ class Restore:
             for i in range(len(file_origin_path)):
                 relative_file_path = relative_file_path + file_origin_path[i] + "/"
 
-            # print to see the relative path for the path, this path will be created in the restore destination directory
+            # print to see the relative path for the path, this path will be created in the restore
+            # destination directory
             # print(relative_file_path)
 
             # check if the restore destination directory for this file already exists

@@ -17,6 +17,10 @@ class TestRestore(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        os.makedirs("jewel",exist_ok=True)
+        #f = open("test1.txt", "a")
+        #f.write("Now the file has more content!")
+        #f.close()
         cls.daten = datenbank.Datenbank()
         cls.config = ih.get_json_info(device_name)
         cls.workingDirectory = str(pathlib.Path(__file__).parent.resolve())
@@ -69,10 +73,10 @@ class TestRestore(unittest.TestCase):
       os.utime(f"{self.workingDirectory}/unitTestFiles/jewel")
 
     
-      time.sleep(10)
+      time.sleep(1)
       backup_d = Backup(self.jewel_list, self.workingDirectory + "/" + self.config["destination"][device_name], True)
       backup_d.initialize_backup(0)
-      time.sleep(30)
+      time.sleep(1)
       jewel = self.daten.get_restore_Jewel(restoreDay,1)
       self.assertTrue(jewel.res_file[0].version_number == 2, f'Version Number is wrong. Should be 2, but is {jewel.res_file[0].version_number}')
 
@@ -87,7 +91,7 @@ class TestRestore(unittest.TestCase):
         file.close()
         backup_e = Backup(self.jewel_list, self.workingDirectory + "/" + self.config["destination"][device_name], True)
         backup_e.initialize_backup(0)
-        time.sleep(45)
+        time.sleep(1)
 
         jewel = self.daten.get_restore_Jewel(restoreDay,1)
         self.assertTrue(jewel!= None,"An answer is None")

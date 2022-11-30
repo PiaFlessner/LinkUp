@@ -23,7 +23,7 @@ def are_dir_trees_equal(dir1, dir2):
     
     (match, mismatch, errors) =  cmpfiles(dir1, dir2, dirs_cmp.common_files, shallow=False)
     
-    if len(mismatch) > 0 or len(errors) > 0:    # nach in halt überprüfen
+    if len(mismatch) > 0 or len(errors) > 0:    # nach Inhalt überprüfen
         return False
     
     for common_dir in dirs_cmp.common_dirs:
@@ -37,7 +37,7 @@ class TestBackup(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-      
+        os.makedirs("jewel",exist_ok=True)
         cls.daten = datenbank.Datenbank()
         cls.config = ih.get_json_info(device_name)
         cls.workingDirectory = str(pathlib.Path(__file__).parent.resolve())

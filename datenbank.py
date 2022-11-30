@@ -123,8 +123,6 @@ class Blob:
 class Datenbank:
 
     device_name = platform.node()
-    config = get_json_info(device_name)
-    database_path = config['destination'][device_name] + '/datenbank.db'
 
     """Created a DB Connections and provied all Methods for DB connection
     """
@@ -145,7 +143,11 @@ class Datenbank:
 
         return conn
 
-    def __init__(self):
+    def __init__(self, testcase=False):
+        if (testcase):
+            self.device_name = "testCases"
+        self.config = get_json_info(self.device_name)
+        self.database_path = self.config['destination'][self.device_name] + '/datenbank.db'
         # Datenbank.create_connection = classmethod(Datenbank.create_connection)
         if not file_exists(self.database_path):
             conn = self.create_connection(self.database_path)

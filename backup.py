@@ -57,7 +57,7 @@ class Backup:
 
     def execute_backup(self, jewel_sources, verbose_level, start_time):
         
-        differential_backup_name = f"diff-{self.current_date_time_formatted)}"
+        differential_backup_name = f"diff-{self.current_date_time_formatted}"
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
         #Before starting check if the backup process was finished the last time. (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)

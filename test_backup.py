@@ -17,7 +17,8 @@ class TestRestore(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        os.makedirs("jewel",exist_ok=True)
+        os.makedirs("unitTestFiles/jewel",exist_ok=True)
+        cls.assertTrue(cls,os.path.exists("unitTestFiles/jewel"))
         #f = open("test1.txt", "a")
         #f.write("Now the file has more content!")
         #f.close()

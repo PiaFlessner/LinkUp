@@ -17,6 +17,7 @@ class Backup:
         self.jewel_path_list = jewel_path_list
         self.destination = destination
         self.db = Datenbank(testcase)
+        self.device_name = platform.node()
         if (testcase):
             self.device_name = "testCases"
         self.fullbackup_name = "fullBackup" + self.device_name

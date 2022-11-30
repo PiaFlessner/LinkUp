@@ -3,6 +3,7 @@ import itertools
 from operator import attrgetter
 import sqlite3
 from os.path import exists as file_exists
+import time
 from unicodedata import numeric
 import uuid
 import base64
@@ -14,8 +15,26 @@ from resJewel import resJewel
 
 
 class Jewel:
+    """Class Jewel. Contains many Files
+    
+    A Jewel is a starting point of a backup. All Files which are in the Jewel will be also be backupped
+    
+    """
 
-    def __init__(self, id, comment, monitoring_Startdate, jewelSource, device_name, fullbackup_source):
+    def __init__(self, id:int, comment:str|None, monitoring_Startdate:datetime.date, jewelSource:str, device_name:str, fullbackup_source:str) -> "Jewel":
+        """Constructor
+
+        Args:
+            id (int): Database id of Jewel
+            comment (str | None): comment to the Jewel
+            monitoring_Startdate (datetime.date): date, when Jewel was inserted in database
+            jewelSource (str): Path to the actual Jewel
+            device_name (str): name of the device, where jewel is found
+            fullbackup_source (str): path where the fullbackup of Jewel is located
+
+        Returns:
+            Jewel: Instance of Jewel
+        """
         self.id = id
         self.comment = comment
         self.monitoring_Startdate = monitoring_Startdate
@@ -25,23 +44,59 @@ class Jewel:
 
 
 class File:
+    """Class File Contains many Blobs
 
-    def __init__(self, id, blobs, birth, is_hardlink = False):
+    A File contains mainly the blobs to a File. One File can contain many Blobs.
+    The is_hardlink property is set to True, if the File was a Hardlink in the past or is a hardlink in the present."""
+    def __init__(self, id:str, blobs:list("Blob"), birth:datetime.datetime, is_hardlink:bool = False)->"File":
+        """Constructor
+
+        Args:
+            id (str): DB ID of FIle
+            blobs (list): Blobs(Versions) of File
+            birth (datetime.datetime): Date when actual File were created
+            is_hardlink (bool, optional): States if File was or is an Hardlink. Defaults to False.
+
+        Returns:
+        File: Instance of File
+        """
         self.id = id
         self.blobs = blobs
         self.birth = birth
         self.is_hardlink = is_hardlink
 
-##need to be searched because auf hardlinks and real blobs
-    def get_last_blob(self) -> "Blob":
+    def get_last_blob(self) -> "Blob":#
+        """Returns the Blob with the highes Version Number"""
         last_blob = max(self.blobs, key=attrgetter('number'))
         return last_blob
 
 
 class Blob:
+    """Blob Class which represents the Blob (Versions) of a whole File
+    
+    A Blob contains the main infos to a File Version. Such as Hash, number origin_name etc."""
+    
 
-    def __init__(self, id, number, hash, name, fileSize, creationDate, modify, iD_File, origin_name, source_path,
-                 store_destination):
+    def __init__(self, id:int, number:int, hash:str, name:str, fileSize:numeric, creationDate:datetime, modify:datetime.datetime, iD_File:str, origin_name:str, source_path:str,
+                 store_destination:str)->"Blob":
+        """Constructor
+
+        Args:
+            id (int): Database ID
+            number (int): Version number
+            hash (str): Hash
+            name (str): alternative name of file
+            fileSize (numeric): size of the file in bytes
+            creationDate (datetime): insert date of this specific blob
+            modify (datetime.datetime): date, when file was last modified
+            iD_File (str): Reference to a File ID
+            origin_name (str): the actual name of the file
+            source_path (str): Path to where the actual File is located
+            store_destination (str): Path to where the backup file is located
+
+        Returns:
+            Blob: Instance of Blob
+        """
         self.id = id
         self.number = number
         self.hash = str(hash)
@@ -65,8 +120,17 @@ class Blob:
 
 
 class Datenbank:
-
+    """Created a DB Connections and provied all Methods for DB connection
+    """
     def create_connection(self, db_file:str) -> sqlite3.Connection:
+        """Created Connection
+
+        Args:
+            db_file (str): Takes location of DB
+
+        Returns:
+            sqlite3.Connection: Connection to DB
+        """
         conn = None
         try:
             conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
@@ -168,15 +232,27 @@ class Datenbank:
         file.id = uri
         return uri
 
+
     def add_to_database(self, jewel:"Jewel", file:"File", device_name:str)-> Blob | bool:
-##TODO when file was created with hardlink, and then changed, and then changed again: version number does not increase
+        """Function which handles the insertion from files and jewels to the database
+
+        Args:
+            jewel (Jewel): Jewel which should be inserted
+            file (File): File which should be inserted
+            device_name (str): name of the current device
+
+        Raises:
+            ValueError: No DB Connection
+
+        Returns:
+            Blob | bool: Blob -> Blob which should be a Hardlink | Bool -> True means, no further steps needed after Insertion
+        """
         self.set_uri(file, device_name, file.blobs[0].source_path, file.blobs[0].origin_name)
         jewel.id = self.addJewel(jewel)
 
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
-
             old_file = self.check_if_uri_exists(file, cur)
             ## no uri 
             if old_file is None:
@@ -190,24 +266,23 @@ class Datenbank:
                     return True
                 # no uri but existing hash
                 else:
-                    ##find the same hash
-                    for blob in old_file.blobs:
-                        ## asa blob is same, we need the path to this file
-                        if blob.hash == file.blobs[0].hash:
-                            #self.addJewelFileAssignment(jewel.id, old_file.id)
-                            self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
-                            conn.close()
-                            return [blob, old_file.is_hardlink]
+                    #find the same hash
+                    ##asa blob is same, we need the path to this file
+                    same_blob = next((blob for blob in old_file.blobs if blob.hash == file.blobs[0].hash), None)
+                    if same_blob != None:
+                        self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(same_blob.number) + " Blob ID: " + str(same_blob.id), old_file.id, conn, cur )
+                        conn.close()
+                        return [same_blob, old_file.is_hardlink]
             # uri
             else:
                 ##has old_file a blob with same hash?
-                for blob in old_file.blobs:
-                    ## asa blob is same,  we need the path to this file
-                    if blob.hash == file.blobs[0].hash:
-                        #self.addJewelFileAssignment(jewel.id, old_file.id)
-                        self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(blob.number) + " Blob ID: " + str(blob.id), old_file.id, conn, cur )
-                        conn.close()
-                        return [blob, old_file.is_hardlink]
+                ##asa blob is same,  we need the blob to this file
+                same_blob = next((blob for blob in old_file.blobs if blob.hash == file.blobs[0].hash), None)                
+                if same_blob != None:
+                    self.protocol_skipped_file(jewel,file,"Version existing in same File","Version Number:" + str(same_blob.number) + " Blob ID: " + str(same_blob.id), old_file.id, conn, cur )
+                    conn.close()
+                    return [same_blob, old_file.is_hardlink]
+
                 #if no hash exists then add new blob
                 self.insert_new_blob_to_existing_file(file,cur,conn,old_file)
                 self.addJewelFileAssignment(jewel.id,old_file.id)
@@ -216,7 +291,17 @@ class Datenbank:
         else:
             raise ValueError('No Connection to Database')
 
-    def check_if_uri_exists(self, file:"File", cur:sqlite3.Cursor)-> File | None:
+
+    def check_if_uri_exists(self, file:"File", cur:sqlite3.Cursor)-> File | None:    
+        """Looks into database and checks, if any record with same Uri exists
+        
+        Args:
+            file (File): File which should be checked
+            cur (sqlite3.Cursor): cursor of DB connection
+            
+        Returns:
+            File | None: File with same URI or None when URI not existing in DB"""
+
         is_hardlink = False
         command = """SELECT * FROM File INNER JOIN Blob on File.ID = Blob.ID_File WHERE File.ID = ? ORDER BY Blob.Number ASC;"""
         params = (self._encode_base64(file.id),)
@@ -229,7 +314,6 @@ class Datenbank:
                          WHERE File.ID = ? ORDER BY Blob.Number ASC;"""
         cur.execute(command,params)
         data_hardlink = cur.fetchall()
-        #is_hardlink = True
 
     ## just note, if there was an hardlink, if only hardlink data exists, take hardlink data, but also just choose the "normal" data, because 
     ## the matching hash could be also in there
@@ -243,25 +327,31 @@ class Datenbank:
             return None
 
         ##create file from data
-        blobs = []
-        for row in data:
-            blobs.append(Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
+        blobs_files = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12])))
-        for row in data_hardlink:
-            blobs.append(Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
+                              self._decode_base64(row[12])) for row in data]
+       
+        blobs_hardlink = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12])))
+                              self._decode_base64(row[12])) for row in data_hardlink]
 
-             
+        blobs = blobs_files + blobs_hardlink       
         file = File(self._decode_base64(choosed_data[0][0]), blobs, choosed_data[0][1], is_hardlink)
         return file
 
-    def insert_new_blob_to_existing_file(self, new_file, cur, conn, old_file):
+    def insert_new_blob_to_existing_file(self, new_file:File, cur:sqlite3.Cursor, conn:sqlite3.Connection, old_file:File) -> None:
+        """Insert a new Blob to an existing File in DB
+
+        Args:
+            new_file (File): File which should be inserted.
+            cur (sqlite3.Cursor): cursor of DB.
+            conn (sqlite3.Connection): Connection of DB.
+            old_file (File): the file, to which the new fil(blob) should be appended"""
+
         command = """INSERT INTO Blob
                               (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
-        #         
+          
         params = (
         old_file.get_last_blob().number + 1, new_file.blobs[0].hash, self._encode_base64(new_file.blobs[0].name),
         new_file.blobs[0].fileSize, new_file.blobs[0].creationDate, new_file.blobs[0].modify,
@@ -271,6 +361,14 @@ class Datenbank:
         conn.commit()
 
     def insert_first_Blob(self, file:File, cur: sqlite3.Cursor, conn:sqlite3.Connection) -> None:
+        """Insert the first Blob to a File with no Blobs in DB
+        
+        Args:
+            file (File): File which should be inserted.
+            cur (sqlite3.Cursor): cursor of DB.
+            conn (sqlite3.Connection): Connection of DB.
+        """
+
         command = """INSERT INTO Blob
                               (Number, Hash, Name, FileSize, CreationDate, Modify, ID_File, Origin_Name, Source_Path, Store_Destination) 
                               VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
@@ -283,12 +381,29 @@ class Datenbank:
         conn.commit()
 
     def insert_File(self, file: File, cur: sqlite3.Cursor, con:sqlite3.Connection)-> None:
+        """Insert a File to DB
+        
+        Args:
+            file (File): File which should be inserted.
+            cur (sqlite3.Cursor): cursor of DB.
+            con (sqlite3.Connection): Connection of DB.
+        """
+
         command = "INSERT INTO FILE (ID, Birth) VALUES (?, ?);"
         params = (self._encode_base64(file.id), file.birth,)
         cur.execute(command, params)
         con.commit()
 
     def check_if_hash_exists(self, file:File, cur:sqlite3.Cursor, device_name:str) -> File | None:
+        """Checks if a hash of a file is alredy existing in db
+        
+        Args:
+            file (File): File which contains the named hash.
+            cur (sqlite3.Cursor): cursor of DB.
+            conn (sqlite3.Connection): Connection of DB.
+            device_name (str): tname of the current device
+        """
+
         command = """SELECT File.ID, File.Birth, Blob.ID, Blob.Number, Blob.Hash, Blob.Name,Blob.FileSize, Blob.CreationDate, Blob.Modify, Blob.ID_File, Blob.Origin_Name, Blob.Source_Path, Blob.Store_Destination  FROM File 
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
@@ -304,14 +419,22 @@ class Datenbank:
 
         ##create file from data
         blobs = []
-        for row in data:
-            blobs.append(Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
+
+        blobs = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
                               self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12])))
+                              self._decode_base64(row[12])) for row in data]
+
         file = File(self._decode_base64(data[0][0]), blobs, data[0][1])
         return file
 
-    def addJewel(self, jewel:Jewel)-> int | None:
+    def addJewel(self, jewel:Jewel)-> int:
+        """adds a JEwel if the Jewel is not existing yet
+        
+        Args:
+            jewel (Jewel): the Jewel which should be inserted
+        Returns:
+            int : id of Jewel
+        """
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
@@ -337,6 +460,14 @@ class Datenbank:
         conn.close()
 
     def addJewelFileAssignment(self, id_jewel:int, id_file:str)-> None | bool:
+        """Connects a file with a Jewel
+        
+        Args:
+            id_jewel (int): id of jewel which should be connected to a file
+            id_file (str): id of file which should be connected to a jewel
+
+        Returns:
+            None | bool: False means something went wrong, None means everything is finde"""
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
@@ -355,6 +486,15 @@ class Datenbank:
                 return False
 
     def check_which_jewel_sources_exist(self, jewel_source_arr: list[str], device_name:str)-> list[str]:
+        """searches for the jewel sources in db
+
+        Args:
+            jewel_source_arr (list[str]): sources which should be checked
+            device_name (str): name of the current device
+
+        Returns:
+            list[str]: all sources which are already existing in db
+        """
         conn = self.create_connection('datenbank.db')
         if conn != None:
             cur = conn.cursor()
@@ -530,6 +670,17 @@ class Datenbank:
         return blob
 
     def protocol_skipped_file(self, jewel:Jewel, file:File, reason:str, additional_information:str, connected_file:str, conn:sqlite3.Connection, cur:sqlite3.Cursor)-> None:
+        """protocols skipped files which where not inserted again as a whole new file to the database
+
+        Args:
+            jewel (Jewel): Jewel of File
+            file (File): File which was skipped
+            reason (str): The Reason why
+            additional_information (str): some optional reasons
+            connected_file (str): file which is the reason of skipping
+            conn (sqlite3.Connection): connection to db
+            cur (sqlite3.Cursor): cursor to db
+        """
         command = "INSERT INTO Skipped_Files (ID_Jewel, UUID, Occurance_Date, Hash, Reason, Additional_Information, Connected_File_to_Jewel) VALUES (?, ?, ?, ?, ?, ?, ? );"
         params = (jewel.id, self._encode_base64(file.id), datetime.datetime.today(), file.blobs[0].hash, reason,
                   additional_information, self._encode_base64(connected_file))
@@ -537,6 +688,11 @@ class Datenbank:
         conn.commit()
 
     def get_all_skipped_files (self)-> list[tuple[str]]:
+        """Gives informatinos of skipped files for the show method
+
+        Returns:
+            list[tuple[str]]: files which should be displayed
+        """
         result = []
         conn = self.create_connection('datenbank.db')
         if conn != None:
@@ -564,27 +720,16 @@ class Datenbank:
             if row: row = (row[0], row[1], self._decode_base64(row[2]), row[3], row[4], row[5], row[6], self._decode_base64(row[7]))
         return row
 
-    def get_fullbackup_paths(self, jewel_source_arr:str)->list[Jewel]:
-        conn = self.create_connection('datenbank.db')
-        params = []
-        answer = []
-        if conn != None:
-            cur = conn.cursor()
-            command = """SELECT * FROM Jewel WHERE JewelSource = ?"""
-            command = command + " ".join([" OR JewelSource = ?"] * (len(jewel_source_arr) - 1))
-
-            for source in jewel_source_arr:
-                params.append(self._encode_base64(source))
-
-            cur.execute(command, params)
-            tmp = cur.fetchall()
-            conn.close()
-            for row in tmp:
-                answer.append(Jewel(row[0], self._decode_base64(row[1]), row[2], self._decode_base64(row[3]),
-                                    self._decode_base64(row[4]), self._decode_base64(row[5])))
-            return answer
-
     def get_restore_Jewel(self, until_date: datetime.datetime, jewel_id: int)->resJewel|None:
+        """Gets the information from DB for Jewel restoring
+        
+        Args:
+            until_date (datetime.datetime): Date to which time the jewel should be restored
+            jewel_id (int): jewel id which should be restored
+            
+        Returns:
+            resJewel | None: The Jewel or nothing if Id is not existing"""
+
         # the database shall look in every value of this day
         until_date = until_date.replace(hour=23, minute=59, second=59)
         assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
@@ -614,7 +759,7 @@ class Datenbank:
                         AND Blob.CreationDate <= ?
                         GROUP BY Blob.ID_File)
                         GROUP BY ID_File"""
-                        
+
             params = (jewel_id, until_date, jewel_id, until_date)
             cur.execute(command, params)
             tmp = cur.fetchall()
@@ -629,7 +774,15 @@ class Datenbank:
             else:
                 return None
 
-    def get_restore_File(self, until_date: datetime, file_id: str)-> resJewel:
+    def get_restore_File(self, until_date: datetime, file_id: str)-> resFile | None:
+        """Gets the data for File restoring from DB
+        
+            Args:
+                until_date(datetime.datetime): Date to which time the file should be restored
+                file_id(str): id of file which should be restored
+                
+            Returns:
+                resFile | None: restored file data or nothing if id is not existing"""
         # the database shall look in every value of this day
         until_date = until_date.replace(hour=23, minute=59, second=59)
         assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
@@ -684,6 +837,11 @@ class Datenbank:
 
 
     def protocol_hardlink(self, hardlink_info:HardlinkInfo, device_name:str) -> None:
+        """insert a hardlink to a file
+        
+            Args:
+                hardlink_info(HardlinkInfo): all infos provided for hardlink
+                device_name: name of current device"""
         conn = self.create_connection('datenbank.db')
         if conn != None:
             uri = self.set_uri(File(None,None,None), device_name, hardlink_info.source_path,hardlink_info.origin_name)

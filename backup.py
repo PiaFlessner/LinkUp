@@ -32,6 +32,14 @@ class Backup:
 
         self.check_packages(['rsync', 'openssl'])
 
+        #Checks and deletes the first backup when it runned not through and start from scratch again. (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
+        #if os.path.exists("db.log"):
+           #log_lines= open("db.log", "r").readlines()
+           #if len(log_lines) > 1:  
+               #if log_lines[1].rstrip() == self.fullbackup_name:   
+                    #info_handler.check_db_hash(self.destination, self.fullbackup_name)
+                    #os.remove("tmp.db") 
+
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
 
@@ -53,6 +61,9 @@ class Backup:
         differential_backup_name = f"diff-{date.now().strftime('%d-%m-%Y-%H-%M')}"
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
+        #Before starting check if the backup process was finished the last time. (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
+        #info_handler.check_db_hash(self.destination, differential_backup_name)
+
         subprocess_return_verbose = self.call_rsync_differential('aAXnvv', backup_sources_for_r_sync, differential_backup_name)
 
         subprocess_return = self.call_rsync_differential('aAXn', backup_sources_for_r_sync, differential_backup_name)
@@ -69,8 +80,15 @@ class Backup:
 
         self.print_feedback(verbose_level, differential_backup_name, 'differential', subprocess_return_verbose, start_time)
 
+        #Update the database hash in db.log (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
+        #info_handler.update_db_hash(self.destination, differential_backup_name)
+
 
     def execute_fullbackup(self, jewel_sources, verbose_level, start_time):
+
+        #Before starting create new db.log and write hash into it. (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
+        #info_handler.check_db_hash(self.destination, self.fullbackup_name)
+
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
         output = self.call_rsync_full('aAX', jewel_path_list_string)
@@ -85,6 +103,9 @@ class Backup:
             self.set_hardlink(hardlink_info)
 
         self.print_feedback(verbose_level, self.fullbackup_name, 'full', subprocess_return_verbose, start_time)
+
+        #Update the database hash and backup_name in db.log (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
+        #info_handler.update_db_hash(self.destination, self.fullbackup_name)
 
 
     def list_to_string(self, string_list) -> str:
@@ -135,7 +156,7 @@ class Backup:
                 file_object = info_handler.get_metadata(working_dir + '/' + line)
                 # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
                 file_name = line.rsplit('/', 1)[1]
-                blob = Blob(0, 0, file_object.f_hash, (f'{file_object.f_size}_{file_object.f_hash}'),
+                blob = Blob(0, 0, file_object.f_hash, (f'{self.db._encode_base64(file_name)}_{file_object.f_hash}'),
                             file_object.f_size,
                             self.current_date_time, file_object.modify, 0, file_name,
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
@@ -325,3 +346,4 @@ class Backup:
                     exit()
             except:
                 pass
+

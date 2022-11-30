@@ -17,9 +17,11 @@ class Backup:
     def __init__(self, jewel_path_list, destination, testcase=False):
         self.jewel_path_list = jewel_path_list
         self.destination = destination
-        self.db = Datenbank()
         if (testcase):
             self.device_name = "testCases"
+            self.db = Datenbank(testcase=True)
+        else:
+            self.db = Datenbank()
         self.fullbackup_name = "fullBackup" + self.device_name
         self.current_date_time = date.now()
         self.current_date_time_formatted = self.current_date_time.strftime("%Y-%m-%d-%H-%M")

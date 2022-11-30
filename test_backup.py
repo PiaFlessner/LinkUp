@@ -101,7 +101,7 @@ class TestRestore(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
 
-        os.remove("datenbank.db")
+        os.remove(cls.config["destination"][device_name] + '/datenbank.db')
         shutil.rmtree(cls.config["destination"][device_name])
         shutil.rmtree(cls.config["restore_destination"][device_name])
         os.remove("unitTestFiles/jewel/test_new.txt")

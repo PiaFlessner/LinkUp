@@ -26,6 +26,7 @@ class Backup:
         self.new_backup_location = f"backup-{self.current_date_time_formatted}"
         self.current_source_path = None
 
+
     def initialize_backup(self, verbose_level):
 
         start_time = time.time()
@@ -245,11 +246,16 @@ class Backup:
                         pass
 
         total_amount = sum([len(files) for r, d, files in os.walk(self.destination)])
-        total_size = sum(f.stat().st_size for f in Path(self.destination).glob('**/*') if f.is_file())
+        total_size = sum(f.stat().st_size for f in Path(self.destination).glob('**/*') if f.is_file() and f.name != 'datenbank.db')
+
+        database_size = os.stat(f'{self.destination}/datenbank.db').st_size
+        print(self.destination)
+        print(database_size)
 
         files_size_unit = 'bytes'
         excluded_size_unit = 'bytes'
         total_size_unit = 'bytes'
+        database_size_unit = 'bytes'
         unit_list = ['bytes', 'kilobytes', 'megabytes', 'gigabytes']
         for i in range(len(unit_list) - 1, 0, -1):
             if (files_size / pow(1000, i)) >= 1:
@@ -261,6 +267,9 @@ class Backup:
             if (total_size / pow(1000, i)) >= 1:
                 total_size = round((total_size / pow(1000, i)), 2)
                 total_size_unit = unit_list[i]
+            if (database_size / pow(1000, i)) >= 1:
+                database_size = round((database_size / pow(1000, i)), 2)
+                database_size_unit = unit_list[i]
 
         if verbose_level == 0:
             print(f'\nCURRENT BACKUP DETAILS\n'
@@ -287,8 +296,9 @@ class Backup:
 
             if backup_type == 'differential':
                 print(f'\nOVERALL BACKUP DETAILS\n'
-                    f'└── number of files:\t\t\t{total_amount}\n'
-                    f'    └── size of files:\t\t\t{total_size} {total_size_unit}\n')
+                    f'├── number of files:\t\t\t{total_amount}\n'
+                    f'│   └── size of files:\t\t\t{total_size} {total_size_unit}\n'
+                    f'└── size of database:\t\t\t{database_size} {database_size_unit}\n')
 
 
     def call_rsync_differential(self, options: str, backup_sources_for_r_sync: str, backup_name: str):

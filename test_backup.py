@@ -97,6 +97,18 @@ class TestRestore(unittest.TestCase):
         self.assertTrue(jewel!= None,"An answer is None")
         self.assertTrue(jewel.res_file[0].version_number == 2, f"Version Number ist wrong, should be 2, is {jewel.res_file[0].version_number}")
 
+    def test_g_restore_symlink_file(self):
+        open(os.path.join(os.path.dirname(__file__), "unitTestFiles/reference_file_to_symlink.txt"), "a")
+        os.symlink("unitTestFiles/reference_file_to_symlink.txt", "unitTestFiles/jewel/symlink")
+        backup_g = Backup(self.jewel_list, self.workingDirectory + "/" + self.config["destination"][device_name], True)
+        backup_g.initialize_backup(0)
+
+        latest_diff_folder = max([os.path.join('unitTestFiles/backupLocation',d) for d in os.listdir('unitTestFiles/backupLocation') if not d.endswith("db")], key=os.path.getmtime)
+        self.assertTrue(os.path.islink(latest_diff_folder + "/" + "jewel/symlink"), "File should be a symlink")
+
+
+
+
 
     @classmethod
     def tearDownClass(cls):
@@ -104,6 +116,8 @@ class TestRestore(unittest.TestCase):
         shutil.rmtree(cls.config["destination"][device_name])
         shutil.rmtree(cls.config["restore_destination"][device_name])
         os.remove("unitTestFiles/jewel/test_new.txt")
+        os.remove("unitTestFiles/reference_file_to_symlink.txt")
+        os.remove("unitTestFiles/jewel/symlink")
 
 
 def suite():
@@ -117,6 +131,7 @@ def suite():
   suite.addTest(TestRestore.test_d_restore_jewel_diff_backup_change_file)
   suite.addTest(TestRestore.test_e_restore_Jewel_diff_backup_new_file)
   suite.addTest(TestRestore.test_f_restore_File_diff_backup)
+  suite.addTest(TestRestore.test_g_restore_symlink_file)
   return suite
 
         

@@ -1,5 +1,145 @@
 # Projektgruppe
 
+This program is able to backup whole directories as well as restore them and error check them.
+Also there are functions to display the database and the inherited files.
+
+# Installation
+
+## Requirements
+
+install the requirements globally.
+TODO: how to do that.
+
+## Create executable
+
+navigate to one file to a folder that is listed in your path variables e.g. 
+```
+/usr/local/bin
+```
+create a softlink to the execute.py file of this project and name it like you want.
+```
+ln -s [path to execute.py]/execute.py backupper
+```
+maybe the execute.py needs to be changed to executable
+
+```
+chmod +x execute.py
+```
+
+now you can use it everywhere with the defined softlink name e.g.
+
+```
+backupper backup
+
+```
+
+# Config
+
+The config.json is needed to run the program properly.
+Mostly all properties need device names. 
+
+## jewel_sources
+
+Defines the jewels which will be considered in the backup.
+
+The structure needs to be exactly like this:
+
+```
+ "jewel_sources" :
+  {
+    "device_name": ["absolute/jewel/path", "absolute/jewel/path2"],
+  },
+
+```
+
+The device name describes the device on which the backup is now running.
+The jewel paths need to be absolute und defines the starting points of the backup process.
+IMPORTANT: the path is not allowed to end with an slash (/)!
+
+## blacklist
+
+the blacklist property let the user define directories, extensions and files which should not be regocnized in the whole backup process.
+TODO: further informations about the usage of the properties.
+
+```
+"blacklist" :
+  {
+    "directories": ["folderToIgnore1", "folderToIgnore2"],
+    "extensions": [".tmp", ".html"],
+    "files": ["fileToIgnore1.png", "fileToIgnore2.jpg", "fileToIgnore.txt"]
+  },
+  
+```
+## destination
+
+ Describes the destination for the backup files.
+
+  ```
+  "destination":
+  {
+    "device_name": "/home/gruppe/Schreibtisch/backupLocation"
+  },
+
+  ```
+
+ The device name describes the device on which the backup is now running.
+ Destination needs to be an absolute path.
+ IMPORTANT: the path is not allowed to end with an slash (/)!
+
+## restore_destination
+  Describes the Restore Destination for the restoring process. All restored data will be copied there.
+
+  ```
+  "restore_destination":
+  {
+    "device_name": "/home/gruppe/Schreibtisch/Restore"
+  }
+  ```
+
+ The device name describes the device on which the backup is now running.
+ Destination needs to be an absolute path.
+ IMPORTANT: the path is not allowed to end with an slash (/)!
+
+# Running
+
+## Backup Section
+
+Backup is needed to start the backup process. The backup process will backup all paths which were contributed in the config.json under the jewel_sources property.
+The backup will be stored in the backup path defined in the "destination" property in the config.json.
+
+```
+execute.py backup
+```
+
+## Restore Section
+
+Restore is needed to restore files or jewels. The files will be restored in the restore path defined in the config.json.
+
+### commands
+To restore a Jewel or a File just use the matching flag following by the id of the File or Jewel.
+-F for Files
+-J for Jewels
+
+The ID of Files are text based.
+The ID of Jewels are number based.
+
+The Datetime format is expected to be in ISO-Format (yyyy-mm-dd-MM-ss)
+If the user only provides the day, the program will restore the last trending backup of this day.
+
+```
+execute.py restore -F|-J [id] [datetime]
+```
+
+## Show Section
+
+```
+execute.py show -F|-J|-B [id]
+```
+TODO
+
+
+
+
 ## Projekt importieren
 ### Section 1 - Personal Access Token generieren 
 1. Auf euer Profilbild oben rechts gehen

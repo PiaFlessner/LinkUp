@@ -64,9 +64,9 @@ class Backup:
         #Before starting check if the backup process was finished the last time. (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
         #info_handler.check_db_hash(self.destination, differential_backup_name)
 
-        subprocess_return_verbose = self.call_rsync_differential('aAXnvv', backup_sources_for_r_sync, differential_backup_name)
+        subprocess_return_verbose = self.call_rsync_differential('aAXlnvv', backup_sources_for_r_sync, differential_backup_name)
 
-        subprocess_return = self.call_rsync_differential('aAXn', backup_sources_for_r_sync, differential_backup_name)
+        subprocess_return = self.call_rsync_differential('aAXln', backup_sources_for_r_sync, differential_backup_name)
 
         output_array = subprocess_return.splitlines()
         insert_results = self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
@@ -97,7 +97,7 @@ class Backup:
                                                     f"{self.destination}/{self.fullbackup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
         
-        subprocess_return_verbose = self.call_rsync_full('aAXnvv', jewel_path_list_string)
+        subprocess_return_verbose = self.call_rsync_full('aAXlnvv', jewel_path_list_string)
 
         for hardlink_info in insert_results:
             self.set_hardlink(hardlink_info)

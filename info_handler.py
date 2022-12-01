@@ -11,7 +11,12 @@ json_file_name = "config.json"
 
 
 def get_metadata(filepth: str):
-    stats = os.stat(filepth)
+    try:
+        stats = os.stat(filepth)
+    #needed because sometimes the OS cannot find the symlink via stats
+    except FileNotFoundError:
+        stats = os.lstat(filepth)
+
     checksum = get_hash(filepth)
     size = stats.st_size / 1024  # file size in kb
     birth = date.fromtimestamp(stats.st_ctime)

@@ -67,7 +67,7 @@ class Restore:
         jewel = db_object.get_restore_Jewel(date_time, jewel_id)
         restore_destination_paths = self.restore_directory_structure(jewel)
         for file in jewel.res_file:
-            subprocess.run(f'rsync -aAXv {file.backup_location} {restore_destination_paths[count]} ',
+            subprocess.run(f'rsync -aAXlv {file.backup_location} {restore_destination_paths[count]} ',
                            shell=True)
             count += 1
 
@@ -77,4 +77,4 @@ class Restore:
         jewel = db_object.get_restore_File(date_time, file_id)
         restore_destination_paths = self.restore_directory_structure(jewel)
         print(restore_destination_paths[0])
-        subprocess.run(f'rsync -aAXv {jewel.res_file[0].backup_location} {restore_destination_paths[0]} ', shell=True)
+        subprocess.run(f'rsync -aAXlv {jewel.res_file[0].backup_location} {restore_destination_paths[0]} ', shell=True)

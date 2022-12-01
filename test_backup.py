@@ -11,8 +11,6 @@ from datetime import datetime as date
 import datenbank
 import shutil
 
-from restore import Restore
-
 device_name = "testCases"
 class TestRestore(unittest.TestCase):
 
@@ -100,7 +98,6 @@ class TestRestore(unittest.TestCase):
         self.assertTrue(jewel.res_file[0].version_number == 2, f"Version Number ist wrong, should be 2, is {jewel.res_file[0].version_number}")
 
     def test_g_restore_symlink_file(self):
-        restoreDay = date.today()
         open(os.path.join(os.path.dirname(__file__), "unitTestFiles/reference_file_to_symlink.txt"), "a")
         os.symlink("unitTestFiles/reference_file_to_symlink.txt", "unitTestFiles/jewel/symlink")
         backup_g = Backup(self.jewel_list, self.workingDirectory + "/" + self.config["destination"][device_name], True)

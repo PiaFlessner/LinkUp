@@ -782,7 +782,7 @@ class Datenbank:
 
             if tmp:
                 for row in tmp:
-                    files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4], row[9], self._decode(row[10])))
+                    files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4], row[9], self._decode_base64(row[10])))
                 jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
                 return jewel
             else:

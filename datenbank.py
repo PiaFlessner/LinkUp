@@ -922,6 +922,5 @@ class Datenbank:
                          WHERE Blob.ID = ? Limit 1;"""
 
             cur.executemany(command, insert_batch)
-            records = cur.fetchall()
             conn.commit()
             conn.close()

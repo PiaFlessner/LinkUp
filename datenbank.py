@@ -754,9 +754,9 @@ class Datenbank:
 
         if conn != None:
             cur = conn.cursor()
-            command = """SELECT Id, FullbackupSource, JewelSource, ID_File, Number, source_path, Origin_Name, Store_Destination, max(insert_date) as insert_date FROM 
+            command = """SELECT Id, FullbackupSource, JewelSource, ID_File, Number, source_path, Origin_Name, Store_Destination, max(insert_date) as insert_date, Hash, Reed_Solomon_Path FROM 
                         (SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path,
-                        Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date FROM File
+                        Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date, Blob.Hash, Blob.Reed_Solomon_Path FROM File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
 						INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File
@@ -765,7 +765,7 @@ class Datenbank:
                         AND Hardlinks.insert_date <= ?
                         UNION
                         SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  
-                        Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination, Blob.CreationDate as insert_date FROM File
+                        Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination, Blob.CreationDate as insert_date, Blob.Hash, Blob.Reed_Solomon_Path FROM File
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
@@ -782,7 +782,7 @@ class Datenbank:
 
             if tmp:
                 for row in tmp:
-                    files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4]))
+                    files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4], row[9], self._decode(row[10])))
                 jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
                 return jewel
             else:
@@ -807,7 +807,7 @@ class Datenbank:
 
         if conn != None:
             cur = conn.cursor()
-            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination, Blob.CreationDate FROM File
+            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination, Blob.CreationDate, Blob.hash, Blob.Reed_Solomon_Path FROM File
                         INNER JOIN Blob on File.ID = Blob.ID_File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
@@ -818,7 +818,7 @@ class Datenbank:
             cur.execute(command, params)
             row_files = cur.fetchone() 
 
-            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date FROM File
+            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date, Blob.hash, Blob.Reed_Solomon_Path FROM File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
                         INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
 						INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File
@@ -831,11 +831,11 @@ class Datenbank:
             conn.close()
 
             if row_files:
-                files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row_files[7]), row_files[4]))
+                files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row_files[7]), row_files[4], row_files[5], self._decode_base64(row_files[6])))
                 jewel = resJewel(None, row_files[0], files, self._decode_base64(row_files[2]))        
 
             if row_hardlink:
-                files_hardlink.append(resFile(self._decode_base64(row_hardlink[6]),self._decode_base64(row_hardlink[5]), self._decode_base64(row_hardlink[7]), row_hardlink[4]))
+                files_hardlink.append(resFile(self._decode_base64(row_hardlink[6]),self._decode_base64(row_hardlink[5]), self._decode_base64(row_hardlink[7]), row_hardlink[4], row_hardlink[5], self._decode_base64(row_hardlink[6])))
                 jewel_hardlink = resJewel(None, row_hardlink[0], files_hardlink, self._decode_base64(row_hardlink[2]))
 
             ##if both have solutions, take the one which is newer, since it is closer to the date, the user wants

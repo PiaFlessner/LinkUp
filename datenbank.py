@@ -879,7 +879,14 @@ class Datenbank:
             conn.commit()
             conn.close()
 
+            
     def get_all_blobs_for_repair(self)-> list[Blob]:
+        """Returns all blobs which were needed to proceeds with Reed Solomon
+        Meaning all Blobs,which do not have a RS path.  
+
+        Returns:
+            list[Blob]: list of blobs with no reed solomon path.
+        """
         blobs = []
         conn = self.create_connection(self.database_path)
         if conn != None:
@@ -899,6 +906,11 @@ class Datenbank:
         return blobs
 
     def update_blobs_after_repair(self, rs_blobs:list("Blob"))-> None:
+        """Inserts the new Reed Solomon paths to the blobs in the db.
+
+            Args:
+            rs_blobs(list(Blob)): List ob blobs with new reed solomon paths
+        """
         conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
@@ -909,12 +921,7 @@ class Datenbank:
                          SET Reed_Solomon_Path = ?
                          WHERE Blob.ID = ? Limit 1;"""
 
-            #param = (self._encode_base64(rs_blob.reed_solomon_path), rs_blob.id)
-            #cur.execute(command, param)
             cur.executemany(command, insert_batch)
             records = cur.fetchall()
             conn.commit()
             conn.close()
-
-
-        

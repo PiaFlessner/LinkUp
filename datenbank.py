@@ -121,6 +121,9 @@ class Blob:
         else:
             return False
 
+    def __iter__(self):
+        return self
+
 
 class Datenbank:
 
@@ -638,7 +641,7 @@ class Datenbank:
                 for row in records:
                     blob = Blob(row[0], row[1], row[2], self._decode_base64(row[3]), row[4], row[5], row[6],
                                 self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]),
-                                self._decode_base64(row[10]))
+                                self._decode_base64(row[10]), self._decode(row[11]))
                     blobs.append(blob)
 
             conn.commit()
@@ -875,5 +878,43 @@ class Datenbank:
             cur.execute(command,params)
             conn.commit()
             conn.close()
+
+    def get_all_blobs_for_repair(self)-> list[Blob]:
+        blobs = []
+        conn = self.create_connection(self.database_path)
+        if conn != None:
+            cur = conn.cursor()
+            command = "SELECT * FROM Blob WHERE Reed_Solomon_Path == ?"
+            param = (self._encode_base64("None"),)
+            cur.execute(command, param)
+            records = cur.fetchall()
+            conn.commit()
+            conn.close()
+
+            if records is not None:
+                 blobs = [Blob(row[0], row[1], row[2], self._decode_base64(row[3]), row[4], row[5], row[6],
+                                self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]),
+                                self._decode_base64(row[10]), self._decode_base64(row[11])) for row in records]
+
+        return blobs
+
+    def update_blobs_after_repair(self, rs_blobs:list("Blob"))-> None:
+        conn = self.create_connection(self.database_path)
+        if conn != None:
+            cur = conn.cursor()
+
+            insert_batch = [(self._encode_base64(blob.reed_solomon_path), blob.id) for blob in rs_blobs]
+
+            command = """UPDATE Blob
+                         SET Reed_Solomon_Path = ?
+                         WHERE Blob.ID = ? Limit 1;"""
+
+            #param = (self._encode_base64(rs_blob.reed_solomon_path), rs_blob.id)
+            #cur.execute(command, param)
+            cur.executemany(command, insert_batch)
+            records = cur.fetchall()
+            conn.commit()
+            conn.close()
+
 
         

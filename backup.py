@@ -245,7 +245,7 @@ class Backup:
                     except:
                         pass
 
-        total_amount = sum([len(files) for r, d, files in os.walk(self.destination)])
+        total_amount = sum([len(files) for r, d, files in os.walk(self.destination) if 'datenbagnk.db' not in files])
         total_size = sum(f.stat().st_size for f in Path(self.destination).glob('**/*') if f.is_file() and f.name != 'datenbank.db')
 
         database_size = os.stat(f'{self.destination}/datenbank.db').st_size

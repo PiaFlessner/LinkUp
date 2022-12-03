@@ -104,3 +104,11 @@ def check_info_from_config(property:str, key:str, config, device_name):
     except json.decoder.JSONDecodeError:
         print("There is a form error in the config.json.")
         sys.exit()
+
+def validate_date_format(date_var:str, format:str):
+    res = True
+    try:
+        res = bool(date.strptime(date_var, format))
+    except:
+        res = False
+    return res

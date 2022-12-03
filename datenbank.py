@@ -631,8 +631,8 @@ class Datenbank:
 
     def get_restore_File(self, until_date: datetime, file_id: str)-> resJewel:
         # the database shall look in every value of this day
-        until_date = until_date.replace(hour=23, minute=59, second=59)
-        assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
+        #until_date = until_date.replace(hour=23, minute=59, second=59)
+        #assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
         conn = self.create_connection('datenbank.db')
         # temporär, da objekt struktur noch nicht existiert
         files = []

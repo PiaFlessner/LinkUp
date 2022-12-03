@@ -57,10 +57,10 @@ class Restore:
 
         return restore_directory_list
 
-    def restore_jewel(self, jewel_id: int, date_time: str):
+    def restore_jewel(self, jewel_id: int, date_time: datetime):
         count = 0
         db_object = Datenbank()
-        date_time = date.fromisoformat(date_time)
+        #date_time = date.fromisoformat(date_time)
         jewel = db_object.get_restore_Jewel(date_time, jewel_id)
         restore_destination_paths = self.restore_directory_structure(jewel)
         for file in jewel.res_file:

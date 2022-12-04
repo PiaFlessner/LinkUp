@@ -828,11 +828,11 @@ class Datenbank:
             conn.close()
 
             if row_files:
-                files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row_files[7]), row_files[4], row_files[5], self._decode_base64(row_files[6])))
+                files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row_files[7]), row_files[4], row_files[9], self._decode_base64(row_files[10])))
                 jewel = resJewel(None, row_files[0], files, self._decode_base64(row_files[2]))        
 
             if row_hardlink:
-                files_hardlink.append(resFile(self._decode_base64(row_hardlink[6]),self._decode_base64(row_hardlink[5]), self._decode_base64(row_hardlink[7]), row_hardlink[4], row_hardlink[5], self._decode_base64(row_hardlink[6])))
+                files_hardlink.append(resFile(self._decode_base64(row_hardlink[6]),self._decode_base64(row_hardlink[5]), self._decode_base64(row_hardlink[7]), row_hardlink[4], row_hardlink[9], self._decode_base64(row_hardlink[10])))
                 jewel_hardlink = resJewel(None, row_hardlink[0], files_hardlink, self._decode_base64(row_hardlink[2]))
 
             ##if both have solutions, take the one which is newer, since it is closer to the date, the user wants

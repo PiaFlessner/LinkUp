@@ -703,7 +703,7 @@ class Datenbank:
                     GROUP BY Blob.ID_File LIMIT 1;"""
 
         params = (self._encode_base64(file_id), until_date)
-        row_files = self.execute_db_command_fetchall(command, params)[0]
+        row_files = self.execute_db_command_fetchall(command, params)
 
 
         command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date, Blob.hash, Blob.Reed_Solomon_Path FROM File
@@ -714,13 +714,17 @@ class Datenbank:
                     WHERE File.ID = ?
                     AND Hardlinks.insert_date <= ?
                     ORDER BY Hardlinks.insert_date DESC;"""
-        row_hardlink = self.execute_db_command_fetchall(command,params)[0]
+        row_hardlink = self.execute_db_command_fetchall(command,params)
 
         if len(row_files) > 0:
+            #for better visualisation
+            row_files = row_files[0]
             files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row_files[7]), row_files[4], row_files[9], self._decode_base64(row_files[10])))
             jewel = resJewel(None, row_files[0], files, self._decode_base64(row_files[2]))  
 
         if len(row_hardlink) > 0:
+            #for better visualisation 
+            row_hardlink = row_hardlink[0]
             files_hardlink.append(resFile(self._decode_base64(row_hardlink[6]),self._decode_base64(row_hardlink[5]), self._decode_base64(row_hardlink[7]), row_hardlink[4], row_hardlink[9], self._decode_base64(row_hardlink[10])))
             jewel_hardlink = resJewel(None, row_hardlink[0], files_hardlink, self._decode_base64(row_hardlink[2]))
 

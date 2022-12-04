@@ -93,6 +93,7 @@ class TestRestore(unittest.TestCase):
 
     def test_f_restore_File_diff_backup(self):
         restoreDay = date.today()
+        restoreDay.replace(hour=23, minute = 59, second=59)
         jewel = self.daten.get_restore_File(restoreDay, f"testCases{self.workingDirectory}/unitTestFiles/jewel/test1.txt")
         self.assertTrue(jewel!= None,"An answer is None")
         self.assertTrue(jewel.res_file[0].version_number == 2, f"Version Number ist wrong, should be 2, is {jewel.res_file[0].version_number}")

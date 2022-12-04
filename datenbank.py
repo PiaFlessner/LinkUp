@@ -649,8 +649,7 @@ class Datenbank:
         # the database shall look in every value of this day
         until_date = until_date.replace(hour=23, minute=59, second=59)
         assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
-        files = []
-        jewel = None
+
         command = """SELECT Id, FullbackupSource, JewelSource, ID_File, Number, source_path, Origin_Name, Store_Destination, max(insert_date) as insert_date, Hash, Reed_Solomon_Path FROM 
                         (SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path,
                         Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date, Blob.Hash, Blob.Reed_Solomon_Path FROM File
@@ -674,13 +673,9 @@ class Datenbank:
         params = (jewel_id, until_date, jewel_id, until_date)
         tmp = self.execute_db_command_fetchall(command, params)
 
-        if len(tmp) > 0:
-            for row in tmp:
-                files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4], row[9], self._decode_base64(row[10])))
-            jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
-            return jewel
-        else:
-            return None
+        jewel = self.generate_resJewel_from_db_output(tmp,0,2,6,5,7,4,9,10)
+        return jewel
+
 
     def get_restore_File(self, until_date: datetime, file_id: str)-> resFile | None:
         """Gets the data for File restoring from DB
@@ -691,9 +686,7 @@ class Datenbank:
                 
             Returns:
                 resFile | None: restored file data or nothing if id is not existing"""
-        files = []
-        files_hardlink = []
-
+ 
         command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination, Blob.CreationDate, Blob.hash, Blob.Reed_Solomon_Path FROM File
                     INNER JOIN Blob on File.ID = Blob.ID_File
                     INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
@@ -716,21 +709,14 @@ class Datenbank:
                     ORDER BY Hardlinks.insert_date DESC;"""
         row_hardlink = self.execute_db_command_fetchall(command,params)
 
-        if len(row_files) > 0:
-            #for better visualisation
-            row_files = row_files[0]
-            files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row_files[7]), row_files[4], row_files[9], self._decode_base64(row_files[10])))
-            jewel = resJewel(None, row_files[0], files, self._decode_base64(row_files[2]))  
+        jewel = self.generate_resJewel_from_db_output(row_files,0,2,6,5,7,4,9,10)
+        jewel_hardlink = self.generate_resJewel_from_db_output(row_hardlink,0,2,6,5,7,4,9,10)
 
-        if len(row_hardlink) > 0:
-            #for better visualisation 
-            row_hardlink = row_hardlink[0]
-            files_hardlink.append(resFile(self._decode_base64(row_hardlink[6]),self._decode_base64(row_hardlink[5]), self._decode_base64(row_hardlink[7]), row_hardlink[4], row_hardlink[9], self._decode_base64(row_hardlink[10])))
-            jewel_hardlink = resJewel(None, row_hardlink[0], files_hardlink, self._decode_base64(row_hardlink[2]))
-
+        #decide,which one to choose
         ##if both have solutions, take the one which is newer, since it is closer to the date, the user wants
-        if len(row_hardlink) > 0 and len(row_files) > 0 and row_hardlink[8] > row_files[8]:
+        if len(row_hardlink) > 0 and len(row_files) > 0 and row_hardlink[0][8] > row_files[0][8]:
             return jewel_hardlink
+        #when no normal data exists, choose the hardlink
         elif len(row_hardlink) > 0 and not len(row_files)>0:
             return jewel_hardlink
         #else if the user gave an id wich is non existent
@@ -791,11 +777,32 @@ class Datenbank:
         self.execute_db_command_fetchall(command,insert_batch, executemany=True)
 
 
-    def create_Blob_List_from_db_input(self, db_output, id_idx:int, number_idx:int, hash_idx:int,name_idx:int,fileSize_idx:int,
-    creationDate_idx:int,modify_idx:int,iD_File_idx:int,origin_name_idx:int,source_path_idx:int, store_destination_idx:int, reed_Solomon_path_idx:int ):
+    def create_Blob_List_from_db_input(self, db_output_row:list(tuple(str)), id_idx:int, number_idx:int, hash_idx:int,name_idx:int,fileSize_idx:int,
+    creationDate_idx:int,modify_idx:int,iD_File_idx:int,origin_name_idx:int,source_path_idx:int, store_destination_idx:int, reed_Solomon_path_idx:int )->list("Blob"):
+        """takes a multirow db output and creates an bloblist
+
+        Args:
+        db_output_row (list(tuple(str))): multirow db output
+        id_idx (int): index which to search for this property
+        number_idx (int): index which to search for this property
+        hash_idx (int): index which to search for this property
+        name_idx (int): index which to search for this property
+        fileSize_idx (int): index which to search for this property
+        creationDate_idx (int): index which to search for this property
+        modify_idx (int): index which to search for this property
+        iD_File_idx (int): index which to search for this property
+        origin_name_idx (int): index which to search for this property
+        source_path_idx (int): index which to search for this property
+        store_destination_idx (int): index which to search for this property
+        reed_Solomon_path_idx (int): index which to search for this property
+            
+
+        Returns:
+            list(Blob): a list of Blobs
+        """
         blob_list = []
 
-        if db_output:
+        if db_output_row:
             blob_list = [Blob(
                     id=row[id_idx], 
                     number=row[number_idx], 
@@ -809,10 +816,23 @@ class Datenbank:
                     source_path= self._decode_base64(row[source_path_idx]),
                     store_destination = self._decode_base64(row[store_destination_idx]),
                     reed_solomon_path = self._decode_base64(row[reed_Solomon_path_idx])
-                    )for row in db_output]
+                    )for row in db_output_row]
         return blob_list
 
-    def execute_db_command_fetchall(self, command:str,params:tuple=(), executemany:bool=False):
+    def execute_db_command_fetchall(self, command:str,params:tuple=(), executemany:bool=False)-> list(tuple(str)):
+        """Creates a db connection. Execute a db command, commits it and does fetchall. Closes the connection
+
+        Args:
+            command (str): the desired command which should be executed
+            params (tuple, optional): needed params. Defaults to ().
+            executemany (bool, optional): If wished, the command and params will executed with executemany. Defaults to False.
+
+        Raises:
+            ConnectionError: If no connection is possible, this Error will be raised.
+
+        Returns:
+            list(tuple(str)): Database output, which will be always in a form of many rows, because of fetchall().
+        """
         records = None
         conn = self.create_connection(self.database_path)
 
@@ -831,6 +851,64 @@ class Datenbank:
         conn.close()
 
         return records
+
+
+    def generate_resJewel_from_db_output(self,database_rows:list(str), jewel_id_idx:int, jewel_source_idx:int,
+                                         file_name_idx:int, origin_location_idx:int, backup_location_idx:int,
+                                         version_number_idx:int, hash_idx:int, reed_solomon_path_idx:int)-> resJewel | None:
+        """generate a resJewel from a multiline db output
+
+        Args:
+            database_rows (list(str)): multiline db output
+            jewel_id_idx (int): index which to search for this property
+            jewel_source_idx (int): index which to search for this property
+            file_name_idx (int): index which to search for this property
+            origin_location_idx (int): index which to search for this property
+            backup_location_idx (int): index which to search for this property
+            version_number_idx (int): index which to search for this property
+            hash_idx (int): index which to search for this property
+            reed_solomon_path_idx (int): index which to search for this property
+
+        Returns:
+            resJewel | None: resJewel if db output has values, None if db output has no values
+        """
+        if len(database_rows) > 0:
+            files = [self.generate_resFile_from_db_output(row,file_name_idx,origin_location_idx,
+                     backup_location_idx,version_number_idx,hash_idx,reed_solomon_path_idx)
+                     for row in database_rows]
+
+            jewel = resJewel(None, database_rows[0][jewel_id_idx], files, self._decode_base64(database_rows[0][jewel_source_idx]))
+            return jewel
+        else:
+            return None 
+
+    def generate_resFile_from_db_output(self, db_output_row:list(str), file_name_idx:int, origin_location_idx:int, backup_location_idx:int,
+                                        version_number_idx:int, hash_idx:int, reed_solomon_path_idx:int) ->resFile:
+        """takes an db row and converts it to a resFile
+
+        Args:
+            db_output_row (list(str)): db output row
+            file_name_idx (int): index which to search for this property
+            origin_location_idx (int): index which to search for this property
+            backup_location_idx (int): index which to search for this property
+            version_number_idx (int): index which to search for this property
+            hash_idx (int): index which to search for this property
+            reed_solomon_path_idx (int): index which to search for this property
+
+        Returns:
+            resFile: a resFile
+        """
+    
+        res_file = resFile(
+        file_name = self._decode_base64(db_output_row[file_name_idx]),
+        origin_location = self._decode_base64(db_output_row[origin_location_idx]),
+        backup_location = self._decode_base64(db_output_row[backup_location_idx]),
+        version_number = db_output_row[version_number_idx],
+        hash = db_output_row[hash_idx],
+        reed_solomon_path = self._decode_base64(db_output_row[reed_solomon_path_idx])) 
+
+        return res_file
+
 
 
             

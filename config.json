@@ -2,7 +2,7 @@
   "jewel_sources" :
   {
     "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2"],
-    "kali": ["/home/kali/folderToBackup"],
+    "kali": ["/home/kali/folderToBackup", "/home/kali/extraFolder", "/home/kali/extraExtraFolder"],
     "mirco-ThinkPad-T495": ["/home/mirco/Backuptest"],
     "testCases" : ["/unitTestFiles/jewel", "/unitTestFiles/jewel2"],
     "fedora": ["/home/ole/importantDocuments"]
@@ -12,7 +12,7 @@
   {
     "directories": ["folderToIgnore1", "folderToIgnore2"],
     "extensions": [".tmp", ".html"],
-    "files": ["fileToIgnore1.png", "fileToIgnore2.jpg", "fileToIgnore.txt", ".*"]
+    "files": ["fileToIgnore1.png", "fileToIgnore2.jpg", "fileToIgnore.txt"]
   },
 
   "destination":

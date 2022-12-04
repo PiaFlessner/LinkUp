@@ -2,6 +2,7 @@ import argparse
 from backup import Backup
 from show_tables import ShowTables
 from restore import Restore
+from datetime import datetime
 import info_handler as ih
 import platform
 import datetime
@@ -15,8 +16,8 @@ if __name__ == "__main__":
                                      epilog="Dies ist der Epilog")
     # command: python3 execute.py show (user enters display of tables section)
     subparser = parser.add_subparsers(dest='command')
+    
     showTables = subparser.add_parser('show', help="Get into show section of program. Eg. show File Table.")
-
     # user can choose either of one commands now
     group = showTables.add_mutually_exclusive_group()
     # command: python3 execute.py show -J
@@ -30,8 +31,8 @@ if __name__ == "__main__":
     # command: python3 execute.py show -[J F sf B] 123hi
     showTables.add_argument('id', type=str, nargs='?')
     # command: python3 execute.py show -[J F sf B] ? -[v vv]
-    showTables.add_argument('-v', '--verbose', action='store_true')
-    showTables.add_argument('-vv', '--verboseverbose', action='store_true')
+    showTables.add_argument('-v', '--verbose', action='store_true', help="more detail")
+    showTables.add_argument('-vv', '--verboseverbose', action='store_true', help="all of the detail")
     paths = parser.add_mutually_exclusive_group()
 
     # command: python3 execute.py restore
@@ -51,8 +52,19 @@ if __name__ == "__main__":
     # command: python3 execute.py backup -v
     group.add_argument('-v', '--verbose', action='store_true', help='Backup with detailed information')
 
+    helpSection = subparser.add_parser('help', help="info for all commands")
+    group = helpSection.add_mutually_exclusive_group()
+
     # makes args accessable
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except:
+        print("unknown command, use help for more information")
+        exit(0)
+
+    # user chooses the help section
+    if args.command == "help":
+        print("helping right now")
 
     # user chooses the show section
     if args.command == "show":
@@ -174,3 +186,6 @@ if __name__ == "__main__":
         config = ih.get_json_info()
         backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
         backup.initialize_backup(verbose_level)
+
+    if args.command == None:
+        print("no command given, use help for more information")

@@ -129,10 +129,8 @@ class Datenbank:
 
     device_name = platform.node()
 
-    """Created a DB Connections and provied all Methods for DB connection
-    """
     def create_connection(self, db_file:str) -> sqlite3.Connection:
-        """Created Connection
+        """Create Connection to db
 
         Args:
             db_file (str): Takes location of DB

@@ -777,12 +777,12 @@ class Datenbank:
         self.execute_db_command_fetchall(command,insert_batch, executemany=True)
 
 
-    def create_Blob_List_from_db_input(self, db_output_row, id_idx:int, number_idx:int, hash_idx:int,name_idx:int,fileSize_idx:int,
+    def create_Blob_List_from_db_input(self, db_output_row:list[tuple[str]], id_idx:int, number_idx:int, hash_idx:int,name_idx:int,fileSize_idx:int,
     creationDate_idx:int,modify_idx:int,iD_File_idx:int,origin_name_idx:int,source_path_idx:int, store_destination_idx:int, reed_Solomon_path_idx:int )->list("Blob"):
         """takes a multirow db output and creates an bloblist
 
         Args:
-        db_output_row (list(tuple(str))): multirow db output
+        db_output_row (list[tuple[str]]): multirow db output
         id_idx (int): index which to search for this property
         number_idx (int): index which to search for this property
         hash_idx (int): index which to search for this property
@@ -853,13 +853,13 @@ class Datenbank:
         return records
 
 
-    def generate_resJewel_from_db_output(self,database_rows:list(str), jewel_id_idx:int, jewel_source_idx:int,
+    def generate_resJewel_from_db_output(self,database_rows:list[str], jewel_id_idx:int, jewel_source_idx:int,
                                          file_name_idx:int, origin_location_idx:int, backup_location_idx:int,
                                          version_number_idx:int, hash_idx:int, reed_solomon_path_idx:int)-> resJewel | None:
         """generate a resJewel from a multiline db output
 
         Args:
-            database_rows (list(str)): multiline db output
+            database_rows (list[str]): multiline db output
             jewel_id_idx (int): index which to search for this property
             jewel_source_idx (int): index which to search for this property
             file_name_idx (int): index which to search for this property
@@ -882,12 +882,12 @@ class Datenbank:
         else:
             return None 
 
-    def generate_resFile_from_db_output(self, db_output_row:list(str), file_name_idx:int, origin_location_idx:int, backup_location_idx:int,
+    def generate_resFile_from_db_output(self, db_output_row:list[str], file_name_idx:int, origin_location_idx:int, backup_location_idx:int,
                                         version_number_idx:int, hash_idx:int, reed_solomon_path_idx:int) ->resFile:
         """takes an db row and converts it to a resFile
 
         Args:
-            db_output_row (list(str)): db output row
+            db_output_row (list[str]): db output row
             file_name_idx (int): index which to search for this property
             origin_location_idx (int): index which to search for this property
             backup_location_idx (int): index which to search for this property

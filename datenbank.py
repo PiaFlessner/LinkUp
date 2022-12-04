@@ -921,3 +921,26 @@ class Datenbank:
             cur.executemany(command, insert_batch)
             conn.commit()
             conn.close()
+
+
+    def create_Blob_List_from_db_input(self, db_output, id_idx:int, number_idx:int, hash_idx:int,name_idx:int,fileSize_idx:int,
+    creationDate_idx:int,modify_idx:int,iD_File_idx:int,origin_name_idx:int,source_path_idx:int, store_destination_idx:int, reed_Solomon_path_idx:int ):
+        blob_list = []
+
+        if db_output:
+            blobs = [Blob(
+                    id=row[id_idx], 
+                    number=row[number_idx], 
+                    hash = row[hash_idx],
+                    name = self._decode_base64(row[name_idx]),
+                    fileSize= row[fileSize_idx],
+                    creationDate =row[creationDate_idx],
+                    modify=row[modify_idx],
+                    iD_File = self._decode_base64(row[iD_File_idx]),
+                    origin_name = self._decode_base64(row[origin_name_idx]),
+                    source_path= self._decode_base64(row[source_path_idx]),
+                    store_destination = self._decode_base64(row[store_destination_idx]),
+                    reed_solomon_path = self._decode_base64(row[reed_Solomon_path_idx])
+                    )for row in db_output]
+        return blob_list
+            

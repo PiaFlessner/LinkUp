@@ -329,8 +329,7 @@ class Datenbank:
         cur.execute(command,params)
         data_hardlink = cur.fetchall()
 
-    ## just note, if there was an hardlink, if only hardlink data exists, take hardlink data, but also just choose the "normal" data, because 
-    ## the matching hash could be also in there
+    ##note, if blob was or is a hardlink
         if len(data_hardlink)!=0:
             is_hardlink = True
             if len(data) != 0:
@@ -340,14 +339,8 @@ class Datenbank:
         elif len(data) == 0:
             return None
 
-        ##create file from data
-        blobs_files = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
-                              self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12]), self._decode_base64(row[13])) for row in data]
-       
-        blobs_hardlink = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
-                              self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12]), self._decode_base64(row[13])) for row in data_hardlink]
+        blobs_files = self.create_Blob_List_from_db_input(data,2,3,4,5,6,7,8,9,10,11,12,13)
+        blobs_hardlink = self.create_Blob_List_from_db_input(data_hardlink,2,3,4,5,6,7,8,9,10,11,12,13)
 
         blobs = blobs_files + blobs_hardlink       
         file = File(self._decode_base64(choosed_data[0][0]), blobs, choosed_data[0][1], is_hardlink)
@@ -434,10 +427,7 @@ class Datenbank:
         ##create file from data
         blobs = []
 
-        blobs = [Blob(row[2], row[3], row[4], self._decode_base64(row[5]), row[6], row[7], row[8],
-                              self._decode_base64(row[9]), self._decode_base64(row[10]), self._decode_base64(row[11]),
-                              self._decode_base64(row[12]), self._decode_base64(row[13])) for row in data]
-
+        blobs = self.create_Blob_List_from_db_input(data,2,3,4,5,6,7,8,9,10,11,12,13)
         file = File(self._decode_base64(data[0][0]), blobs, data[0][1])
         return file
 
@@ -509,102 +499,71 @@ class Datenbank:
         Returns:
             list[str]: all sources which are already existing in db
         """
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            command = "SELECT JewelSource FROM Jewel WHERE (JewelSource = ? AND DeviceName = ?)"
-            command = command + " ".join([" OR (JewelSource = ? AND DeviceName = ?)"] * (len(jewel_source_arr) - 1))
+        command = "SELECT JewelSource FROM Jewel WHERE (JewelSource = ? AND DeviceName = ?)"
+        command = command + " ".join([" OR (JewelSource = ? AND DeviceName = ?)"] * (len(jewel_source_arr) - 1))
 
-            params = []
+        params = []
 
-            for source in jewel_source_arr:
-                params.append(self._encode_base64(source))
-                params.append(self._encode_base64(device_name))
+        #append the params of the array to the params
+        for source in jewel_source_arr:
+            params.append(self._encode_base64(source))
+            params.append(self._encode_base64(device_name))
 
-            cur.execute(command, params)
-            tmp = cur.fetchall()
-            conn.close()
-            answer = []
-            for row in tmp:
-                answer.append(self._decode_base64(row[0]))
-            return answer
+        data = self.execute_db_command_fetchall(command,params)
+
+        answer = []
+        answer = [self._decode_base64(row[0]) for row in data]
+        return answer
 
     def get_Jewel_via_id(self, id:int)-> Jewel:
         jewel = None
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            sqlite_insert_with_param = "SELECT * FROM Jewel WHERE ID= ?"
-            cur.execute(sqlite_insert_with_param, [id])
-            j_tuple = cur.fetchone()
-            if j_tuple is not None:
-                jewel = Jewel(j_tuple[0], self._decode_base64(j_tuple[1]), j_tuple[2], self._decode_base64(j_tuple[3]),
-                              self._decode_base64(j_tuple[4]), self._decode_base64(j_tuple[5]))
-            conn.commit()
-            conn.close()
+        sqlite_insert_with_param = "SELECT * FROM Jewel WHERE ID= ? Limit 1"
+        data = self.execute_db_command_fetchall(sqlite_insert_with_param, [id])
+        if len(data) > 0:
+            jewel = Jewel(data[0][0], self._decode_base64(data[0][1]), data[0][2], self._decode_base64(data[0][3]),
+                        self._decode_base64(data[0][4]), self._decode_base64(data[0][5]))
         return jewel
 
     def get_File_via_id(self, id:str)-> File:
         file = None
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            sqlite_insert_with_param = "SELECT * FROM File WHERE ID= ?"
-            cur.execute(sqlite_insert_with_param, [self._encode_base64(id)])
-            b_tuple = cur.fetchone()
-            conn.commit()
-            conn.close()
-            if b_tuple is not None:
-                blobs = self.get_Blobs_via_file_id(self._decode_base64(b_tuple[0]))
-                file = File(self._decode_base64(b_tuple[0]), blobs, b_tuple[1])
+        sqlite_insert_with_param = "SELECT * FROM File WHERE ID= ? Limit 1"
+        data = self.execute_db_command_fetchall(sqlite_insert_with_param, [self._encode_base64(id)])
+        if len(data) > 0:
+            blobs = self.get_Blobs_via_file_id(self._decode_base64(data[0][0]))
+            file = File(self._decode_base64(data[0][0]), blobs, data[0][1])
         return file
 
     def get_File_via_hash(self, hash:str)-> File:
         file = None
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            sqlite_insert_with_param = """SELECT DISTINCT File.ID, File.Birth 
-                                          FROM File, Blob WHERE Blob.Hash = ? AND File.ID = Blob.ID_File"""
-            cur.execute(sqlite_insert_with_param, [hash])
-            b_tuple = cur.fetchone()
-            conn.commit()
-            conn.close()
-            if b_tuple is not None:
-                blobs = self.get_Blobs_via_file_id(self._decode_base64(b_tuple[0]))
-                file = File(self._decode_base64(b_tuple[0]), blobs, b_tuple[1])
+        sqlite_insert_with_param = """SELECT DISTINCT File.ID, File.Birth 
+                                      FROM File, Blob WHERE Blob.Hash = ? AND File.ID = Blob.ID_File Limit 1"""
+        data = self.execute_db_command_fetchall(sqlite_insert_with_param,[hash])
+
+        if len(data) > 0:
+                blobs = self.get_Blobs_via_file_id(self._decode_base64(data[0][0]))
+                file = File(self._decode_base64(data[0][0]), blobs, data[0][1])
         return file
+
 
     def get_all_Files(self)-> list[File]:
         files = []
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM File")
-            records = cur.fetchall()
-            conn.commit()
-            conn.close()
-            if records is not None:
-                for row in records:
-                    blobs = self.get_Blobs_via_file_id(self._decode_base64(row[0]))
-                    file = File(self._decode_base64(row[0]), blobs, row[1])
-                    files.append(file)
+        command = "SELECT * FROM File"
+        records = self.execute_db_command_fetchall(command)
+
+        if len(records) > 0:
+            for row in records:
+                blobs = self.get_Blobs_via_file_id(self._decode_base64(row[0]))
+                file = File(self._decode_base64(row[0]), blobs, row[1])
+                files.append(file)
         return files
 
     def get_Files_via_jewel_id(self, jewel_id:int)-> list[File]:
         files = []
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            # Alle Files, die zu einem Jewel gehören, werden aus der Datenbank geholt. 
-            sqlite_insert_with_param = """SELECT DISTINCT File.ID, File.Birth
+        sqlite_insert_with_param = """SELECT DISTINCT File.ID, File.Birth
                                           FROM Jewel_File_Assignment, File WHERE Jewel_File_Assignment.ID_Jewel= ? AND Jewel_File_Assignment.ID_File = File.ID"""
-            cur.execute(sqlite_insert_with_param, [jewel_id])
-            records = cur.fetchall()
-            conn.commit()
-            conn.close()
+        records = self.execute_db_command_fetchall(sqlite_insert_with_param, [jewel_id])
 
-            if records is not None:
+        if len(records) > 0:
                 for row in records:
                     blobs = self.get_Blobs_via_file_id(self._decode_base64(row[0]))
                     file = File(self._decode_base64(row[0]), blobs, row[1])
@@ -612,75 +571,33 @@ class Datenbank:
         return files
 
     def get_all_Jewels(self)->list[Jewel]:
-        jewels = []
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM Jewel")
-            records = cur.fetchall()
-
-            if records is not None:
-                for row in records:
-                    jewel = Jewel(row[0], self._decode_base64(row[1]), row[2], self._decode_base64(row[3]),
-                                  self._decode_base64(row[4]), self._decode_base64(row[5]))
-                    jewels.append(jewel)
-
-            conn.commit()
-            conn.close()
+        records = self.execute_db_command_fetchall("SELECT * FROM Jewel")
+        if len(records) > 0:
+            jewels = [Jewel(row[0], self._decode_base64(row[1]), row[2], self._decode_base64(row[3]),
+                      self._decode_base64(row[4]), self._decode_base64(row[5]))for row in records]
         return jewels
+ 
 
     def get_all_Blobs(self)-> list[Blob]:
         blobs = []
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM Blob")
-            records = cur.fetchall()
-
-            if records is not None:
-                for row in records:
-                    blob = Blob(row[0], row[1], row[2], self._decode_base64(row[3]), row[4], row[5], row[6],
-                                self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]),
-                                self._decode_base64(row[10]), self._decode(row[11]))
-                    blobs.append(blob)
-
-            conn.commit()
-            conn.close()
+        records = self.execute_db_command_fetchall("SELECT * FROM Blob")
+        if len(records)>0:
+            blobs = self.create_Blob_List_from_db_input(records,0,1,2,3,4,5,6,7,8,9,10,11)
         return blobs
 
     def get_Blobs_via_file_id(self, file_id:str)-> list[Blob]:
-        blobs = []
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM Blob WHERE ID_File= ?", [self._encode_base64(file_id)])
-            records = cur.fetchall()
-
-            if records is not None:
-                for row in records:
-                    blob = Blob(row[0], row[1], row[2], self._decode_base64(row[3]), row[4], row[5], row[6],
-                                self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]),
-                                self._decode_base64(row[10]))
-                    blobs.append(blob)
-
-            conn.commit()
-            conn.close()
+        records = self.execute_db_command_fetchall("SELECT * FROM Blob WHERE ID_File= ?", [self._encode_base64(file_id)])
+        blobs = self.create_Blob_List_from_db_input(records,0,1,2,3,4,5,6,7,8,9,10,11)
         return blobs
+
 
     def get_Blob_via_id(self, id:str)-> Blob:
         blob = None
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM Blob WHERE ID= ?", [id])
-            row = cur.fetchone()
-            if row is not None:
-                blob = Blob(row[0], row[1], row[2], self._decode_base64(row[3]), row[4], row[5], row[6],
-                            self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]),
-                            self._decode_base64(row[10]))
-            conn.commit()
-            conn.close()
-
+        row = self.execute_db_command_fetchall("SELECT * FROM Blob WHERE ID= ?", [id])
+        if len(row) > 0:
+                blob = Blob(row[0][0], row[0][1], row[0][2], self._decode_base64(row[0][3]), row[0][4], row[0][5], row[0][6],
+                            self._decode_base64(row[0][7]), self._decode_base64(row[0][8]), self._decode_base64(row[0][9]),
+                            self._decode_base64(row[0][10]))
         return blob
 
     def protocol_skipped_file(self, jewel:Jewel, file:File, reason:str, additional_information:str, connected_file:str, conn:sqlite3.Connection, cur:sqlite3.Cursor)-> None:
@@ -698,8 +615,8 @@ class Datenbank:
         command = "INSERT INTO Skipped_Files (ID_Jewel, UUID, Occurance_Date, Hash, Reason, Additional_Information, Connected_File_to_Jewel) VALUES (?, ?, ?, ?, ?, ?, ? );"
         params = (jewel.id, self._encode_base64(file.id), datetime.datetime.today(), file.blobs[0].hash, reason,
                   additional_information, self._encode_base64(connected_file))
-        cur.execute(command, params)
-        conn.commit()
+        self.execute_db_command_fetchall(command,params)
+
 
     def get_all_skipped_files (self)-> list[tuple[str]]:
         """Gives informatinos of skipped files for the show method
@@ -708,30 +625,17 @@ class Datenbank:
             list[tuple[str]]: files which should be displayed
         """
         result = []
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM Skipped_Files")
-            record = cur.fetchall()
-            conn.commit()
-            conn.close()
-            if record:
-                for row in record: 
-                    result.append((row[0], row[1], self._decode_base64(row[2]), row[3], row[4], row[5], row[6], self._decode_base64(row[7])))
+        records = self.execute_db_command_fetchall("SELECT * FROM Skipped_Files")
+        for row in records: 
+            result.append((row[0], row[1], self._decode_base64(row[2]), row[3], row[4], row[5], row[6], self._decode_base64(row[7])))
 
         return result
 
 
     def get_skipped_file_via_id (self, id:str)-> list[str]:
         row = []
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM Skipped_Files WHERE ID= ?", [id])
-            row = cur.fetchone()
-            conn.commit()
-            conn.close()
-            if row: row = (row[0], row[1], self._decode_base64(row[2]), row[3], row[4], row[5], row[6], self._decode_base64(row[7]))
+        row = self.execute_db_command_fetchall("SELECT * FROM Skipped_Files WHERE ID= ? Limit 1", [id])
+        if len(row) > 0: row = (row[0], row[0][1], self._decode_base64(row[0][2]), row[0][3], row[0][4], row[0][5], row[0][6], self._decode_base64(row[0][7]))
         return row
 
     def get_restore_Jewel(self, until_date: datetime.datetime, jewel_id: int)->resJewel|None:
@@ -747,14 +651,9 @@ class Datenbank:
         # the database shall look in every value of this day
         until_date = until_date.replace(hour=23, minute=59, second=59)
         assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
-        conn = self.create_connection(self.database_path)
-        # temporär, da objekt struktur noch nicht existiert
         files = []
         jewel = None
-
-        if conn != None:
-            cur = conn.cursor()
-            command = """SELECT Id, FullbackupSource, JewelSource, ID_File, Number, source_path, Origin_Name, Store_Destination, max(insert_date) as insert_date, Hash, Reed_Solomon_Path FROM 
+        command = """SELECT Id, FullbackupSource, JewelSource, ID_File, Number, source_path, Origin_Name, Store_Destination, max(insert_date) as insert_date, Hash, Reed_Solomon_Path FROM 
                         (SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path,
                         Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date, Blob.Hash, Blob.Reed_Solomon_Path FROM File
                         INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
@@ -774,19 +673,16 @@ class Datenbank:
                         GROUP BY Blob.ID_File)
                         GROUP BY ID_File"""
 
-            params = (jewel_id, until_date, jewel_id, until_date)
-            cur.execute(command, params)
-            tmp = cur.fetchall()
-            conn.close()
+        params = (jewel_id, until_date, jewel_id, until_date)
+        tmp = self.execute_db_command_fetchall(command, params)
 
-
-            if tmp:
-                for row in tmp:
-                    files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4], row[9], self._decode_base64(row[10])))
-                jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
-                return jewel
-            else:
-                return None
+        if len(tmp) > 0:
+            for row in tmp:
+                files.append(resFile(self._decode_base64(row[6]),self._decode_base64(row[5]), self._decode_base64(row[7]), row[4], row[9], self._decode_base64(row[10])))
+            jewel = resJewel(None, row[0], files, self._decode_base64(row[2]))
+            return jewel
+        else:
+            return None
 
     def get_restore_File(self, until_date: datetime, file_id: str)-> resFile | None:
         """Gets the data for File restoring from DB
@@ -797,54 +693,49 @@ class Datenbank:
                 
             Returns:
                 resFile | None: restored file data or nothing if id is not existing"""
-        conn = self.create_connection(self.database_path)
-        # temporär, da objekt struktur noch nicht existiert
         files = []
         files_hardlink = []
 
-        if conn != None:
-            cur = conn.cursor()
-            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination, Blob.CreationDate, Blob.hash, Blob.Reed_Solomon_Path FROM File
-                        INNER JOIN Blob on File.ID = Blob.ID_File
-                        INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
-                        INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
-                        WHERE File.ID = ?
-                        AND Blob.CreationDate <= ?
-                        GROUP BY Blob.ID_File;"""
-            params = (self._encode_base64(file_id), until_date)
-            cur.execute(command, params)
-            row_files = cur.fetchone() 
+        command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Blob.ID_File, Max(Blob.Number) as Number,  Blob.Source_Path, Blob.Origin_Name, Blob.Store_Destination, Blob.CreationDate, Blob.hash, Blob.Reed_Solomon_Path FROM File
+                    INNER JOIN Blob on File.ID = Blob.ID_File
+                    INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
+                    INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
+                    WHERE File.ID = ?
+                    AND Blob.CreationDate <= ?
+                    GROUP BY Blob.ID_File LIMIT 1;"""
 
-            command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date, Blob.hash, Blob.Reed_Solomon_Path FROM File
-                        INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
-                        INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
-						INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File
-						INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
-                        WHERE File.ID = ?
-                        AND Hardlinks.insert_date <= ?
-                        ORDER BY Hardlinks.insert_date DESC;"""
-            cur.execute(command,params)
-            row_hardlink = cur.fetchone()
-            conn.close()
+        params = (self._encode_base64(file_id), until_date)
+        row_files = self.execute_db_command_fetchall(command, params)[0]
 
-            if row_files:
-                files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row_files[7]), row_files[4], row_files[9], self._decode_base64(row_files[10])))
-                jewel = resJewel(None, row_files[0], files, self._decode_base64(row_files[2]))        
 
-            if row_hardlink:
-                files_hardlink.append(resFile(self._decode_base64(row_hardlink[6]),self._decode_base64(row_hardlink[5]), self._decode_base64(row_hardlink[7]), row_hardlink[4], row_hardlink[9], self._decode_base64(row_hardlink[10])))
-                jewel_hardlink = resJewel(None, row_hardlink[0], files_hardlink, self._decode_base64(row_hardlink[2]))
+        command = """SELECT Jewel.ID, Jewel.FullbackupSource, Jewel.JewelSource, Hardlinks.ID_File, Blob.Number as Number,  Hardlinks.Source_Path, Hardlinks.origin_Name as Origin_Name, Hardlinks.destination_path as Store_Destination, Hardlinks.insert_date, Blob.hash, Blob.Reed_Solomon_Path FROM File
+                    INNER JOIN Jewel_File_Assignment on Jewel_File_Assignment.ID_File = File.ID
+                    INNER JOIN Jewel on Jewel.ID = Jewel_File_Assignment.ID_Jewel
+					INNER JOIN Hardlinks on File.ID = Hardlinks.ID_File
+					INNER JOIN Blob on Hardlinks.ID_Blob = Blob.ID
+                    WHERE File.ID = ?
+                    AND Hardlinks.insert_date <= ?
+                    ORDER BY Hardlinks.insert_date DESC;"""
+        row_hardlink = self.execute_db_command_fetchall(command,params)[0]
 
-            ##if both have solutions, take the one which is newer, since it is closer to the date, the user wants
-            if row_hardlink and row_files and row_hardlink[8] > row_files[8]:
-                return jewel_hardlink
-            elif row_hardlink and not row_files:
-                return jewel_hardlink
-            #else if the user gave an id wich is non existent
-            elif not row_files and not row_hardlink:
-                return None
-            #otherwise the normal file is the desired file
-            else: return jewel
+        if len(row_files) > 0:
+            files.append(resFile(self._decode_base64(row_files[6]),self._decode_base64(row_files[5]), self._decode_base64(row_files[7]), row_files[4], row_files[9], self._decode_base64(row_files[10])))
+            jewel = resJewel(None, row_files[0], files, self._decode_base64(row_files[2]))  
+
+        if len(row_hardlink) > 0:
+            files_hardlink.append(resFile(self._decode_base64(row_hardlink[6]),self._decode_base64(row_hardlink[5]), self._decode_base64(row_hardlink[7]), row_hardlink[4], row_hardlink[9], self._decode_base64(row_hardlink[10])))
+            jewel_hardlink = resJewel(None, row_hardlink[0], files_hardlink, self._decode_base64(row_hardlink[2]))
+
+        ##if both have solutions, take the one which is newer, since it is closer to the date, the user wants
+        if len(row_hardlink) > 0 and len(row_files) > 0 and row_hardlink[8] > row_files[8]:
+            return jewel_hardlink
+        elif len(row_hardlink) > 0 and not len(row_files)>0:
+            return jewel_hardlink
+        #else if the user gave an id wich is non existent
+        elif not len(row_files)>0 and not  len(row_hardlink) > 0:
+            return None
+        #otherwise the normal file is the desired file
+        else: return jewel
 
 
     def protocol_hardlink(self, hardlink_info:HardlinkInfo, device_name:str) -> None:
@@ -853,28 +744,21 @@ class Datenbank:
             Args:
                 hardlink_info(HardlinkInfo): all infos provided for hardlink
                 device_name: name of current device"""
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            uri = self.set_uri(File(None,None,None), device_name, hardlink_info.source_path,hardlink_info.origin_name)
-            cur = conn.cursor()   
 
-            command = """INSERT INTO FILE(ID, Birth) SELECT ?, ?
-            WHERE NOT EXISTS(SELECT 1 FROM FILE WHERE ID = ?);"""
+        command = """INSERT INTO FILE(ID, Birth) SELECT ?, ?
+                     WHERE NOT EXISTS(SELECT 1 FROM FILE WHERE ID = ?);"""
 
-            params = (self._encode_base64(uri), hardlink_info.insert_date, self._encode_base64(uri))
-            cur.execute(command, params)
-            conn.commit()
+        uri = self.set_uri(File(None,None,None), device_name, hardlink_info.source_path,hardlink_info.origin_name)
+        params = (self._encode_base64(uri), hardlink_info.insert_date, self._encode_base64(uri))
+        self.execute_db_command_fetchall(command,params)
+        self.addJewelFileAssignment(hardlink_info.jewel_id, uri)
 
-            self.addJewelFileAssignment(hardlink_info.jewel_id, uri)
-
-            command = """INSERT INTO "main"."Hardlinks"
-                        ("ID_File", "ID_Blob", "destination_path", "source_path", "insert_date", "origin_name")
-                        SELECT ?, ?, ?, ?, ?, ?
-                        WHERE NOT EXISTS(SELECT 1 FROM Hardlinks WHERE ID_File = ? AND ID_Blob = ?);"""
-            params = (self._encode_base64(uri),hardlink_info.id, self._encode_base64(hardlink_info.destination_path), self._encode_base64(hardlink_info.source_path), hardlink_info.insert_date, self._encode_base64(hardlink_info.origin_name), self._encode_base64(uri),hardlink_info.id)
-            cur.execute(command,params)
-            conn.commit()
-            conn.close()
+        command = """INSERT INTO "main"."Hardlinks"
+                    ("ID_File", "ID_Blob", "destination_path", "source_path", "insert_date", "origin_name")
+                    SELECT ?, ?, ?, ?, ?, ?
+                    WHERE NOT EXISTS(SELECT 1 FROM Hardlinks WHERE ID_File = ? AND ID_Blob = ?);"""
+        params = (self._encode_base64(uri),hardlink_info.id, self._encode_base64(hardlink_info.destination_path), self._encode_base64(hardlink_info.source_path), hardlink_info.insert_date, self._encode_base64(hardlink_info.origin_name), self._encode_base64(uri),hardlink_info.id)
+        self.execute_db_command_fetchall(command,params)
 
             
     def get_all_blobs_for_repair(self)-> list[Blob]:
@@ -884,43 +768,25 @@ class Datenbank:
         Returns:
             list[Blob]: list of blobs with no reed solomon path.
         """
-        blobs = []
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-            command = "SELECT * FROM Blob WHERE Reed_Solomon_Path == ?"
-            param = (self._encode_base64("None"),)
-            cur.execute(command, param)
-            records = cur.fetchall()
-            conn.commit()
-            conn.close()
 
-            if records is not None:
-                 blobs = [Blob(row[0], row[1], row[2], self._decode_base64(row[3]), row[4], row[5], row[6],
-                                self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]),
-                                self._decode_base64(row[10]), self._decode_base64(row[11])) for row in records]
-
+        command = "SELECT * FROM Blob WHERE Reed_Solomon_Path == ?"
+        param = (self._encode_base64("None"),)
+        records = self.execute_db_command_fetchall(command, param)
+        blobs = self.create_Blob_List_from_db_input(records, 0,1,2,3,4,5,6,7,8,9,10,11)
         return blobs
 
+   
     def update_blobs_after_repair(self, rs_blobs:list("Blob"))-> None:
         """Inserts the new Reed Solomon paths to the blobs in the db.
 
             Args:
             rs_blobs(list(Blob)): List ob blobs with new reed solomon paths
         """
-        conn = self.create_connection(self.database_path)
-        if conn != None:
-            cur = conn.cursor()
-
-            insert_batch = [(self._encode_base64(blob.reed_solomon_path), blob.id) for blob in rs_blobs]
-
-            command = """UPDATE Blob
-                         SET Reed_Solomon_Path = ?
-                         WHERE Blob.ID = ? Limit 1;"""
-
-            cur.executemany(command, insert_batch)
-            conn.commit()
-            conn.close()
+        insert_batch = [(self._encode_base64(blob.reed_solomon_path), blob.id) for blob in rs_blobs]
+        command = """UPDATE Blob
+                     SET Reed_Solomon_Path = ?
+                     WHERE Blob.ID = ? Limit 1;"""
+        self.execute_db_command_fetchall(command,insert_batch, executemany=True)
 
 
     def create_Blob_List_from_db_input(self, db_output, id_idx:int, number_idx:int, hash_idx:int,name_idx:int,fileSize_idx:int,
@@ -928,7 +794,7 @@ class Datenbank:
         blob_list = []
 
         if db_output:
-            blobs = [Blob(
+            blob_list = [Blob(
                     id=row[id_idx], 
                     number=row[number_idx], 
                     hash = row[hash_idx],
@@ -943,4 +809,26 @@ class Datenbank:
                     reed_solomon_path = self._decode_base64(row[reed_Solomon_path_idx])
                     )for row in db_output]
         return blob_list
+
+    def execute_db_command_fetchall(self, command:str,params:tuple=(), executemany:bool=False):
+        records = None
+        conn = self.create_connection(self.database_path)
+
+        if conn == None:
+            raise ConnectionError
+
+        cur = conn.cursor()
+
+        if executemany:
+            cur.executemany(command,params)
+        else:
+            cur.execute(command, params)
+
+        records = cur.fetchall()
+        conn.commit()
+        conn.close()
+
+        return records
+
+
             

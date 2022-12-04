@@ -111,6 +111,13 @@ def check_info_from_config(property:str, key:str, config, device_name):
         print("There is a form error in the config.json.")
         sys.exit()
 
+def validate_date_format(date_var:str, format:str):
+    res = True
+    try:
+        res = bool(date.strptime(date_var, format))
+    except:
+        res = False
+    return res
 
 # TODO: Alle Datenbank-Pfade zum backup_path ändern, wenn die Datenbank in der BackupLocation liegt
 def check_db_hash(backup_path:str, backup_name:str):

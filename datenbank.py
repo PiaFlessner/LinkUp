@@ -797,9 +797,6 @@ class Datenbank:
                 
             Returns:
                 resFile | None: restored file data or nothing if id is not existing"""
-        # the database shall look in every value of this day
-        until_date = until_date.replace(hour=23, minute=59, second=59)
-        assert (until_date.minute == 59 and until_date.hour == 23 and until_date.second == 59)
         conn = self.create_connection(self.database_path)
         # temporär, da objekt struktur noch nicht existiert
         files = []

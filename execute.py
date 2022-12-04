@@ -5,6 +5,7 @@ from restore import Restore
 from datetime import datetime
 import info_handler as ih
 import platform
+import datetime
 
 # Hier startet das Programm
 if __name__ == "__main__":
@@ -42,8 +43,8 @@ if __name__ == "__main__":
     # command: python3 execute.py restore -J 12hi
     group.add_argument('-J', '--restoreJewel', action='store_true', help='Restore certain Jewel')
     # needed Id to restore
-    restoreSection.add_argument('id', type=str)
-    restoreSection.add_argument('datetime', type=str)
+    restoreSection.add_argument('id', type=str, help="File ID in Table File")
+    restoreSection.add_argument('datetime', type=str, help="Date in Format: Y-m-D-H-M-S")
 
     # command: python3 execute.py backup
     backupSection = subparser.add_parser('backup', help="Get into backup section of program.")
@@ -116,21 +117,67 @@ if __name__ == "__main__":
             else:
                 sT.show_all_blobs(verbose_level)
 
-    if args.command == "restore":
+        # user chooses nothing
+        else:
+            print("No action selected.")
+
+    elif args.command == "restore":
+
         restore_object = Restore()
-        if args.datetime == "today":
-            args.datetime = str(datetime.today())
-        try:
-            datetime.fromisoformat(args.datetime)
-        except:
-            print("datetime format is incorrect, use year-month-day XXXX-XX-XX")
-            exit(0)
+
         if args.restoreFile:
-            restore_object.restore_file(args.id, args.datetime)
+            try:
+                # User date input
+                date_input = args.datetime
+                print(date_input)
+                if date_input == 'today':
+                    # needs to be converted into a string of the specific format
+                    date_var = datetime.date.today().strftime("%Y-%m-%d-%H-%M-%S")
+                    # creates a datetime object supporting the correct format
+                    date_var = datetime.datetime.strptime(date_var, "%Y-%m-%d-%H-%M-%S")
+                    date_var = date_var.replace(hour=23, minute=59, second=59)
+                elif date_input == 'yesterday':
+                    # calculates the date for yesterday
+                    date_var = datetime.date.today() + datetime.timedelta(-1)
+                    date_var = datetime.datetime.strftime("%Y-%m-%d-%H-%M-%S")
+                    date_var = datetime.datetime.strptime(date_var, "%Y-%m-%d-%H-%M-%S")
+                    date_var = date_var.replace(hour=23, minute=59, second=59)
+                elif date_input == 'now':
+                    # procedure for now
+                    date_var = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                    date_var = datetime.datetime.strptime(date_var, "%Y-%m-%d-%H-%M-%S")
+                elif ih.validate_date_format(date_input, "%Y-%m-%d-%H-%M-%S"):
+                    # if datetime is given in the correct format
+                    date_var = datetime.datetime.strptime(date_input, "%Y-%m-%d-%H-%M-%S")
+                elif ih.validate_date_format(date_input, "%Y-%m-%d-%H-%M"):
+                    # without the second timestamp
+                    date_var = datetime.datetime.strptime(date_input, "%Y-%m-%d-%H-%M")
+                    date_var = date_var.strftime("%Y-%m-%d-%H-%M-%S")
+                    date_var = datetime.datetime.strptime(date_var, "%Y-%m-%d-%H-%M-%S")
+                    date_var = date_var.replace(second=59)
+                elif ih.validate_date_format(date_input, "%Y-%m-%d-%H"):
+                    # without second and minute
+                    date_var = datetime.datetime.strptime(date_input, "%Y-%m-%d-%H")
+                    date_var = date_var.strftime("%Y-%m-%d-%H-%M-%S")
+                    date_var = datetime.datetime.strptime(date_var, "%Y-%m-%d-%H-%M-%S")
+                    date_var = date_var.replace(minute=59, second=59)
+                elif ih.validate_date_format(date_input, "%Y-%m-%d"):
+                    # without hour, minute and second
+                    date_var = datetime.datetime.strptime(date_input, "%Y-%m-%d")
+                    date_var = date_var.strftime("%Y-%m-%d-%H-%M-%S")
+                    date_var = datetime.datetime.strptime(date_var, "%Y-%m-%d-%H-%M-%S")
+                    date_var = date_var.replace(hour=23, minute=59, second=59)
+                else:
+                    print("No valid format. Use YYYY-mm-DD-HH-MM-SS")
+                restore_object.restore_file(args.id, date_var)
+            except:
+                print("No valid format. Use YYYY-mm-DD-HH-MM-SS")
+            
+            pass
         elif args.restoreJewel:
             restore_object.restore_jewel(args.id, args.datetime)
         else:
-            print("No restore action selected")
+            print("Please enter appropriate flag (-F or -J) ")
 
     if args.command == "backup":
         verbose_level = 0

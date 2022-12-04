@@ -777,7 +777,7 @@ class Datenbank:
         self.execute_db_command_fetchall(command,insert_batch, executemany=True)
 
 
-    def create_Blob_List_from_db_input(self, db_output_row:list(tuple(str)), id_idx:int, number_idx:int, hash_idx:int,name_idx:int,fileSize_idx:int,
+    def create_Blob_List_from_db_input(self, db_output_row, id_idx:int, number_idx:int, hash_idx:int,name_idx:int,fileSize_idx:int,
     creationDate_idx:int,modify_idx:int,iD_File_idx:int,origin_name_idx:int,source_path_idx:int, store_destination_idx:int, reed_Solomon_path_idx:int )->list("Blob"):
         """takes a multirow db output and creates an bloblist
 
@@ -819,7 +819,7 @@ class Datenbank:
                     )for row in db_output_row]
         return blob_list
 
-    def execute_db_command_fetchall(self, command:str,params:tuple=(), executemany:bool=False)-> list(tuple(str)):
+    def execute_db_command_fetchall(self, command:str,params:tuple=(), executemany:bool=False):
         """Creates a db connection. Execute a db command, commits it and does fetchall. Closes the connection
 
         Args:

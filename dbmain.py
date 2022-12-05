@@ -7,9 +7,5 @@ import platform
 restoreDay = date(2022,11,21,17,45)
 daten = Datenbank()
 
-jewel = daten.get_restore_Jewel(restoreDay,1)
-print(f"{jewel}: restore destination: {jewel.restore_destination}, jewel source: {jewel.jewel_source}\n")
-
-file = daten.get_restore_File(restoreDay, "gruppe-VirtualBox/home/gruppe/backupTest/jewels/dritte_datei")
-print(f"{file}\n")
- 
+blobs = daten.get_all_blobs_for_repair()
+print(blobs[0])

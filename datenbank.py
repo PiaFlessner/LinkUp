@@ -641,7 +641,7 @@ class Datenbank:
                 for row in records:
                     blob = Blob(row[0], row[1], row[2], self._decode_base64(row[3]), row[4], row[5], row[6],
                                 self._decode_base64(row[7]), self._decode_base64(row[8]), self._decode_base64(row[9]),
-                                self._decode_base64(row[10]), self._decode(row[11]))
+                                self._decode_base64(row[10]), self._decode_base64(row[11]))
                     blobs.append(blob)
 
             conn.commit()

@@ -120,7 +120,7 @@ def validate_date_format(date_var:str, format:str):
     return res
 
 
-def check_db_hash(backup_path:str, backup_name:str):
+def check_db_hash(backup_path:str, backup_name:str, test=False):
     log_file = None
 
     # Checks if a log file for database exist, when not will create it after if. 
@@ -148,7 +148,7 @@ def check_db_hash(backup_path:str, backup_name:str):
                             log_file  = open(backup_path + "/" + "db.log", "w")
                             log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
                             log_file.close()
-                            sys.exit()  
+                            if not test: sys.exit()  
 
                         else:
                              print("The backup database was corrupted and could not be restored, because db.log got also corrupted.")
@@ -166,6 +166,7 @@ def check_db_hash(backup_path:str, backup_name:str):
     log_file  = open("db.log", "w")
     log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
     log_file.close()
+
 
     status = subprocess.call('cp ' + backup_path + '/' + 'datenbank.db ' + backup_path + '/' +  'tmp.db', shell=True) 
 

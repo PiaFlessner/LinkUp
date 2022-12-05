@@ -98,13 +98,37 @@ class TestRestore(unittest.TestCase):
         self.assertTrue(jewel.res_file[0].version_number == 2, f"Version Number ist wrong, should be 2, is {jewel.res_file[0].version_number}")
 
     def test_g_restore_symlink_file(self):
-        open(os.path.join(os.path.dirname(__file__), "unitTestFiles/reference_file_to_symlink.txt"), "a")
+        file = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/reference_file_to_symlink.txt"), "a")
         os.symlink("unitTestFiles/reference_file_to_symlink.txt", "unitTestFiles/jewel/symlink")
         backup_g = Backup(self.jewel_list, self.workingDirectory + "/" + self.config["destination"][device_name], True)
         backup_g.initialize_backup(0)
+       
 
-        latest_diff_folder = max([os.path.join('unitTestFiles/backupLocation',d) for d in os.listdir('unitTestFiles/backupLocation') if not d.endswith("db")], key=os.path.getmtime)
+        latest_diff_folder = max([os.path.join('unitTestFiles/backupLocation',d) for d in os.listdir('unitTestFiles/backupLocation') if not d.endswith(".db") and not d.endswith(".log")], key=os.path.getmtime)
         self.assertTrue(os.path.islink(latest_diff_folder + "/" + "jewel/symlink"), "File should be a symlink")
+        file.close()
+
+
+    def test_h_db_log (self):
+        self.assertTrue(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation" + "/" + "db.log"), "db.log does not exist")
+
+
+    def test_i_restore_database_and_backup (self):
+        os.mkdir(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation" + "/" + "diff-test"))
+        file = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation" + "/" + "db.log"), "r")
+        old_hash = file.readlines()[0].rstrip()
+        file.close()
+        ih.update_db_hash(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation"), "diff-test")
+        ih.check_db_hash(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation"), "test", True)
+        jewel = self.daten.get_Jewel_via_id(1)
+        jewel.device_name = "Hallo"
+        jewel.fullbackup_source = "Test"
+        self.daten.addJewel(jewel)
+        ih.check_db_hash(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation"), "test", True)
+        file = open(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation" + "/" + "db.log"), "r")
+        self.assertTrue(file.readlines()[0].rstrip() == old_hash, "database hash should be the same")
+        self.assertFalse(os.path.exists(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation" + "/" + "diff-test")))
+        file.close()
 
 
 
@@ -113,6 +137,7 @@ class TestRestore(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         os.remove(cls.config["destination"][device_name] + '/datenbank.db')
+        os.remove(cls.config["destination"][device_name] + '/db.log')
         shutil.rmtree(cls.config["destination"][device_name])
         shutil.rmtree(cls.config["restore_destination"][device_name])
         os.remove("unitTestFiles/jewel/test_new.txt")

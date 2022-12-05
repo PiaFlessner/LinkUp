@@ -35,7 +35,9 @@ class Backup:
 
         #Checks and deletes the first backup when it runned not through and start from scratch again.
         if os.path.exists(self.destination + "/" + "db.log"):
-           log_lines= open(self.destination  + "/" + "db.log", "r").readlines()
+           file = open(self.destination  + "/" + "db.log", "r")
+           log_lines= file.readlines()
+           file.close()
            if len(log_lines) > 1:  
                if log_lines[1].rstrip() == self.fullbackup_name:   
                     info_handler.check_db_hash(self.destination, self.fullbackup_name)

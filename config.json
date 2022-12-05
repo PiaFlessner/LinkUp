@@ -1,7 +1,7 @@
 {
   "jewel_sources" :
   {
-    "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels", "/home/gruppe/backupTest/jewels2"],
+    "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels2", "/home/gruppe/backupTest/jewels/jewelInJewel","/home/gruppe/backupTest/jewels"],
     "kali": ["/home/kali/folderToBackup", "/home/kali/extraFolder", "/home/kali/extraExtraFolder"],
     "mirco-ThinkPad-T495": ["/home/mirco/Backuptest"],
     "testCases" : ["/unitTestFiles/jewel", "/unitTestFiles/jewel2"],

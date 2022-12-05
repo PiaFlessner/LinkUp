@@ -150,6 +150,7 @@ class Backup:
                     elif jewel_path.rsplit('/', 1)[1].strip("/") == line.split("/")[0]:
                         jewel = Jewel(0, None, date.today(), jewel_path, self.device_name,
                                       f'{fullbackup_store_destination_body}/{line.strip("/")}')
+                        break
 
             else:
                 # get only the working dir without the jewel(because line inherits the jewel)

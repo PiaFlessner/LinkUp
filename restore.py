@@ -4,6 +4,9 @@ import subprocess
 from datetime import datetime as date
 import info_handler
 import platform
+
+from repair import Repair
+from resFile import resFile
 import datetime
 
 
@@ -61,13 +64,14 @@ class Restore:
 
         return restore_directory_list
 
-    def restore_jewel(self, jewel_id: int, date_time: datetime):
+    def restore_jewel(self, jewel_id: int,  date_time: datetime):
         count = 0
         db_object = Datenbank()
         #date_time = date.fromisoformat(date_time)
         jewel = db_object.get_restore_Jewel(date_time, jewel_id)
         restore_destination_paths = self.restore_directory_structure(jewel)
         for file in jewel.res_file:
+            self.repair_file_if_necessary(file)
             subprocess.run(f'rsync -aAXlv {file.backup_location} {restore_destination_paths[count]} ',
                            shell=True)
             count += 1
@@ -76,6 +80,18 @@ class Restore:
         db_object = Datenbank()
         #date_time = date.fromisoformat(date_time)
         jewel = db_object.get_restore_File(date_time, file_id)
+        self.repair_file_if_necessary(jewel.res_file[0])
         restore_destination_paths = self.restore_directory_structure(jewel)
         print(restore_destination_paths[0])
         subprocess.run(f'rsync -aAXlv {jewel.res_file[0].backup_location} {restore_destination_paths[0]} ', shell=True)
+
+    def repair_file_if_necessary(self, res_file : resFile, verbosity :bool=False) -> None:
+        repair=Repair()
+        if repair.check_if_file_is_broken(res_file):
+            if(res_file.reed_solomon_path is not None):
+                repair.repair_file(res_file)
+                print("file "+res_file.backup_location+" was repaired")
+            elif(verbosity):
+                print("""File is broken, but there is no redundancy information for this file so it can't be repaired.\n
+                 sourcepath="""+res_file.backup_location)
+

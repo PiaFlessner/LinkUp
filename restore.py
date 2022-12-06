@@ -70,11 +70,33 @@ class Restore:
         #date_time = date.fromisoformat(date_time)
         jewel = db_object.get_restore_Jewel(date_time, jewel_id)
         restore_destination_paths = self.restore_directory_structure(jewel)
+        files_in_destination = []
+        files_in_backup = []
         for file in jewel.res_file:
             self.repair_file_if_necessary(file)
-            subprocess.run(f'rsync -aAXlv {file.backup_location} {restore_destination_paths[count]} ',
-                           shell=True)
+            try:
+                subprocess.run(f'rsync -aAXlv "{file.backup_location}" "{restore_destination_paths[count]}"',
+                            shell=True)
+            except:
+                print(f'Error: rsync couldn\'t be executed\n'
+                  f'used option: aAXlv\n'
+                  f'backup path: {file.backup_location}\n'
+                  f'destination path: {restore_destination_paths[count]}\n')
+                exit()
+            # which files got restored
+            for (restore_destination_paths[count], dir_names, file_names) in os.walk(restore_destination_paths[count]):
+                files_in_destination.extend(file_names)
+            # which files should have been restored
+            file_path = '/'.join(str(file.backup_location).split('/')[:-1])
+            for (file_path, dir_names, file_names) in os.walk(file_path):
+                files_in_backup.extend(file_names)
             count += 1
+        # differences
+        difference = list(set(files_in_backup) - set(files_in_destination))
+        if len(difference) != 0:
+            print(f'\nWarning: {len(difference)} files couldn\'t be restored\n'
+                  f'Missing files: {difference}\n')
+
 
     def restore_file(self, file_id: str, date_time: datetime):
         db_object = Datenbank()
@@ -82,8 +104,29 @@ class Restore:
         jewel = db_object.get_restore_File(date_time, file_id)
         self.repair_file_if_necessary(jewel.res_file[0])
         restore_destination_paths = self.restore_directory_structure(jewel)
-        print(restore_destination_paths[0])
-        subprocess.run(f'rsync -aAXlv {jewel.res_file[0].backup_location} {restore_destination_paths[0]} ', shell=True)
+        files_in_destination = []
+        files_in_backup = []
+        try:
+            subprocess.run(f'rsync -aAXlv "{jewel.res_file[0].backup_location}" "{restore_destination_paths[0]}"', shell=True)
+        except:
+            print(f'Error: rsync couldn\'t be executed\n'
+                f'used option: aAXlv\n'
+                f'backup path: {jewel.res_file[0].backup_location}\n'
+                f'destination path: {restore_destination_paths[0]}\n')
+            exit()
+        # which files got restored
+        for (restore_destination_paths[0], dir_names, file_names) in os.walk(restore_destination_paths[0]):
+            files_in_destination.extend(file_names)
+        # which files should get restored
+        file_path = '/'.join(str(jewel.res_file[0].backup_location).split('/')[:-1])
+        for (file_path, dir_names, file_names) in os.walk(file_path):
+            files_in_backup.extend(file_names)
+        # differences
+        difference = list(set(files_in_backup) - set(files_in_destination))
+        if len(difference) != 0:
+            print(f'\nWarning: {len(difference)} files couldn\'t be restored\n'
+                  f'Missing files: {difference}\n')
+
 
     def repair_file_if_necessary(self, res_file : resFile, verbosity :bool=False) -> None:
         repair=Repair()

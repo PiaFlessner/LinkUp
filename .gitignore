@@ -135,3 +135,6 @@ dmypy.json
 
 # Database
 /datenbank.db
+test_Files_Backup/backup_Location/*
+test_Files_Backup/jewel/*
+test_Files_Backup/jewel2/*

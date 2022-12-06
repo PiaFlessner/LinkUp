@@ -151,7 +151,6 @@ class TestDatabase(unittest.TestCase):
             # check if the jewel already exists in the database
             command = "SELECT MAX(ID) FROM Jewel"
             cur.execute(command)
-            data = cur.fetchone()
             cur.execute("SELECT * FROM Jewel")
             data = cur.fetchall()
             mylist = []

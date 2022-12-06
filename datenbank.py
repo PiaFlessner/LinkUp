@@ -13,6 +13,7 @@ from hardlink_info import HardlinkInfo
 from resFile import resFile
 from resJewel import resJewel
 from info_handler import get_json_info
+import datetime
 
 
 class Jewel:
@@ -142,7 +143,7 @@ class Datenbank:
         try:
             conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         except sqlite3.Error as e:
-            print(e)
+            print("sqlite_error!: ",e)
 
         return conn
 

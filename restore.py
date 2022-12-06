@@ -88,10 +88,9 @@ class Restore:
     def repair_file_if_necessary(self, res_file : resFile, verbosity :bool=False) -> None:
         repair=Repair()
         if repair.check_if_file_is_broken(res_file):
-            if(res_file.reed_solomon_path is not None):
+            if(res_file.reed_solomon_path != 'None'):
                 repair.repair_file(res_file)
-                print("file "+res_file.backup_location+" was repaired")
-            elif(verbosity):
-                print("""File is broken, but there is no redundancy information for this file so it can't be repaired.\n
-                 sourcepath="""+res_file.backup_location)
+                print("File "+res_file.backup_location+" was repaired")
+            else:
+                print("""- File is broken, but there is no redundancy information for this file so it can't be repaired.\nsourcepath= """+res_file.backup_location)
 

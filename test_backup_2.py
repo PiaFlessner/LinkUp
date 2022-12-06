@@ -67,7 +67,7 @@ class TestBackup(unittest.TestCase):
     def test_a_fullbackup_jewel(self):
       
         try:
-            self.assertFalse(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel",
+            self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel",
                                                     str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/backup_Location/fullBackup"f"{device_name}/jewel"))
         except FileNotFoundError:
             print("Test A:")
@@ -83,8 +83,15 @@ class TestBackup(unittest.TestCase):
             print("Test B:")
             print("File or Directory not Found")
             self.assertTrue(False)
-            
-    def test_c_diffBackup_jewel(self):
+    # def test_c_fullbackup_special_Files(self):
+    #     try:
+    #         self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel3",
+    #                                             str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/backup_Location/fullBackup"f"{device_name}/jewel3"))
+    #     except FileNotFoundError:
+    #         print("Test C:")
+    #         print("File or Directory not Found")
+    #         self.assertTrue(False)
+    def test_d_diffBackup_jewel(self):
         
         with open('./test_Files_Backup/execScripts.sh', 'rb') as file:
              script = file.read()
@@ -92,11 +99,13 @@ class TestBackup(unittest.TestCase):
         
         os.utime(f"{str(pathlib.Path(__file__).parent.resolve())}/test_Files_Backup/jewel")
         os.utime(f"{str(pathlib.Path(__file__).parent.resolve())}/test_Files_Backup/jewel2")
+        os.utime(f"{str(pathlib.Path(__file__).parent.resolve())}/test_Files_Backup/jewel3")
+        
         
        # time.sleep(1)
         #global date_Format
         #date_Format = date.now().strftime('%d-%m-%Y-%H-%M')
-        self.backup.initialize_backup(0) 
+        self.backup.initialize_backup(2) 
         
         # time.sleep(1)
         global diffPath
@@ -109,18 +118,18 @@ class TestBackup(unittest.TestCase):
             self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel/make_Data_Dir"
                    ,str(pathlib.Path(__file__).parent.resolve()) + diffPath + "/jewel/make_Data_Dir"))
         except FileNotFoundError:
-            print("Test C:")
+            print("Test D:")
             print("File or Directory not Found")
             self.assertTrue(False)
             
             
-    def test_d_diffBackup_jewel2(self):
+    def test_e_diffBackup_jewel2(self):
        
         try:
             self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel2/data_And_Link_Dir"
                             , str(pathlib.Path(__file__).parent.resolve()) + diffPath + "/jewel2/data_And_Link_Dir"))
         except FileNotFoundError:
-            print("Test D")
+            print("Test E")
             print("File or Directory not Found")
             self.assertTrue(False)
       

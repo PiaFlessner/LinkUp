@@ -66,8 +66,13 @@ if __name__ == "__main__":
     # command: python3 execute.py backup -v
     group.add_argument('-v', '--verbose', action='store_true', help='Backup with detailed information')
 
+    # command: python3 execute.py reset
+    resetSection = subparser.add_parser('reset', help="Reset the backups of current device.")
+    group = resetSection.add_mutually_exclusive_group()
+
     helpSection = subparser.add_parser('help', help="info for all commands")
     group = helpSection.add_mutually_exclusive_group()
+
 
     # makes args accessable
     try:
@@ -179,6 +184,13 @@ if __name__ == "__main__":
             print("ID missing! exiting...")
   
 
+    if args.command == "reset":
+        print("Do you really want to reset the backup for your current device: " + platform.node() + "?")
+        print("Then please enter >I am sure< to reset your backup.")
+        print("Or enter something else to cancel.")
+        user_input = input()
+        if user_input == "I am sure": ih.reset_backup()
+        else: print("The reset was canceled.")
        
 
      

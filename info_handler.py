@@ -178,3 +178,8 @@ def update_db_hash(backup_path:str, backup_name:str):
     if os.path.exists(backup_path + "/" +"tmp.db"):  os.remove(backup_path +"/" +"tmp.db") 
 
 
+def reset_backup(device=platform.node()):
+    reset_path = get_json_info()['destination'][device]
+    shutil.rmtree(reset_path, ignore_errors=True)
+    print("The reset was successfully performed for the device: " + device+ ".")
+

@@ -122,62 +122,59 @@ def validate_date_format(date_var:str, format:str):
     return res
 
 
-# TODO: Alle Datenbank-Pfade zum backup_path ändern, wenn die Datenbank in der BackupLocation liegt
-def check_db_hash(backup_path:str, backup_name:str):
-    log_file = None
 
+def check_db_hash(backup_path:str, backup_name:str, test=False):
+    log_file = None
     # Checks if a log file for database exist, when not will create it after if. 
-    if  os.path.exists(db_log):
+    if  os.path.exists(backup_path + "/" + "db.log"):
 
             # Reads file and checks if the hash is right and replace by false datenbank.db with tmp.db and the last backup folder will be deleted.
-            log_file  = open(db_log, "r")
-            if os.stat(db_log).st_size != 0:
+            log_file  = open(backup_path + "/" + "db.log", "r")
+            if os.stat(backup_path + "/" + "db.log").st_size != 0:
                 lines = log_file.readlines()
                 old_hash = lines[0].rstrip()
-                current_hash = get_hash('/home/gruppe/Dokumente/PG5/projektgruppe/datenbank.db')
+                current_hash = get_hash(backup_path + "/" + "datenbank.db")
                 log_file.close()
                
                 if old_hash != current_hash:
-                    if not os.path.exists(tmp_db):
-                        print("The backup database was corrupted and could not be restored.")
-                        print("Please delete the specific backup folder and start from scratch.")
-                        print("da")
+                    if not os.path.exists(backup_path + "/" + "tmp.db"):
+                        print("The backup database was corrupted and could not be restored, because the file tmp.db could not be found.")
+                        print("Please delete the specific backup folder and start from scratch or add the file tmp.db into: "+ backup_path + ".")
                         sys.exit()
                     else:
-                        os.remove("datenbank.db") 
-                        os.rename(tmp_db, "datenbank.db")
+                        os.remove(backup_path + "/" + "datenbank.db") 
+                        os.rename(backup_path + "/" + "tmp.db", backup_path + "/" + "datenbank.db")
                         if len(lines) >1: 
                             shutil.rmtree(backup_path + "/" + lines[1].rstrip(), ignore_errors=True)
                             print("The database changed before the backup process could be completed and the old version of the database and backup was restored.")
-                            log_file  = open(db_log, "w")
-                            log_file.write(get_hash('/home/gruppe/Dokumente/PG5/projektgruppe/datenbank.db') + "\n" + backup_name)
+                            log_file  = open(backup_path + "/" + "db.log", "w")
+                            log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
                             log_file.close()
-                            sys.exit()  
+                            if not test: sys.exit()  
 
                         else:
-                             print("The backup database was corrupted and could not be restored.")
+                             print("The backup database was corrupted and could not be restored, because db.log got also corrupted.")
                              print("Please delete the specific backup folder and start from scratch.")
-                             print("hier")
                              sys.exit()
                         
             else:
                  print("The backup database was corrupted and could not be restored.")
                  print("Please delete the specific backup folder and start from scratch.")
-                 print("End")
                  sys.exit()
 
     # Creates a new tmp.db and delete the old one if it is still there.
     # Overrides or creates a new db.log
-    if os.path.exists(tmp_db):  os.remove(tmp_db) 
-    log_file  = open(db_log, "w")
-    log_file.write(get_hash('/home/gruppe/Dokumente/PG5/projektgruppe/datenbank.db') + "\n" + backup_name)
+    if os.path.exists(backup_path + "/" + "tmp.db"):  os.remove(backup_path + "/" + "tmp.db") 
+    log_file  = open("db.log", "w")
+    log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
     log_file.close()
-    status = subprocess.call('cp /home/gruppe/Dokumente/PG5/projektgruppe/datenbank.db /home/gruppe/Dokumente/PG5/projektgruppe/tmp.db', shell=True) 
+    status = subprocess.call('cp ' + backup_path + '/' + 'datenbank.db ' + backup_path + '/' +  'tmp.db', shell=True) 
 
 
 def update_db_hash(backup_path:str, backup_name:str):
-    log_file  = open(db_log, "w")
-    log_file.write(get_hash('/home/gruppe/Dokumente/PG5/projektgruppe/datenbank.db') + "\n" + backup_name)
+    log_file  = open(backup_path + "/" + "db.log", "w")
+    log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
     log_file.close()
-    if os.path.exists(tmp_db):  os.remove(tmp_db) 
+    if os.path.exists(backup_path + "/" +"tmp.db"):  os.remove(backup_path +"/" +"tmp.db") 
+
 

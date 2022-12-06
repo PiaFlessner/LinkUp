@@ -1,5 +1,7 @@
 import argparse
 from backup import Backup
+from datenbank import Datenbank
+from repair import Repair
 from show_tables import ShowTables
 from restore import Restore
 from datetime import datetime
@@ -34,6 +36,17 @@ if __name__ == "__main__":
     showTables.add_argument('-v', '--verbose', action='store_true', help="more detail")
     showTables.add_argument('-vv', '--verboseverbose', action='store_true', help="all of the detail")
     paths = parser.add_mutually_exclusive_group()
+
+    #command: python3 rs -[c ca r ra] ############################## TODO 
+    reed_solomon = subparser.add_parser('rs', help="Get into Reed-Solomon section of program. E.g. -create and -repair.")
+    group2 = reed_solomon.add_mutually_exclusive_group()
+    group2.add_argument('-ca', '--createall', action='store_true', help='Create forward error correction for everything')
+    group2.add_argument('-c', '--createone', action='store_true', help='Create forward error correction for one')
+    group2.add_argument('-ra', '--repairall', action='store_true', help='Create forward error correction for one')
+    group2.add_argument('-r', '--repairone', action='store_true', help='Create forward error correction for one')
+    reed_solomon.add_argument('id', type=str, nargs='?')
+    reed_solomon.add_argument('-v', '--verbose', action='store_true', help="more detail")
+    reed_solomon.add_argument('-o', '--overwrite', action='store_true', help="overwrite Files")
 
     # command: python3 execute.py restore
     restoreSection = subparser.add_parser('restore', help="Get into restore section of program.")
@@ -187,5 +200,35 @@ if __name__ == "__main__":
         backup = Backup(config["jewel_sources"][platform.node()], config["destination"][platform.node()])
         backup.initialize_backup(verbose_level)
 
+    # user chooses the Reed-Solomon section
+    if args.command == "rs":
+        verbose_level = 0
+        if args.verbose == 1:
+            verbose_level = 1
+        repair=Repair()
+        daten = Datenbank()
+        blobs=[]
+        if args.createall:
+            blobs = daten.get_all_Blobs()
+            for blob in blobs:
+                repair.create_repair_data(blob)
+            print("Redundancy information created")
+        elif args.createone:
+            if args.id is not None:
+                blob = daten.get_Blob_via_id(args.id)
+                repair.create_repair_data(blob)
+                print("Redundancy information created")
+        
+            
+        else:
+            print("ID missing! exiting...")
+  
+
+       
+
+     
+  
+
     if args.command == None:
         print("no command given, use help for more information")
+

@@ -8,6 +8,8 @@ import sys
 import shutil
 
 json_file_name = "config.json"
+db_log="db.log"
+tmp_db="tmp.db"
 
 
 def get_metadata(filepth: str):
@@ -120,9 +122,9 @@ def validate_date_format(date_var:str, format:str):
     return res
 
 
+
 def check_db_hash(backup_path:str, backup_name:str, test=False):
     log_file = None
-
     # Checks if a log file for database exist, when not will create it after if. 
     if  os.path.exists(backup_path + "/" + "db.log"):
 
@@ -166,8 +168,6 @@ def check_db_hash(backup_path:str, backup_name:str, test=False):
     log_file  = open("db.log", "w")
     log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
     log_file.close()
-
-
     status = subprocess.call('cp ' + backup_path + '/' + 'datenbank.db ' + backup_path + '/' +  'tmp.db', shell=True) 
 
 
@@ -176,4 +176,5 @@ def update_db_hash(backup_path:str, backup_name:str):
     log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
     log_file.close()
     if os.path.exists(backup_path + "/" +"tmp.db"):  os.remove(backup_path +"/" +"tmp.db") 
+
 

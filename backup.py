@@ -33,9 +33,9 @@ class Backup:
 
         self.check_packages(['rsync', 'openssl'])
 
-        #Checks and deletes the first backup when it runned not through and start from scratch again.
-        if os.path.exists(self.destination + "/" + "db.log"):
-           file = open(self.destination  + "/" + "db.log", "r")
+        #Checks and deletes the first backup when it runned not through and start from scratch again. 
+        if os.path.exists("db.log"):
+           file = open("db.log", "r")
            log_lines= file.readlines()
            file.close()
            if len(log_lines) > 1:  
@@ -64,6 +64,7 @@ class Backup:
         differential_backup_name = f"diff-{self.current_date_time_formatted}"
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
+        
         info_handler.check_db_hash(self.destination, differential_backup_name)
 
         subprocess_return_verbose = self.call_rsync_differential('aAXlnvv', backup_sources_for_r_sync, differential_backup_name)
@@ -80,14 +81,15 @@ class Backup:
         for hardlink_info in insert_results:
             self.set_hardlink(hardlink_info)
 
+        info_handler.update_db_hash(self.destination, differential_backup_name)
         self.print_feedback(verbose_level, differential_backup_name, 'differential', subprocess_return_verbose, start_time)
 
-      
-        info_handler.update_db_hash(self.destination, differential_backup_name)
+       
 
 
     def execute_fullbackup(self, jewel_sources, verbose_level, start_time):
 
+       
         info_handler.check_db_hash(self.destination, self.fullbackup_name)
 
 
@@ -103,9 +105,9 @@ class Backup:
         for hardlink_info in insert_results:
             self.set_hardlink(hardlink_info)
 
+        info_handler.update_db_hash(self.destination, self.fullbackup_name)
         self.print_feedback(verbose_level, self.fullbackup_name, 'full', subprocess_return_verbose, start_time)
 
-        info_handler.update_db_hash(self.destination, self.fullbackup_name)
 
 
     def list_to_string(self, string_list) -> str:
@@ -149,6 +151,7 @@ class Backup:
                     elif jewel_path.rsplit('/', 1)[1].strip("/") == line.split("/")[0]:
                         jewel = Jewel(0, None, date.today(), jewel_path, self.device_name,
                                       f'{fullbackup_store_destination_body}/{line.strip("/")}')
+                        break
 
             else:
                 # get only the working dir without the jewel(because line inherits the jewel)
@@ -353,4 +356,3 @@ class Backup:
                     exit()
             except:
                 pass
-

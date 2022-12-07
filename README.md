@@ -5,15 +5,17 @@ Also there are functions to display the database and the inherited files.
 
 # Installation
 
+For the install process a network connection is needed.
+
 1. Ensure to put the whole archive, were you want it to be. For example in /opt/.
 2. Open the terminal in the project directory (IMPORTANT -> ignoring it, will cause errors in the future).
 3. Make sure, that the installation.sh is executable:
 ```
-chmod +x installation.sh
+chmod +x install.sh
 ```
-4. Now execute the "installation.sh" with sudo rights:
+4. Now execute the "install.sh" with sudo rights:
 ```
-sudo ./installation.sh
+sudo ./install.sh
 ```
 
 Now the programm can be executed from everywhere. It can be called by:
@@ -30,13 +32,13 @@ CAUTION: this name will be the calling name. Renaming it, means, that all callin
 # Deinstallation
 
 1. Open the terminal in the project directory (IMPORTANT -> ignoring it, will cause errors).
-2. Make sure, that the deinstallation.sh is executable:
+2. Make sure, that the uninstall.sh is executable:
 ```
-chmod +x deinstallation.sh
+chmod +x uninstall.sh
 ```
-4. Now execute the "deinstallation.sh" with sudo rights:
+4. Now execute the "uninstall.sh" with sudo rights:
 ```
-sudo ./deinstallation.sh
+sudo ./uninstall.sh
 ```
 
 The program is now deinstalled from the system.

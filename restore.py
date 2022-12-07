@@ -79,9 +79,9 @@ class Restore:
                             shell=True)
             except:
                 print(f'Error: rsync couldn\'t be executed\n'
-                  f'used option: aAXlv\n'
-                  f'backup path: {file.backup_location}\n'
-                  f'destination path: {restore_destination_paths[count]}\n')
+                      f'used option: aAXlv\n'
+                      f'backup path: {file.backup_location}\n'
+                      f'destination path: {restore_destination_paths[count]}\n')
                 exit()
             # which files got restored
             for (restore_destination_paths[count], dir_names, file_names) in os.walk(restore_destination_paths[count]):
@@ -118,11 +118,12 @@ class Restore:
         for (restore_destination_paths[0], dir_names, file_names) in os.walk(restore_destination_paths[0]):
             files_in_destination.extend(file_names)
         # which files should get restored
-        file_path = '/'.join(str(jewel.res_file[0].backup_location).split('/')[:-1])
-        for (file_path, dir_names, file_names) in os.walk(file_path):
-            files_in_backup.extend(file_names)
+        files_in_backup.append(jewel.res_file[0].backup_location.split('/')[-1])
         # differences
         difference = list(set(files_in_backup) - set(files_in_destination))
+        print(f'\nfiles_in_backup = {files_in_backup}\n'
+              f'files_in_destination = {files_in_destination}\n'
+              f'difference = {difference}\n')
         if len(difference) != 0:
             print(f'\nWarning: {len(difference)} files couldn\'t be restored\n'
                   f'Missing files: {difference}\n')

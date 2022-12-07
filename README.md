@@ -5,33 +5,27 @@ Also there are functions to display the database and the inherited files.
 
 # Installation
 
-## Requirements
-
-install the requirements globally.
-TODO: how to do that.
-
-## Create executable
-
-navigate to one file to a folder that is listed in your path variables e.g. 
+1. Ensure to put the whole archive, were you want it to be. For example in /opt/.
+2. Open the terminal in the project directory (IMPORTANT).
+3. Make sure, that the installation.sh is executable:
 ```
-/usr/local/bin
+chmod +x installation.sh
 ```
-create a softlink to the execute.py file of this project and name it like you want.
+4. Now execute the "installation.sh" with sudo rights:
 ```
-ln -s [path to execute.py]/execute.py backupper
-```
-maybe the execute.py needs to be changed to executable
-
-```
-chmod +x execute.py
+sudo ./installation.sh
 ```
 
-now you can use it everywhere with the defined softlink name e.g.
-
+Now the programm can be executed from everywhere. It can be called by:
 ```
-backupper backup
-
+backupper [ærguments]
 ```
+
+## Problems
+1. Symlink could not be created (file is already existing)
+If this is not caused, because the program is already installed, then you may have to rename the program.
+This is done by renaming the symlink name (backupper) in the installation.sh to another name.
+CAUTION: this name will be the calling name. Renaming it, means, that all calling examples in the following are renamed to the choosen name.`
 
 # Config
 

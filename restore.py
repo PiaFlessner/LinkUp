@@ -121,9 +121,6 @@ class Restore:
         files_in_backup.append(jewel.res_file[0].backup_location.split('/')[-1])
         # differences
         difference = list(set(files_in_backup) - set(files_in_destination))
-        print(f'\nfiles_in_backup = {files_in_backup}\n'
-              f'files_in_destination = {files_in_destination}\n'
-              f'difference = {difference}\n')
         if len(difference) != 0:
             print(f'\nWarning: {len(difference)} files couldn\'t be restored\n'
                   f'Missing files: {difference}\n')

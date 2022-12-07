@@ -27,6 +27,20 @@ If this is not caused, because the program is already installed, then you may ha
 This is done by renaming the symlink name (backupper) in the installation.sh to another name.
 CAUTION: this name will be the calling name. Renaming it, means, that all calling examples in the following are renamed to the choosen name.`
 
+# Deinstallation
+
+1. Open the terminal in the project directory (IMPORTANT -> ignoring it, will cause errors).
+2. Make sure, that the deinstallation.sh is executable:
+```
+chmod +x deinstallation.sh
+```
+4. Now execute the "deinstallation.sh" with sudo rights:
+```
+sudo ./deinstallation.sh
+```
+
+The program is now deinstalled from the system.
+
 # Config
 
 The config.json is needed to run the program properly.

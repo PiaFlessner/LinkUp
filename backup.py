@@ -190,14 +190,16 @@ class Backup:
     def set_hardlink(self, hl_info:HardlinkInfo ):
         d_path = os.path.dirname(os.path.abspath(hl_info.destination_path))
         try:
-            subprocess.run(f'ls "{d_path}"', shell=True)
+            os.listdir(d_path)
+            #subprocess.run(f'ls "{d_path}"', shell=True)
         except:
             print(f'Error: ls couldn\'t be executed\n'
                   f'path: {d_path}\n')
             exit()
         os.remove(hl_info.destination_path)
         try:
-            subprocess.run(f'ln "{hl_info.link_path}" "{hl_info.destination_path}"', shell=True)
+            os.link(hl_info.link_path,hl_info.destination_path)
+            #subprocess.run(f'ln "{hl_info.link_path}" "{hl_info.destination_path}"', shell=True)
         except:
             print(f'Error: ln couldn\'t be executed\n'
                   f'origin path: {hl_info.link_path}\n'

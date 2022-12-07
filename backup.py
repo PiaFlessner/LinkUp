@@ -126,7 +126,7 @@ class Backup:
         result = []
         if output_array == []:
             print("result ist leer")
-            exit
+            exit #TODO Was passier hier?
         index = 0
         for line in output_array:
             # needed, since sometimes the first line ist not the jewel path,
@@ -250,8 +250,8 @@ class Backup:
         total_size = sum(f.stat().st_size for f in Path(self.destination).glob('**/*') if f.is_file() and f.name != 'datenbank.db')
 
         database_size = os.stat(f'{self.destination}/datenbank.db').st_size
-        print(self.destination)
-        print(database_size)
+        print("meep",self.destination)
+        print("meep2",database_size)
 
         files_size_unit = 'bytes'
         excluded_size_unit = 'bytes'

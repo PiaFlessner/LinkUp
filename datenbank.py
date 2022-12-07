@@ -910,6 +910,3 @@ class Datenbank:
 
         return res_file
 
-
-
-            

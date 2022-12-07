@@ -33,13 +33,15 @@ class Backup:
 
         self.check_packages(['rsync', 'openssl'])
 
-        #Checks and deletes the first backup when it runned not through and start from scratch again. (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
-        #if os.path.exists("db.log"):
-           #log_lines= open("db.log", "r").readlines()
-           #if len(log_lines) > 1:  
-               #if log_lines[1].rstrip() == self.fullbackup_name:   
-                    #info_handler.check_db_hash(self.destination, self.fullbackup_name)
-                    #os.remove("tmp.db") 
+        #Checks and deletes the first backup when it runned not through and start from scratch again. 
+        if os.path.exists("db.log"):
+           file = open("db.log", "r")
+           log_lines= file.readlines()
+           file.close()
+           if len(log_lines) > 1:  
+               if log_lines[1].rstrip() == self.fullbackup_name:   
+                    info_handler.check_db_hash(self.destination, self.fullbackup_name)
+                    os.remove(self.destination + "/" + "tmp.db") 
 
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
@@ -62,8 +64,8 @@ class Backup:
         differential_backup_name = f"diff-{self.current_date_time_formatted}"
         backup_sources_for_r_sync = " ".join(jewel_sources)
 
-        #Before starting check if the backup process was finished the last time. (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
-        #info_handler.check_db_hash(self.destination, differential_backup_name)
+        
+        info_handler.check_db_hash(self.destination, differential_backup_name)
 
         subprocess_return_verbose = self.call_rsync_differential('aAXlnvv', backup_sources_for_r_sync, differential_backup_name)
 
@@ -79,16 +81,16 @@ class Backup:
         for hardlink_info in insert_results:
             self.set_hardlink(hardlink_info)
 
+        info_handler.update_db_hash(self.destination, differential_backup_name)
         self.print_feedback(verbose_level, differential_backup_name, 'differential', subprocess_return_verbose, start_time)
 
-        #Update the database hash in db.log (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
-        #info_handler.update_db_hash(self.destination, differential_backup_name)
+       
 
 
     def execute_fullbackup(self, jewel_sources, verbose_level, start_time):
 
-        #Before starting create new db.log and write hash into it. (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
-        #info_handler.check_db_hash(self.destination, self.fullbackup_name)
+       
+        info_handler.check_db_hash(self.destination, self.fullbackup_name)
 
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
@@ -103,10 +105,9 @@ class Backup:
         for hardlink_info in insert_results:
             self.set_hardlink(hardlink_info)
 
+        info_handler.update_db_hash(self.destination, self.fullbackup_name)
         self.print_feedback(verbose_level, self.fullbackup_name, 'full', subprocess_return_verbose, start_time)
 
-        #Update the database hash and backup_name in db.log (TODO: Einkommentieren, wenn die Datenbank in BackupLocation liegt)
-        #info_handler.update_db_hash(self.destination, self.fullbackup_name)
 
 
     def list_to_string(self, string_list) -> str:
@@ -189,14 +190,16 @@ class Backup:
     def set_hardlink(self, hl_info:HardlinkInfo ):
         d_path = os.path.dirname(os.path.abspath(hl_info.destination_path))
         try:
-            subprocess.run(f'ls "{d_path}"', shell=True)
+            os.listdir(d_path)
+            #subprocess.run(f'ls "{d_path}"', shell=True)
         except:
             print(f'Error: ls couldn\'t be executed\n'
                   f'path: {d_path}\n')
             exit()
         os.remove(hl_info.destination_path)
         try:
-            subprocess.run(f'ln "{hl_info.link_path}" "{hl_info.destination_path}"', shell=True)
+            os.link(hl_info.link_path,hl_info.destination_path)
+            #subprocess.run(f'ln "{hl_info.link_path}" "{hl_info.destination_path}"', shell=True)
         except:
             print(f'Error: ln couldn\'t be executed\n'
                   f'origin path: {hl_info.link_path}\n'
@@ -355,4 +358,3 @@ class Backup:
                     exit()
             except:
                 pass
-

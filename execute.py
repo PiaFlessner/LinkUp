@@ -1,3 +1,4 @@
+#!/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/.venv_deploy/bin/python3
 import argparse
 from backup import Backup
 from datenbank import Datenbank

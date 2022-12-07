@@ -6,7 +6,7 @@ Also there are functions to display the database and the inherited files.
 # Installation
 
 1. Ensure to put the whole archive, were you want it to be. For example in /opt/.
-2. Open the terminal in the project directory (IMPORTANT).
+2. Open the terminal in the project directory (IMPORTANT -> ignoring it, will cause errors in the future).
 3. Make sure, that the installation.sh is executable:
 ```
 chmod +x installation.sh

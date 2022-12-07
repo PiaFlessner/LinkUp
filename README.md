@@ -102,7 +102,7 @@ Backup is needed to start the backup process. The backup process will backup all
 The backup will be stored in the backup path defined in the "destination" property in the config.json.
 
 ```
-execute.py backup
+backupper backup
 ```
 
 ## Restore Section
@@ -121,13 +121,13 @@ The Datetime format is expected to be in ISO-Format (yyyy-mm-dd-MM-ss)
 If the user only provides the day, the program will restore the last trending backup of this day.
 
 ```
-execute.py restore -F|-J [id] [datetime]
+backupper restore -F|-J [id] [datetime]
 ```
 
 ## Show Section
 
 ```
-execute.py show -F|-J|-B [id]
+backupper show -F|-J|-B [id]
 ```
 TODO
 

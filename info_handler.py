@@ -178,7 +178,7 @@ def check_db_hash(backup_path:str, backup_name:str, test=False):
     # Creates a new tmp.db and delete the old one if it is still there.
     # Overrides or creates a new db.log
     if os.path.exists(backup_path + "/" + "tmp.db"):  os.remove(backup_path + "/" + "tmp.db") 
-    log_file  = open("db.log", "w")
+    log_file  = open(backup_path + "/" + "db.log", "w")
     log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
     log_file.close()
     status = subprocess.call('cp ' + backup_path + '/' + 'datenbank.db ' + backup_path + '/' +  'tmp.db', shell=True) 

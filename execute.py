@@ -71,9 +71,9 @@ if __name__ == "__main__":
     resetSection = subparser.add_parser('reset', help="Reset the backups of current device.")
     group = resetSection.add_mutually_exclusive_group()
 
+
     helpSection = subparser.add_parser('help', help="info for all commands")
     group = helpSection.add_mutually_exclusive_group()
-
 
     # makes args accessable
     try:
@@ -179,7 +179,6 @@ if __name__ == "__main__":
                 blob = daten.get_Blob_via_id(args.id)
                 repair.create_repair_data(blob)
                 print("Redundancy information created")
-        
             
         else:
             print("ID missing! exiting...")
@@ -193,10 +192,7 @@ if __name__ == "__main__":
         if user_input == "I am sure": ih.reset_backup()
         else: print("The reset was canceled.")
        
-
      
-  
 
     if args.command == None:
         print("no command given, use help for more information")
-

@@ -124,6 +124,13 @@ def validate_date_format(date_var:str, format:str):
 
 
 def check_db_hash(backup_path:str, backup_name:str, test=False):
+    """Checks if the old hash of the database and resets the backups and the database to the previous state if the old and new database hash do not match.
+        
+        Args:
+            backup_path: the path where the backup for the device is located
+            backup_name: the current name of the backup folder
+            test: bool if it's a test"""
+
     log_file = None
     # Checks if a log file for database exist, when not will create it after if. 
     if  os.path.exists(backup_path + "/" + "db.log"):
@@ -146,6 +153,12 @@ def check_db_hash(backup_path:str, backup_name:str, test=False):
                         os.rename(backup_path + "/" + "tmp.db", backup_path + "/" + "datenbank.db")
                         if len(lines) >1: 
                             shutil.rmtree(backup_path + "/" + lines[1].rstrip(), ignore_errors=True)
+                            # If the first backup failed the db.log and datenbank.db must be removed.
+                            if not lines[1].rstrip().startswith("diff") and not test:
+                                os.remove(backup_path + "/datenbank.db")
+                                os.remove(backup_path + "/db.log")
+                                print("The database changed before the first backup process could be completed and reset the backup.")
+                                sys.exit()
                             print("The database changed before the backup process could be completed and the old version of the database and backup was restored.")
                             log_file  = open(backup_path + "/" + "db.log", "w")
                             log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
@@ -172,9 +185,27 @@ def check_db_hash(backup_path:str, backup_name:str, test=False):
 
 
 def update_db_hash(backup_path:str, backup_name:str):
+    """Writes the database hash and the current backup name into the db.log file, also it deletes the tmp.db.
+        
+        Args:
+            backup_path: the path where the backup for the device is located
+            backup_name: the current name of the backup folder"""
+
+
     log_file  = open(backup_path + "/" + "db.log", "w")
     log_file.write(get_hash(backup_path + "/" + "datenbank.db") + "\n" + backup_name)
     log_file.close()
     if os.path.exists(backup_path + "/" +"tmp.db"):  os.remove(backup_path +"/" +"tmp.db") 
 
+
+def reset_backup(device=platform.node()):
+    """Resets the backup of a device.
+        
+        Args:
+            device: the device where the backup is on"""
+
+
+    reset_path = get_json_info()['destination'][device]
+    shutil.rmtree(reset_path, ignore_errors=True)
+    print("The reset was successfully performed for the device: " + device+ ".")
 

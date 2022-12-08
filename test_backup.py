@@ -118,7 +118,7 @@ class TestRestore(unittest.TestCase):
         old_hash = file.readlines()[0].rstrip()
         file.close()
         ih.update_db_hash(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation"), "diff-test")
-        ih.check_db_hash(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation"), "test", True)
+        ih.check_db_hash(os.path.join(os.path.dirname(__file__), "unitTestFiles/backupLocation"), "diff-test", True)
         jewel = self.daten.get_Jewel_via_id(1)
         jewel.device_name = "Hallo"
         jewel.fullbackup_source = "Test"

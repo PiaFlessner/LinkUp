@@ -1,5 +1,6 @@
 
 import os
+import platform
 import shutil
 from time import sleep
 import unittest
@@ -12,14 +13,17 @@ import datetime
 import info_handler
 from datenbank import Jewel
 
-device_name = "testCases"
+device_name = platform.node()
 
 
 def are_dir_trees_equal(dir1, dir2):
-
     pass
 
-database_path='datenbank.db'
+config = info_handler.get_json_info(device_name)
+database_path=config['destination'][device_name] + '/datenbank.db'
+print(database_path)
+database_path=os.path.abspath(database_path)
+#print(database_path)
 class TestDatabase(unittest.TestCase):
     
     @classmethod
@@ -29,6 +33,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_1_init_database_exists(self):
         daten = datenbank.Datenbank() #debating whether or not the assignment to daten makes sense because it's the same in the next method
+        print(database_path)
         self.assertTrue(path_exists(database_path))
 
     def test_2_init_same_tables_exist(self):
@@ -180,7 +185,7 @@ class TestDatabase(unittest.TestCase):
         if conn != None:
             cur = conn.cursor()
             db.insert_File(file,cur,conn)
-            file = db.get_File_via_id("id")
+            file = db.get_File_via_id("1")
         print(file)
         conn.close
         conn.close

@@ -30,6 +30,7 @@ before_script:
   - pip install -r requirements.txt
   - apt-get -y update
   - apt-get -y install rsync
+  - python insert_into_config.py
 
 test:
   script:

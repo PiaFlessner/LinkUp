@@ -17,7 +17,7 @@ class ShowTables:
 
     def __init__(self):
         """Constructor"""
-        daten = Datenbank()
+        self.daten = Datenbank()
 
 
     def _verbose_jewel_to_string(self, jewel:Jewel, verbose_level:int) -> list[str]:

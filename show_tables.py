@@ -4,16 +4,33 @@ from prettytable import PrettyTable
 
 class ShowTables:
 
+    """Class ShowTables. Shows the following objects: Jewels, Blobs, Files, skipped Files
+    
+    ShowTables shows objectes with different verbose levels.
+    Level 0: short display
+    Level 1: medium display
+    Level 2: full display
+    
+    """
+
+# These methods adjust the output to the verbose level selected by the user and return a list of strings.
+
     def __init__(self):
-        pass
+        """Constructor"""
+        daten = Datenbank()
 
 
-# Diese Methoden passen die Ausgaben an dem vom Nutzer ausgewählten verbose-level an und geben eine Liste mit Strings zurück.
-# Level 0: kurze Anzeige
-# Level 1: mittlere Anzeige
-# Level 2: vollständige Anzeige
+    def _verbose_jewel_to_string(self, jewel:Jewel, verbose_level:int) -> list[str]:
+        """Adjusts the individual Jewel variables to the verbose level and returns them as a string list.
+        
+            Args:
+                jewel: a Jewel object that should be displayed
+                verbose_level: the level that should be displayed
+                
+            Returns:
+                string list"""
+ 
 
-    def _verbose_jewel_to_string(self, jewel, verbose_level):
         startdate = str(jewel.monitoring_Startdate)
         comment = str(jewel.comment)
         j_source = str(jewel.jewelSource)
@@ -37,7 +54,17 @@ class ShowTables:
         return [str(jewel.id), comment, startdate,  j_source,device, fullbackup_source]
 
 
-    def _verbose_blob_to_string(self, blob, verbose_level):
+    def _verbose_blob_to_string(self, blob:Blob, verbose_level:int)-> list[str]:
+            """Adjusts the individual Blob variables to the verbose level and returns them as a string list.
+        
+            Args:
+                blob: a Blob object that should be displayed
+                verbose_level: the level that should be displayed
+                
+            Returns:
+                string list"""
+
+                
             hash = blob.hash
             name = blob.name
             creationDate = str(blob.creationDate)
@@ -57,7 +84,6 @@ class ShowTables:
                 if len(store_destination) > 5: store_destination = store_destination[0:7] + "..."
                 if len(id_file) > 5: id_file = id_file[0:7] + "..."
 
-
             elif verbose_level == 1:
                 if len (hash) > 15: hash = hash[0:12] + "..."
                 if len(name) > 15: name[0:12] + "..."
@@ -71,7 +97,17 @@ class ShowTables:
             return [str(blob.id), str(blob.number),hash, name, str(blob.fileSize), creationDate, modify, id_file, origin_name, source_path,store_destination]
 
 
-    def _verbose_skipped_files_to_string(self, s_file, verbose_level):
+    def _verbose_skipped_files_to_string(self, s_file:tuple, verbose_level:int) ->list[str]:
+        """Adjusts the individual skipped File variables to the verbose level and returns them as a string list.
+        
+            Args:
+                s_file: a tuple of skipped file variables that should be displayed
+                verbose_level: the level that should be displayed
+                
+            Returns:
+                string list"""
+
+
         file_id= str(s_file[0])
         jewel_id = str(s_file[1])
         uuid = str(s_file[2])
@@ -100,7 +136,17 @@ class ShowTables:
         return [file_id, jewel_id, uuid, occurance_Date, hash, reason, add_info, conn_jewel]
 
 
-    def _verbose_files_to_string(self, file, verbose_level):
+    def _verbose_files_to_string(self, file:File, verbose_level:int)-> list[str]:
+        """Adjusts the individual File variables to the verbose level and returns them as a string list.
+        
+            Args:
+                file: a File object that should be displayed
+                verbose_level: the level that should be displayed
+                
+            Returns:
+                string list"""
+
+
         birth = str(file.birth)
         id = str(file.id)
 
@@ -114,15 +160,18 @@ class ShowTables:
 
         return [id, str(len(file.blobs)) , birth]
 
+# These methods create tables of objects (all from the database or one via id) and output them to the console.
+# Tables of objects: Jewels, Files, Blobs and skipped Files.
 
-# Diese Methoden erstellen Tabellen von Objekten (alle aus der Datenbank oder eins via id) und geben sie in der Console aus.
-# Tabellen von den Objekten: Jewels, Files, Blobs und skipped Files.
-
-    def show_all_jewels(self, verbose_level):
-        daten = Datenbank()
-        jewels = daten.get_all_Jewels()
+    def show_all_jewels(self, verbose_level:int) ->None:
+        """Prints all jewels in table form in the console
         
+           Args:
+                verbose_level: the level that should be displayed"""
 
+
+        jewels = self.daten.get_all_Jewels()
+        
         if jewels is not None:
             table = PrettyTable()
             table.field_names = ["Jewel ID","Comment","Monitoring startdate","Source of the jewel", "Device name", "Fullbackup source"]
@@ -138,9 +187,15 @@ class ShowTables:
 
 
 
-    def show_all_files(self, verbose_level):
-        daten = Datenbank()
-        files = daten.get_all_Files()
+    def show_all_files(self, verbose_level:int) ->None:
+        """Prints all files in table form in the console
+        
+           Args:
+                verbose_level: the level that should be displayed"""
+
+
+
+        files = self.daten.get_all_Files()
 
         if files is not None:
             table = PrettyTable()
@@ -156,14 +211,19 @@ class ShowTables:
             print("\nNo files have been created by the user yet")
 
 
-    def show_all_blobs(self, verbose_level):
-        daten = Datenbank()
-        blobs = daten.get_all_Blobs()
+    def show_all_blobs(self, verbose_level:int) ->None:
+        """Prints all blobs in table form in the console
+        
+           Args:
+                verbose_level: the level that should be displayed"""
+
+
+        blobs = self.daten.get_all_Blobs()
    
         if blobs is not None:
             table = PrettyTable()
 
-            table.field_names = ["Blob ID", "File version", "Hash", "BackUp name", "File size","Creationdate", "Modifydate", 
+            table.field_names = ["Blob ID", "File version", "Hash", "BackUp name", "File size in kB","Creationdate", "Modifydate", 
              "File ID", "Origin name","Source path", "Store destination"]
 
             for blob in blobs:
@@ -176,9 +236,15 @@ class ShowTables:
         else: print("\nNo blobs have been created by the user yet")
 
 
-    def show_jewel_via_id(self,id, verbose_level):
-        daten = Datenbank()
-        jewel = daten.get_Jewel_via_id(id)
+    def show_jewel_via_id(self,id:int, verbose_level:int) ->None:
+        """Prints a jewel and all associated files in table form in the console
+        
+           Args:
+                id: the id of the jewel that should be displayed
+                verbose_level: the level that should be displayed"""
+
+
+        jewel = self.daten.get_Jewel_via_id(id)
     
         if jewel is not None:
             table = PrettyTable()
@@ -186,7 +252,7 @@ class ShowTables:
             j_list = self._verbose_jewel_to_string(jewel, verbose_level)
             table.add_row([j_list[0], j_list[1], j_list[2], j_list[3],  j_list[4], j_list[5]])
             filetable = PrettyTable()
-            files = daten.get_Files_via_jewel_id(id)
+            files = self.daten.get_Files_via_jewel_id(id)
             filetable.field_names = ["File ID","File versions","File birth"]
        
             for file in files:
@@ -200,9 +266,15 @@ class ShowTables:
         else: print("\nThere is no jewel with the id " + str(id))
 
 
-    def show_file_via_id (self,id, verbose_level):
-        daten = Datenbank()
-        file = daten.get_File_via_id(id)
+    def show_file_via_id (self,id:str, verbose_level:int) ->None:
+        """Prints a file and all associated blobs in table form in the console
+        
+           Args:
+                id: the id of the file that should be displayed
+                verbose_level: the level that should be displayed"""
+
+
+        file = self.daten.get_File_via_id(id)
 
         if file is not None:
             table = PrettyTable()
@@ -212,7 +284,7 @@ class ShowTables:
             print(table)
 
             blobtable = PrettyTable()
-            blobtable.field_names = ["Blob ID","File version","Hash","BackUp name","File size","Creationdate","Modifydate","File ID","Origin name","Source path", "Store destination"]
+            blobtable.field_names = ["Blob ID","File version","Hash","BackUp name","File size in kB","Creationdate","Modifydate","File ID","Origin name","Source path", "Store destination"]
 
             for blob in file.blobs:
                 b_list = self._verbose_blob_to_string(blob, verbose_level)
@@ -223,13 +295,19 @@ class ShowTables:
 
         else: print("\nThere is no file with the id " + str(id))
 
-    def show_blob_via_id (self,id, verbose_level):
-        daten = Datenbank()
-        blob = daten.get_Blob_via_id(id)
+    def show_blob_via_id (self,id:int, verbose_level:int) ->None:
+        """Prints a blob in table form in the console
+        
+           Args:
+                id: the id of the blob that should be displayed
+                verbose_level: the level that should be displayed"""
+
+
+        blob = self.daten.get_Blob_via_id(id)
 
         if blob is not None:
             table =  PrettyTable()
-            table.field_names = ["Blob ID", "File version", "Hash", "BackUp name", "File size","Creationdate", "Modifydate", 
+            table.field_names = ["Blob ID", "File version", "Hash", "BackUp name", "File size in kB","Creationdate", "Modifydate", 
             "File ID", "Origin name","Source path", "Store destination"]
             b_list = self._verbose_blob_to_string(blob, verbose_level)
             table.add_row([b_list[0], b_list[1], b_list[2], b_list[3], b_list[4], b_list[5], b_list[6], b_list[7], b_list[8], b_list[9],
@@ -239,9 +317,14 @@ class ShowTables:
             print("\nThere is no blob with the id " + str(id))
 
 
-    def show_all_skipped_Files(self, verbose_level):
-        daten = Datenbank()
-        files = daten.get_all_skipped_files()
+    def show_all_skipped_Files(self, verbose_level:int) ->None:
+        """Prints all skipped files in table form in the console
+        
+           Args:
+                verbose_level: the level that should be displayed"""
+
+
+        files = self.daten.get_all_skipped_files()
  
         if files is not None:
             table =  PrettyTable()
@@ -253,9 +336,16 @@ class ShowTables:
         else:
             print("\nThere are no skipped files yet")
 
-    def show_skipped_file_via_id(self,id, verbose_level):
-        daten = Datenbank()
-        fi = daten.get_skipped_file_via_id(id)
+    def show_skipped_file_via_id(self,id:int, verbose_level:int) ->None:
+        """Prints a skipped file in table form in the console
+        
+           Args:
+                id: the id of the skipped file that should be displayed
+                verbose_level: the level that should be displayed"""
+
+
+  
+        fi = self.daten.get_skipped_file_via_id(id)
         
         if fi is not None:
             table =  PrettyTable()

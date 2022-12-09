@@ -1,3 +1,4 @@
+
 import argparse
 from backup import Backup
 from datenbank import Datenbank
@@ -65,6 +66,11 @@ if __name__ == "__main__":
     group = backupSection.add_mutually_exclusive_group()
     # command: python3 execute.py backup -v
     group.add_argument('-v', '--verbose', action='store_true', help='Backup with detailed information')
+
+    # command: python3 execute.py reset
+    resetSection = subparser.add_parser('reset', help="Reset the backups of current device.")
+    group = resetSection.add_mutually_exclusive_group()
+
 
     helpSection = subparser.add_parser('help', help="info for all commands")
     group = helpSection.add_mutually_exclusive_group()
@@ -173,17 +179,20 @@ if __name__ == "__main__":
                 blob = daten.get_Blob_via_id(args.id)
                 repair.create_repair_data(blob)
                 print("Redundancy information created")
-        
             
         else:
             print("ID missing! exiting...")
   
 
+    if args.command == "reset":
+        print("Do you really want to reset the backup for your current device: " + platform.node() + "?")
+        print("Then please enter >I am sure< to reset your backup.")
+        print("Or enter something else to cancel.")
+        user_input = input()
+        if user_input == "I am sure": ih.reset_backup()
+        else: print("The reset was canceled.")
        
-
      
-  
 
     if args.command == None:
         print("no command given, use help for more information")
-

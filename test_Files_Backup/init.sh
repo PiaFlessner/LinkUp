@@ -16,26 +16,26 @@ echo "test" >> ./jewel/test.txt
 echo "test" >> ./jewel2/test1.txt
 echo "test" >> ./jewel3/test2.txt
 
-cp -r ./special_Files/ jewel3
+# cp -r ./special_Files/ jewel3
 #tar -xf Bad_Names.tar.gz -C ./jewel/Bad_Names_Dir
 
 
-find ./jewel3 -name "readOnly.*" -exec chmod ugo-rwx {} \;
-find ./jewel3 -name "writeOnly.*" -exec chmod ugo-rwx {} \;
-find ./jewel3 -name "execOnly.*" -exec chmod ugo-rwx {} \;
+# find ./jewel3 -name "readOnly.*" -exec chmod ugo-rwx {} \;
+# find ./jewel3 -name "writeOnly.*" -exec chmod ugo-rwx {} \;
+# find ./jewel3 -name "execOnly.*" -exec chmod ugo-rwx {} \;
 
-find ./jewel3 -name "readOnly.*" -exec chmod ugo+r {} \;
-find ./jewel3 -name "writeOnly.*" -exec chmod ugo+w {} \;
-find ./jewel3 -name "execOnly.*" -exec chmod ugo+x {} \;
+# find ./jewel3 -name "readOnly.*" -exec chmod ugo+r {} \;
+# find ./jewel3 -name "writeOnly.*" -exec chmod ugo+w {} \;
+# find ./jewel3 -name "execOnly.*" -exec chmod ugo+x {} \;
 
 
-find ./jewel3/special_Files/execOnly -type d -exec chmod ugo-rwx {} \;
-find ./jewel3/special_Files/readOnly -type  d -exec chmod ugo-rwx {} \;
-find ./jewel3/special_Files/writeOnly -type d -exec chmod ugo-rwx {} \;
+# find ./jewel3/special_Files/execOnly -type d -exec chmod ugo-rwx {} \;
+# find ./jewel3/special_Files/readOnly -type  d -exec chmod ugo-rwx {} \;
+# find ./jewel3/special_Files/writeOnly -type d -exec chmod ugo-rwx {} \;
 
-find ./jewel3/special_Files/execOnly -type d -exec chmod ugo+x {} \;
-find ./jewel3/special_Files/readOnly -type  d -exec chmod ugo+r {} \;
-find ./jewel3/special_Files/writeOnly -type d -exec chmod ugo+w {} \;
+# find ./jewel3/special_Files/execOnly -type d -exec chmod ugo+x {} \;
+# find ./jewel3/special_Files/readOnly -type  d -exec chmod ugo+r {} \;
+# find ./jewel3/special_Files/writeOnly -type d -exec chmod ugo+w {} \;
 
 
 

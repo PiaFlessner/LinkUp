@@ -21,9 +21,7 @@ def are_dir_trees_equal(dir1, dir2):
 
 config = info_handler.get_json_info(device_name)
 database_path=config['destination'][device_name] + '/datenbank.db'
-print(database_path)
 database_path=os.path.abspath(database_path)
-#print(database_path)
 class TestDatabase(unittest.TestCase):
     
     @classmethod
@@ -33,7 +31,6 @@ class TestDatabase(unittest.TestCase):
 
     def test_1_init_database_exists(self):
         daten = datenbank.Datenbank() #debating whether or not the assignment to daten makes sense because it's the same in the next method
-        print(database_path)
         self.assertTrue(path_exists(database_path))
 
     def test_2_init_same_tables_exist(self):
@@ -112,7 +109,6 @@ class TestDatabase(unittest.TestCase):
                 command = """SELECT sql FROM sqlite_master
                 WHERE tbl_name = ? AND type = 'table'"""
                 params = (tablename[0],)
-                # print(params)
                 cur.execute(command, params)
                 data2 = cur.fetchall()
                 for columnname in data2:

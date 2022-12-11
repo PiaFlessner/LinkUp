@@ -13,12 +13,17 @@
         "mirco-ThinkPad-T495": [
             "/home/mirco/Backuptest"
         ],
-        "testCases": [
+        "__Comment__testCases": [
             "/unitTestFiles/jewel",
             "/unitTestFiles/jewel2"
         ],
         "fedora": [
             "/home/ole/importantDocuments"
+        ],
+        "testCases": [
+            "./test_Files_Backup/jewel",
+            "./test_Files_Backup/jewel2",
+            "./test_Files_Backup/jewel3"
         ],
         "fatih": [
             "./test_Files_Backup/jewel",

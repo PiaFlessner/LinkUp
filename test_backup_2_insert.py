@@ -16,23 +16,23 @@ def write_json(table_name, key, value, filename='config.json'):
         json.dump(file_data, file, indent = 4)
 
 list=[]
-list.append("./unitTestFiles/jewel")
-list.append("./unitTestFiles/jewel2")
+list.append("/test_Files_Backup/jewel")
+list.append("/test_Files_Backup/jewel2")
+list.append("/test_Files_Backup/jewel3")
 #print(list)
 
 table_name='jewel_sources' 
-key=platform.node()
+key="testCases"
 data=list
 write_json(table_name, key, data)
 
 table_name='destination'
-key=platform.node()
-data2="/home/gruppe/Schreibtisch/backupLocation"
+data2="test_Files_Backup/backup_Location"
 write_json(table_name,key, data2)
 
+
 table_name='restore_destination'
-key=platform.node()
-data3="/home/gruppe/Schreibtisch/Restore"
+data3="test_Files_Backup/restore_Location"
 write_json(table_name,key, data3)
 
-print("done with insert_into_config.py")
+print("done with test_backup_2_insert.py")

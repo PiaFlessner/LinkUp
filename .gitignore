@@ -135,3 +135,11 @@ dmypy.json
 
 # Database
 /datenbank.db
+
+# Von Tests erstellte Daten
+test_Files_Backup/backup_Location/*
+test_Files_Backup/jewel/*
+test_Files_Backup/jewel2/*
+test_Files_Backup/jewel3/*
+unitTestFiles/jewel/test1.txt
+

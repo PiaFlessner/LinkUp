@@ -10,12 +10,18 @@ from filecmp import cmpfiles
 from datetime import datetime as date
 import datenbank
 import shutil
+import insert_into_config
+
+
 
 device_name = "testCases"
+
+insert_into_config.insert_for_test_backup()
 class TestRestore(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        
         cls.daten = datenbank.Datenbank(testcase=True)
         cls.config = ih.get_json_info(device_name)
         cls.workingDirectory = str(pathlib.Path(__file__).parent.resolve())

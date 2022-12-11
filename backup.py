@@ -127,7 +127,7 @@ class Backup:
         result = []
         if output_array == []:
             print("result ist leer")
-            exit
+            exit #TODO Was macht das exit?
         index = 0
         for line in output_array:
             # needed, since sometimes the first line ist not the jewel path,

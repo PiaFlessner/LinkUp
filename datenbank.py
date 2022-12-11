@@ -13,6 +13,7 @@ from hardlink_info import HardlinkInfo
 from resFile import resFile
 from resJewel import resJewel
 from info_handler import get_json_info
+import datetime
 
 
 class Jewel:
@@ -142,7 +143,7 @@ class Datenbank:
         try:
             conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
         except sqlite3.Error as e:
-            print(e)
+            print("sqlite_error!: ",e)
 
         return conn
 
@@ -440,15 +441,15 @@ class Datenbank:
         conn = self.create_connection(self.database_path)
         if conn != None:
             cur = conn.cursor()
-
+            # check if the jewel already exists in the database
             command = "SELECT ID FROM Jewel WHERE JewelSource = ? AND DeviceName = ?"
             data_tuple = (self._encode_base64(jewel.jewelSource), self._encode_base64(jewel.device_name))
             cur.execute(command, data_tuple)
             id = cur.fetchone()
 
-            if id is not None:
+            if id is not None: #if it exists, return the id
                 return id[0]
-            else:
+            else: #else add it to the database
                 command = """INSERT INTO 'Jewel'
                               ('Comment', 'Monitoring_Startdate', 'JewelSource', 'DeviceName', 'FullbackupSource') 
                               VALUES (?, ?, ?, ?, ?);"""

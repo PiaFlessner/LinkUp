@@ -21,19 +21,17 @@ list.append("./test_Files_Backup/jewel2")
 #print(list)
 
 table_name='jewel_sources' 
-key=platform.node()
+key="testCases2"
 data=list
 write_json(table_name, key, data)
 
 table_name='destination'
-key=platform.node()
-data2="/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/backup_Location"
+data2="/home/gruppe/Dokumente/projektgruppe/test_Files_Backup/backup_Location"
 write_json(table_name,key, data2)
 
 
 table_name='restore_destination'
-key=platform.node()
-data3="/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/restore_Location"
+data3="/home/gruppe/Dokumente/projektgruppe/test_Files_Backup/restore_Location"
 write_json(table_name,key, data3)
 
 print("done with insert_into_config.py")

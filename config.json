@@ -28,6 +28,10 @@
         "fatih": [
             "./test_Files_Backup/jewel",
             "./test_Files_Backup/jewel2"
+        ],
+        "testCases2": [
+            "./test_Files_Backup/jewel",
+            "./test_Files_Backup/jewel2"
         ]
     },
     "blacklist": {
@@ -52,7 +56,8 @@
         "__Comment__testCases": "unitTestFiles/backupLocation",
         "fedora": "/home/ole/backupLocation",
         "testCases": "test_Files_Backup/backup_Location",
-        "fatih": "/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/backup_Location"
+        "fatih": "/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/backup_Location",
+        "testCases2": "/home/gruppe/Dokumente/projektgruppe/test_Files_Backup/backup_Location"
     },
     "restore_destination": {
         "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/Restore",
@@ -61,6 +66,7 @@
         "__Comment__testCases": "unitTestFiles/restoreLocation",
         "fedora": "/home/ole/restoreDestination",
         "testCases": "test_Files_Backup/restore_Location",
-        "fatih": "/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/restore_Location"
+        "fatih": "/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/restore_Location",
+        "testCases2": "/home/gruppe/Dokumente/projektgruppe/test_Files_Backup/restore_Location"
     }
 }

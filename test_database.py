@@ -12,6 +12,8 @@ import string
 import datetime
 import info_handler
 from datenbank import Jewel
+import test_database_insert
+test_database_insert.insert_for_test_database()
 
 device_name = platform.node()
 
@@ -182,8 +184,7 @@ class TestDatabase(unittest.TestCase):
             cur = conn.cursor()
             db.insert_File(file,cur,conn)
             file = db.get_File_via_id("1")
-        print(file)
-        conn.close
+        # print(file)
         conn.close
         pass
 

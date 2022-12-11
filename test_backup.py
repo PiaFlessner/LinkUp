@@ -34,7 +34,7 @@ class TestRestore(unittest.TestCase):
         restoreDay = date.today()
         jewel = self.daten.get_restore_Jewel(restoreDay, 1)
         self.assertTrue(jewel!= None,"An answer is None")
-        self.assertTrue(len(jewel.res_file) == 1,f"The lenght is incorrect. Should be 1, but is {len(jewel.res_file)}")
+        self.assertTrue(len(jewel.res_file) == 1,f'The length is incorrect. Should be 1, but is {len(jewel.res_file)}')
         self.assertTrue(jewel.jewel_id == 1, f"The id is wrong. Must be 1, but is {jewel.jewel_id}")
         self.assertTrue(jewel.res_file[0].file_name == 'test1.txt', 'Name is wrong')
         self.assertTrue(jewel.res_file[0].origin_location == f'{self.workingDirectory}/unitTestFiles/jewel/test1.txt', f'jewel path is wrong. Its {jewel.res_file[0].origin_location}')
@@ -99,13 +99,14 @@ class TestRestore(unittest.TestCase):
         self.assertTrue(jewel.res_file[0].version_number == 2, f"Version Number ist wrong, should be 2, is {jewel.res_file[0].version_number}")
 
     def test_g_restore_symlink_file(self):
-        open(os.path.join(os.path.dirname(__file__), "unitTestFiles/reference_file_to_symlink.txt"), "a")
+        open(os.path.join(os.path.dirname(__file__), "unitTestFiles/reference_file_to_symlink.txt"), "a") #TODO close file
         os.symlink("unitTestFiles/reference_file_to_symlink.txt", "unitTestFiles/jewel/symlink")
         backup_g = Backup(self.jewel_list, self.workingDirectory + "/" + self.config["destination"][device_name], True)
         backup_g.initialize_backup(0)
 
         latest_diff_folder = max([os.path.join('unitTestFiles/backupLocation',d) for d in os.listdir('unitTestFiles/backupLocation') if not d.endswith("db") and  not d.endswith("log")], key=os.path.getmtime)
         self.assertTrue(os.path.islink(latest_diff_folder + "/" + "jewel/symlink"), "File should be a symlink")
+        
 
 
     def test_h_db_log (self):
@@ -165,4 +166,3 @@ if __name__ == "__main__":
     runner.run(suite())
 
     #run tests with python3 -m unittest test_backup.py
-

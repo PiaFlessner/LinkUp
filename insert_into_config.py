@@ -18,6 +18,7 @@ def write_json(table_name, key, value, filename='config.json'):
 list=[]
 list.append("./test_Files_Backup/jewel")
 list.append("./test_Files_Backup/jewel2")
+list.append("./test_Files_Backup/jewel3")
 #print(list)
 
 table_name='jewel_sources' 

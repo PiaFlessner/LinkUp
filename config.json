@@ -1,72 +1,37 @@
 {
-    "jewel_sources": {
-        "gruppe-VirtualBox": [
-            "/home/gruppe/backupTest/jewels2",
-            "/home/gruppe/backupTest/jewels/jewelInJewel",
-            "/home/gruppe/backupTest/jewels"
-        ],
-        "kali": [
-            "/home/kali/folderToBackup",
-            "/home/kali/extraFolder",
-            "/home/kali/extraExtraFolder"
-        ],
-        "mirco-ThinkPad-T495": [
-            "/home/mirco/Backuptest"
-        ],
-        "__Comment__testCases": [
-            "/unitTestFiles/jewel",
-            "/unitTestFiles/jewel2"
-        ],
-        "fedora": [
-            "/home/ole/importantDocuments"
-        ],
-        "testCases": [
-            "/test_Files_Backup/jewel",
-            "/test_Files_Backup/jewel2",
-            "/test_Files_Backup/jewel3"
-        ],
-        "fatih": [
-            "./test_Files_Backup/jewel",
-            "./test_Files_Backup/jewel2"
-        ],
-        "testCases2": [
-            "./test_Files_Backup/jewel",
-            "./test_Files_Backup/jewel2"
-        ]
+    "jewel_sources" :
+    {
+      "gruppe-VirtualBox": ["/home/gruppe/backupTest/jewels2", "/home/gruppe/backupTest/jewels/jewelInJewel","/home/gruppe/backupTest/jewels"],
+      "kali": ["/home/kali/folderToBackup", "/home/kali/extraFolder", "/home/kali/extraExtraFolder"],
+      "mirco-ThinkPad-T495": ["/home/mirco/Backuptest"],
+      "testCases" : ["/unitTestFiles/jewel", "/unitTestFiles/jewel2"],
+      "fedora": ["/home/ole/importantDocuments"]
     },
-    "blacklist": {
-        "directories": [
-            "folderToIgnore1",
-            "folderToIgnore2"
-        ],
-        "extensions": [
-            ".tmp",
-            ".html"
-        ],
-        "files": [
-            "fileToIgnore1.png",
-            "fileToIgnore2.jpg",
-            "fileToIgnore.txt"
-        ]
+  
+    "blacklist" :
+    {
+      "directories": ["folderToIgnore1", "folderToIgnore2"],
+      "extensions": [".tmp", ".html"],
+      "files": ["fileToIgnore1.png", "fileToIgnore2.jpg", "fileToIgnore.txt"]
     },
-    "destination": {
-        "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation",
-        "kali": "/home/kali/backupLocation",
-        "mirco-ThinkPad-T495": "/home/mirco/backuptarget",
-        "__Comment__testCases": "unitTestFiles/backupLocation",
-        "fedora": "/home/ole/backupLocation",
-        "testCases": "test_Files_Backup/backup_Location",
-        "fatih": "/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/backup_Location",
-        "testCases2": "/home/gruppe/Dokumente/projektgruppe/test_Files_Backup/backup_Location"
+  
+    "destination":
+    {
+      "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/backupLocation",
+      "kali": "/home/kali/backupLocation",
+      "mirco-ThinkPad-T495": "/home/mirco/backuptarget",
+      "testCases" : "unitTestFiles/backupLocation",
+      "fedora": "/home/ole/backupLocation"
     },
-    "restore_destination": {
-        "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/Restore",
-        "kali": "/home/kali/Restore",
-        "mirco-ThinkPad-T495": "/home/mirco/Backuprestore",
-        "__Comment__testCases": "unitTestFiles/restoreLocation",
-        "fedora": "/home/ole/restoreDestination",
-        "testCases": "test_Files_Backup/restore_Location",
-        "fatih": "/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/restore_Location",
-        "testCases2": "/home/gruppe/Dokumente/projektgruppe/test_Files_Backup/restore_Location"
+  
+    "restore_destination":
+    {
+      "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/Restore",
+      "kali": "/home/kali/Restore",
+      "mirco-ThinkPad-T495": "/home/mirco/Backuprestore",
+      "testCases": "unitTestFiles/restoreLocation",
+      "fedora": "/home/ole/restoreDestination"
     }
-}
+  }
+  
+  

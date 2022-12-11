@@ -13,7 +13,7 @@ from subprocess import run
 import platform
 
 #device_name = platform.node()
-device_name = "testCases"
+device_name = "testCases2"
 
 def are_dir_trees_equal(dir1, dir2):
     

@@ -1,8 +1,9 @@
 {
     "jewel_sources": {
         "gruppe-VirtualBox": [
-            "./unitTestFiles/jewel",
-            "./unitTestFiles/jewel2"
+            "/home/gruppe/backupTest/jewels2",
+            "/home/gruppe/backupTest/jewels/jewelInJewel",
+            "/home/gruppe/backupTest/jewels"
         ],
         "kali": [
             "/home/kali/folderToBackup",

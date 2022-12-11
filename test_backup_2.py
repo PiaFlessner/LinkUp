@@ -12,6 +12,10 @@ import subprocess
 from subprocess import run
 import platform
 
+import test_backup_2_insert
+
+test_backup_2_insert.insert_for_test_backup_2()
+
 #device_name = platform.node()
 device_name = "testCases"
 
@@ -138,7 +142,7 @@ class TestBackup(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         os.remove("./test_Files_Backup/backup_Location/datenbank.db")
-        
+        os.remove("./test_Files_Backup/backup_Location/db.log")
         
         rel_path = cls.config["destination"][device_name]
    

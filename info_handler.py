@@ -7,6 +7,8 @@ from wrapper.file_wrapper import Data
 import sys
 import shutil
 
+print("HALOOOOOOOOOOO")
+
 json_file_name = os.path.dirname(os.path.abspath(__file__))+"/config.json"
 db_log= os.path.dirname(os.path.abspath(__file__))+"/db.log"
 tmp_db= os.path.dirname(os.path.abspath(__file__))+"/tmp.db"

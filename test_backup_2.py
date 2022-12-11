@@ -1,9 +1,7 @@
 import pathlib
-
 import unittest
 from backup import Backup
 import info_handler as ih
-
 import os
 from filecmp import dircmp
 from filecmp import cmpfiles
@@ -12,7 +10,9 @@ import datenbank
 import shutil
 import subprocess 
 from subprocess import run
+import platform
 
+#device_name = platform.node()
 device_name = "testCases"
 
 def are_dir_trees_equal(dir1, dir2):
@@ -58,9 +58,9 @@ class TestBackup(unittest.TestCase):
         os.utime(f"{cls.workingDirectory}/test_Files_Backup/jewel")
         os.utime(f"{cls.workingDirectory}/test_Files_Backup/jewel2")
 
-        
+        print("path: -----", cls.workingDirectory + '/' + cls.config["destination"][device_name])
         cls.backup = Backup(jewel_list, cls.workingDirectory + '/' + cls.config["destination"][device_name], True)
-        cls.backup.initialize_backup(2)
+        cls.backup.initialize_backup(1)
         
 
     
@@ -105,7 +105,7 @@ class TestBackup(unittest.TestCase):
        # time.sleep(1)
         #global date_Format
         #date_Format = date.now().strftime('%d-%m-%Y-%H-%M')
-        self.backup.initialize_backup(2) 
+        self.backup.initialize_backup(1) 
         
         # time.sleep(1)
         global diffPath
@@ -141,9 +141,9 @@ class TestBackup(unittest.TestCase):
         
         rel_path = cls.config["destination"][device_name]
    
-        for root, dirs, files in os.walk(cls.workingDirectory + '/' + rel_path, topdown=False):
-            for name in dirs:
-                shutil.rmtree(os.path.join(root, name))
+        # for root, dirs, files in os.walk(cls.workingDirectory + '/' + rel_path, topdown=False):
+        #     for name in dirs:
+        #         shutil.rmtree(os.path.join(root, name))
                 
    
         shutil.rmtree(cls.config["restore_destination"][device_name])
@@ -151,12 +151,12 @@ class TestBackup(unittest.TestCase):
        
         jewel_list = cls.config["jewel_sources"][device_name]
 
-        for element in jewel_list:    
-            for root, dirs, files in os.walk(element, topdown=False):
-                for name in dirs:
-                    shutil.rmtree(os.path.join(root, name))
-                for name in files:
-                    os.remove(os.path.join(root, name))
+        # for element in jewel_list:    
+        #     for root, dirs, files in os.walk(element, topdown=False):
+        #         for name in dirs:
+        #             shutil.rmtree(os.path.join(root, name))
+        #         for name in files:
+        #             os.remove(os.path.join(root, name))
                     
             
 

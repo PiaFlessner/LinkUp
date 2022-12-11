@@ -15,6 +15,7 @@ touch ./jewel3/test2.txt
 echo "test" >> ./jewel/test.txt
 echo "test" >> ./jewel2/test1.txt
 echo "test" >> ./jewel3/test2.txt
+
 # cp -r ./special_Files/ jewel3
 #tar -xf Bad_Names.tar.gz -C ./jewel/Bad_Names_Dir
 

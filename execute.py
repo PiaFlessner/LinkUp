@@ -40,12 +40,12 @@ if __name__ == "__main__":
     paths = parser.add_mutually_exclusive_group()
 
     #command: python3 rs -[c ca r ra] ############################## TODO 
-    reed_solomon = subparser.add_parser('rs', help="Get into Reed-Solomon section of program. E.g. -create and -repair.")
+    reed_solomon = subparser.add_parser('rs', help="Get into Reed-Solomon section of program. E.g. --createall and --repairall.")
     group2 = reed_solomon.add_mutually_exclusive_group()
-    group2.add_argument('-ca', '--createall', action='store_true', help='Create forward error correction for everything')
-    group2.add_argument('-c', '--createone', action='store_true', help='Create forward error correction for one')
-    group2.add_argument('-ra', '--repairall', action='store_true', help='Create forward error correction for one')
-    group2.add_argument('-r', '--repairone', action='store_true', help='Create forward error correction for one')
+    group2.add_argument('-ca', '--createall', action='store_true', help='Create redundancy information for everything')
+    group2.add_argument('-c', '--createone', action='store_true', help='Create redundancy information for one file')
+    group2.add_argument('-ra', '--repairall', action='store_true', help='Repair all files with redundancy information')
+    group2.add_argument('-r', '--repairone', action='store_true', help='Repair one file with redundancy information')
     reed_solomon.add_argument('id', type=str, nargs='?')
     reed_solomon.add_argument('-v', '--verbose', action='store_true', help="more detail")
     reed_solomon.add_argument('-o', '--overwrite', action='store_true', help="overwrite Files")
@@ -169,6 +169,7 @@ if __name__ == "__main__":
         repair=Repair()
         daten = Datenbank()
         blobs=[]
+        overwrite=args.overwrite
         if args.createall:
             blobs = daten.get_all_Blobs()
             for blob in blobs:
@@ -177,7 +178,7 @@ if __name__ == "__main__":
         elif args.createone:
             if args.id is not None:
                 blob = daten.get_Blob_via_id(args.id)
-                repair.create_repair_data(blob)
+                repair.create_repair_data(blob, overwrite)
                 print("Redundancy information created")
             
         else:
@@ -185,6 +186,7 @@ if __name__ == "__main__":
   
 
     if args.command == "reset":
+        
         print("Do you really want to reset the backup for your current device: " + platform.node() + "?")
         print("Then please enter >I am sure< to reset your backup.")
         print("Or enter something else to cancel.")

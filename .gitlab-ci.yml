@@ -30,14 +30,15 @@ before_script:
   - pip install -r requirements.txt
   - apt-get -y update
   - apt-get -y install rsync
-  - python insert_into_config.py
 
 test:
   script:
     - python miron_test_ci.py
     # Das funktioniert nicht so, wie es soll, es kommt zu keiner assertion, obwohl hier ja ein Fehler vorliegt, siehe Log
     #-python test_backup.py
-    - python -m unittest -v
+    - python -m unittest test_backup.py -v
+    - python -m unittest test_backup_2.py -v
+    - python -m unittest test_database.py -v
 
 run:
   script:

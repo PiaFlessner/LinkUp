@@ -21,9 +21,9 @@
             "/home/ole/importantDocuments"
         ],
         "testCases": [
-            "./test_Files_Backup/jewel",
-            "./test_Files_Backup/jewel2",
-            "./test_Files_Backup/jewel3"
+            "/test_Files_Backup/jewel",
+            "/test_Files_Backup/jewel2",
+            "/test_Files_Backup/jewel3"
         ],
         "fatih": [
             "./test_Files_Backup/jewel",

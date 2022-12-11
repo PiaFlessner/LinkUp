@@ -30,6 +30,7 @@ key=platform.node()
 data2="/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/backup_Location"
 write_json(table_name,key, data2)
 
+
 table_name='restore_destination'
 key=platform.node()
 data3="/home/fatih/projektBackup/projektgruppe-1/test_Files_Backup/restore_Location"

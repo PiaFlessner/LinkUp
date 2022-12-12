@@ -10,17 +10,13 @@ from pathlib import Path
 import time
 
 
-
 class Backup:
 
 
     def __init__(self, jewel_path_list, destination, testcase=False):
-        self.start_time = time.time()
-        print("--- %s seconds ---" % (time.time() - self.start_time))
         self.jewel_path_list = jewel_path_list
         self.destination = destination
         self.db = Datenbank(testcase)
-        # time.sleep(5)
         self.device_name = platform.node()
         if (testcase):
             self.device_name = "testCases"
@@ -46,24 +42,21 @@ class Backup:
                if log_lines[1].rstrip() == self.fullbackup_name:   
                     info_handler.check_db_hash(self.destination, self.fullbackup_name)
                     os.remove(self.destination + "/" + "tmp.db") 
-        print("1--- %s seconds ---" % (time.time() - start_time))
+
         # to minimize work, first check if these paths even exists, then continue
         tmp = self.filter_non_existing_paths(self.jewel_path_list)
-        print("2--- %s seconds ---" % (time.time() - start_time))
+
         diff_backup_sources = self.db.check_which_jewel_sources_exist(tmp, self.device_name)
-        print("3--- %s seconds ---" % (time.time() - start_time))
         # filter out everything, that is in diff_backup already
         full_backup_sources = [e for e in tmp if e not in diff_backup_sources]
-        print("4--- %s seconds ---" % (time.time() - start_time))
 
         # execute,when not empty
         if diff_backup_sources:
             self.execute_backup(diff_backup_sources, verbose_level, start_time)
-        print("5--- %s seconds ---" % (time.time() - start_time))
+
         # execute, when not empty
         if full_backup_sources:
             self.execute_fullbackup(full_backup_sources, verbose_level, start_time)
-        print("6--- %s seconds ---" % (time.time() - start_time))    
 
 
     def execute_backup(self, jewel_sources, verbose_level, start_time):
@@ -98,21 +91,20 @@ class Backup:
 
        
         info_handler.check_db_hash(self.destination, self.fullbackup_name)
-        print("6--- %s seconds ---" % (time.time() - start_time))
+
 
         jewel_path_list_string = self.list_to_string(jewel_sources)
         output = self.call_rsync_full('aAX', jewel_path_list_string)
         output_array = output.splitlines()
-        print("7--- %s seconds ---" % (time.time() - start_time))
         insert_results = self.read_files_and_jewel_from_rsync_output(output_array, jewel_sources,
                                                     f"{self.destination}/{self.fullbackup_name}",
                                                     self.destination + "/" + self.fullbackup_name)
-        print("8--- %s seconds ---" % (time.time() - start_time))
+        
         subprocess_return_verbose = self.call_rsync_full('aAXlnvv', jewel_path_list_string)
-        print("9--- %s seconds ---" % (time.time() - start_time))
+
         for hardlink_info in insert_results:
             self.set_hardlink(hardlink_info)
-        print("10--- %s seconds ---" % (time.time() - start_time))
+
         info_handler.update_db_hash(self.destination, self.fullbackup_name)
         self.print_feedback(verbose_level, self.fullbackup_name, 'full', subprocess_return_verbose, start_time)
 
@@ -135,13 +127,9 @@ class Backup:
         result = []
         if output_array == []:
             print("result ist leer")
-            exit
-        print("7.1--- %s seconds ---" % (time.time() - self.start_time))
+            exit #TODO Was macht das exit?
         index = 0
-        date_today=date.today()
         for line in output_array:
-            # print("7.2--- %s seconds ---" % (time.time() - self.start_time))
-            #print(line)
             # needed, since sometimes the first line ist not the jewel path,
             #happens only, if subfolder content changed
             if index == 0 or line.endswith('/'):
@@ -151,18 +139,17 @@ class Backup:
                 if line.endswith('/'):
                     self.current_source_path = line
 
-                # check whether path is now the jewel
-                for jewel_path in jewel_sources: # TODO get rid of this nested loop
+                # check wether path is now the jewel
+                for jewel_path in jewel_sources:
                  
                     # stripping and splitting is needed, since comparison does not work otherwise
                     if jewel_path.rsplit('/', 1)[1].strip("/") == line.strip("/"):
-                        jewel = Jewel(0, None, date_today, jewel_path, self.device_name,
+                        jewel = Jewel(0, None, date.today(), jewel_path, self.device_name,
                                       f'{fullbackup_store_destination_body}/{line.strip("/")}')
                         break
                     # if top layer of jewel was not changed, the jewel would not be in line.strip... so we need to split and get the first folder
                     elif jewel_path.rsplit('/', 1)[1].strip("/") == line.split("/")[0]:
-                        print("ello?!")
-                        jewel = Jewel(0, None, date_today, jewel_path, self.device_name,
+                        jewel = Jewel(0, None, date.today(), jewel_path, self.device_name,
                                       f'{fullbackup_store_destination_body}/{line.strip("/")}')
                         break
 
@@ -172,22 +159,17 @@ class Backup:
                 file_object = info_handler.get_metadata(working_dir + '/' + line)
                 # Erstellt Array erstes element vor letztem Slash, zweites Element nach dem Slash
                 file_name = line.rsplit('/', 1)[1]
-                # print("7.5--- %s seconds ---" % (time.time() - self.start_time))
                 blob = Blob(0, 0, file_object.f_hash, (f'{self.db._encode_base64(file_name)}_{file_object.f_hash}'),
                             file_object.f_size,
                             self.current_date_time, file_object.modify, 0, file_name,
                             working_dir + "/" + line, f'{store_destination_body}/{line}')
 
                 file = File(0, [blob], file_object.birth)
-                # print("7.6--- %s seconds ---" % (time.time() - self.start_time))
                 db_answer = self.db.add_to_database(jewel, file, self.device_name)
-                # print("7.7--- %s seconds ---" % (time.time() - self.start_time))
 
                 if db_answer is not True:
                     result.append(HardlinkInfo(db_answer[0].id, db_answer[0].store_destination, blob.store_destination, self.current_date_time,blob.origin_name, working_dir + "/" + line, jewel.id, db_answer[1]))
             index = index +1
-        print("7.9--- %s seconds ---" % (time.time() - self.start_time))
-        self.db._commit_db()
         return result
 
 
@@ -322,6 +304,7 @@ class Backup:
                     f'│   └── size of files:\t\t\t{total_size} {total_size_unit}\n'
                     f'└── size of database:\t\t\t{database_size} {database_size_unit}\n')
 
+
     def call_rsync_differential(self, options: str, backup_sources_for_r_sync: str, backup_name: str):
         try:
             subprocess_output = subprocess.Popen(f"rsync -{options} {self.excluding_data()} --out-format='%n' "
@@ -329,7 +312,6 @@ class Backup:
                                                 f"{self.destination}/{backup_name}",
                                                 shell=True,
                                                 stdout=subprocess.PIPE)
-            print("wait_decode_subprocess")
             output=[]
             for line in subprocess_output.stdout:
                 output.append(line)
@@ -338,11 +320,14 @@ class Backup:
             subprocess_output.wait()
             return return_value
         except:
+
             print(f'Error: rsync couldn\'t be executed\n'
                   f'used option: {options}\n'
                   f'fullbackup path: {self.destination}/{self.fullbackup_name}\n'
                   f'destination path: {self.destination}/{backup_name}\n')
             exit()
+
+
     def call_rsync_full(self, options: str, jewel_path_list_string: str):
         try:
             subprocess_output = subprocess.Popen(f'rsync -{options} {self.excluding_data()} --out-format="%n" '
@@ -350,7 +335,6 @@ class Backup:
                                                 f'{self.destination}/{self.fullbackup_name}',
                                                 shell=True,
                                                 stdout=subprocess.PIPE)
-            print("wait_decode_subprocess")
             output=[]
             for line in subprocess_output.stdout:
                 output.append(line)
@@ -359,11 +343,21 @@ class Backup:
             subprocess_output.wait()
             return return_value
         except:
+
             print(f'Error: rsync couldn\'t be executed\n'
                   f'used option: {options}\n'
                   f'jewel path: {jewel_path_list_string}\n'
                   f'destination path: {self.destination}/{self.fullbackup_name}\n')
             exit()
+
+    
+    def wait_decode_subprocess(self, subprocess_output: str):
+        subprocess_output.wait()
+        output = subprocess_output.stdout.read()
+        subprocess_output.stdout.close()
+        output = output.decode('utf-8')
+        return output
+
 
     def check_packages(self, required_packages: list):
         subprocess_output = ''

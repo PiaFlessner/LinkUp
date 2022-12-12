@@ -34,13 +34,13 @@ def restore_options(restore_id:str, date_input:str):
             date_var = datetime.datetime.strptime(date_input, "%Y-%m-%d-%H-%M")
             date_var = date_var.strftime("%Y-%m-%d-%H-%M-%S")
             date_var = datetime.datetime.strptime(date_var, "%Y-%m-%d-%H-%M-%S")
-            date_var = date_var.replace(second=59)
+            date_var = date_var.replace(second=0)
         elif ih.validate_date_format(date_input, "%Y-%m-%d-%H"):
             # without second and minute
             date_var = datetime.datetime.strptime(date_input, "%Y-%m-%d-%H")
             date_var = date_var.strftime("%Y-%m-%d-%H-%M-%S")
             date_var = datetime.datetime.strptime(date_var, "%Y-%m-%d-%H-%M-%S")
-            date_var = date_var.replace(minute=59, second=59)
+            date_var = date_var.replace(minute=0, second=0)
         elif ih.validate_date_format(date_input, "%Y-%m-%d"):
             # without hour, minute and second
             date_var = datetime.datetime.strptime(date_input, "%Y-%m-%d")

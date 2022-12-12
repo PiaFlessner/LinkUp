@@ -312,13 +312,7 @@ class Backup:
                                                 f"{self.destination}/{backup_name}",
                                                 shell=True,
                                                 stdout=subprocess.PIPE)
-            output=[]
-            for line in subprocess_output.stdout:
-                output.append(line)
-            return_value=''.join([x.decode('utf-8') for x in output])
-            subprocess_output.stdout.close()
-            subprocess_output.wait()
-            return return_value
+            return self.wait_decode_subprocess(subprocess_output)
         except:
 
             print(f'Error: rsync couldn\'t be executed\n'
@@ -335,28 +329,22 @@ class Backup:
                                                 f'{self.destination}/{self.fullbackup_name}',
                                                 shell=True,
                                                 stdout=subprocess.PIPE)
-            output=[]
-            for line in subprocess_output.stdout:
-                output.append(line)
-            return_value=''.join([x.decode('utf-8') for x in output])
-            subprocess_output.stdout.close()
-            subprocess_output.wait()
-            return return_value
+            return self.wait_decode_subprocess(subprocess_output)
         except:
-
             print(f'Error: rsync couldn\'t be executed\n'
                   f'used option: {options}\n'
                   f'jewel path: {jewel_path_list_string}\n'
                   f'destination path: {self.destination}/{self.fullbackup_name}\n')
             exit()
 
-    
-    def wait_decode_subprocess(self, subprocess_output: str):
-        subprocess_output.wait()
-        output = subprocess_output.stdout.read()
+    def wait_decode_subprocess(self, subprocess_output):
+        output=[]
+        for line in subprocess_output.stdout:
+            output.append(line)
+        return_value=''.join([x.decode('utf-8') for x in output])
         subprocess_output.stdout.close()
-        output = output.decode('utf-8')
-        return output
+        subprocess_output.wait()
+        return return_value
 
 
     def check_packages(self, required_packages: list):

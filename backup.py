@@ -339,8 +339,7 @@ class Backup:
 
     def wait_decode_subprocess(self, subprocess_output):
         output=[]
-        for line in subprocess_output.stdout:
-            output.append(line)
+        output = [line for line in subprocess_output.stdout]
         return_value=''.join([x.decode('utf-8') for x in output])
         subprocess_output.stdout.close()
         subprocess_output.wait()

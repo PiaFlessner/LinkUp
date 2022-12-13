@@ -1,3 +1,4 @@
+#!/home/gruppe/Schreibtisch/Projektgruppe/projektgruppe/.venv/bin/python3
 
 import argparse
 from backup import Backup

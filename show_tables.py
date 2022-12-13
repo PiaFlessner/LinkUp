@@ -13,155 +13,140 @@ class ShowTables:
     
     """
 
-# These methods adjust the output to the verbose level selected by the user and return a list of strings.
 
     def __init__(self):
         """Constructor"""
         self.daten = Datenbank()
 
 
-    def _verbose_jewel_to_string(self, jewel:Jewel, verbose_level:int) -> list[str]:
-        """Adjusts the individual Jewel variables to the verbose level and returns them as a string list.
+    def generate_jewel_table(self, jewels:list[Jewel], verbose_level:int) ->None:
+        """Adjusts the jewel table to the verbose level and prints the table.
         
             Args:
-                jewel: a Jewel object that should be displayed
-                verbose_level: the level that should be displayed
-                
-            Returns:
-                string list"""
- 
+                jewels: a list of jewel objects that should be displayed
+                verbose_level: the level that should be displayed"""
 
-        startdate = str(jewel.monitoring_Startdate)
-        comment = str(jewel.comment)
-        j_source = str(jewel.jewelSource)
-        device = str(jewel.device_name)
-        fullbackup_source = jewel.fullbackup_source
 
+        table = PrettyTable()
         if verbose_level == 0:
-            startdate = startdate.split(" ")[0]
-            if len(comment) > 15: comment = comment[0:12]+  "..."
-            if len(device) > 15: device = device[0:12] + "..."
-            if len(j_source) > 10: j_source = j_source[0:7] +"..."
-            if len(fullbackup_source) > 10: fullbackup_source = fullbackup_source[0:7]+ "..."
+                table.field_names = ["Jewel ID","Monitoring startdate","Source of the jewel"]
+                table.align["Jewel ID"] = "l"
+                for jewel in jewels:
+                     startdate = str(jewel.monitoring_Startdate).split(" ")[0]
+                     table.add_row([str(jewel.id), startdate, jewel.jewelSource])
 
         elif verbose_level == 1:
-            startdate = startdate.split(".")[0]
-            if len(comment) > 25: comment= comment[0:23] + "..."
-            if len(device)> 25: device = device[0:23] + "..."
-            if len(j_source) > 20: j_source =  device[0:17] + "..."
-            if len(fullbackup_source) > 20: fullbackup_source = fullbackup_source[0:17]+ "..."
+                table.field_names = ["Jewel ID","Monitoring startdate","Source of the jewel", "Fullbackup source"]
+                table.align["Jewel ID"] = "l"
+                for jewel in jewels:
+                    startdate = str(jewel.monitoring_Startdate).split(".")[0]
+                    table.add_row([str(jewel.id), startdate, jewel.jewelSource, jewel.fullbackup_source])
 
-        return [str(jewel.id), comment, startdate,  j_source,device, fullbackup_source]
+        else:
+                table.field_names = ["Jewel ID", "Comment", "Monitoring startdate", "Source of the jewel", "Device name", "Fullbackup source"]
+                table.align["Jewel ID"] = "l"
+                for jewel in jewels:
+                    startdate = str(jewel.monitoring_Startdate)
+                    table.add_row([str(jewel.id),jewel.comment, startdate, jewel.jewelSource, jewel.device_name, jewel.fullbackup_source])
 
-
-    def _verbose_blob_to_string(self, blob:Blob, verbose_level:int)-> list[str]:
-            """Adjusts the individual Blob variables to the verbose level and returns them as a string list.
+        print(table)
+        
+    
+    def generate_file_table(self, files:list[File], verbose_level:int) ->None:
+        """Adjusts the file table to the verbose level and prints the table.
         
             Args:
-                blob: a Blob object that should be displayed
-                verbose_level: the level that should be displayed
-                
-            Returns:
-                string list"""
+                files: a list of file objects that should be displayed
+                verbose_level: the level that should be displayed"""
 
-                
-            hash = blob.hash
-            name = blob.name
-            creationDate = str(blob.creationDate)
-            modify = str(blob.creationDate)
-            origin_name = blob.origin_name
-            source_path = blob.source_path
-            store_destination = blob.store_destination
-            id_file = str(blob.iD_File)
+
+        table = PrettyTable()
+        table.field_names = ["File ID","File versions","File birth"]
+        table.align["File ID"] = "l"
+        for file in files:
+            birth = str(file.birth)
+            if verbose_level == 0: birth = birth.split(" ")[0]
+            elif verbose_level == 1: birth = birth.split(".")[0]
+            table.add_row([file.id, str(len(file.blobs)), birth])
+
+        print(table)
+
+
+    def generate_blobs_table(self, blobs:list[Blob], verbose_level:int) ->None:
+            """Adjusts the blob table to the verbose level and prints the table.
+        
+            Args:
+                blobs: a list of blob objects that should be displayed
+                verbose_level: the level that should be displayed"""
+
+
+            table = PrettyTable()
 
             if verbose_level == 0:
-                if len(hash) > 10: hash = hash[0:7] + "..."
-                if len(name) > 10: name[0:7] + "..."
-                creationDate = creationDate.split(" ")[0]
-                modify = modify.split(" ")[0]
-                if len(origin_name) > 5: origin_name = origin_name[0:7] + "..."
-                if len(source_path) > 5: source_path = source_path[0:7] + "..."
-                if len(store_destination) > 5: store_destination = store_destination[0:7] + "..."
-                if len(id_file) > 5: id_file = id_file[0:7] + "..."
+                table.field_names = ["Blob ID"," File version", "Creationdate", "File ID", "Origin name"]
+                table.align["Blob ID"] = "l"
+                for blob in blobs:
+                    table.add_row([str(blob.id), str(blob.number), str(blob.creationDate).split(" ")[0], blob.iD_File, blob.origin_name ])
+                print(table)
 
             elif verbose_level == 1:
-                if len (hash) > 15: hash = hash[0:12] + "..."
-                if len(name) > 15: name[0:12] + "..."
-                creationDate = creationDate.split(".")[0]
-                modify = modify.split(".")[0]
-                if len(origin_name) > 20: origin_name = origin_name[0:17] + "..."
-                if len(source_path) > 15: source_path = source_path[0:12] + "..."
-                if len(store_destination) > 15: store_destination = store_destination[0:12] + "..."
-                if len(id_file) > 15: id_file = id_file[0:12] + "..."
+                secound_table = PrettyTable()
+                table.field_names = ["Blob ID"," File version", "File size in kB", "Creationdate", "File ID"]
+                table.align["Blob ID"] = "l"
+                secound_table.field_names = ["Blob ID", "Origin name", " Source path", "Store destination "]
+                secound_table.align["Blob ID"] = "l"
+                for blob in blobs:
+                    table.add_row([str(blob.id), str(blob.number), str(blob.fileSize),  str(blob.creationDate).split(".")[0], blob.iD_File])
+                    secound_table.add_row([str(blob.id), blob.origin_name, blob.source_path, blob.store_destination])
+                print("-------------------------the first part of the blob table.----------------------------------------------------------\n")
+                print(table)
+                print("\n-------------------------the secound part of the blob table.---------------------------------------------------------\n")
+                print(secound_table)
+            else: 
+                secound_table = PrettyTable()
+                table.field_names = ["Blob ID"," File version", "Hash", "File size in kB", "Creationdate", "Modifydate"]
+                table.align["Blob ID"] = "l"
+                secound_table.field_names = ["Blob ID",  "File ID", "Origin name", " Source path", "Store destination "]
+                secound_table.align["Blob ID"] = "l"
+                for blob in blobs:
+                    table.add_row([str(blob.id), str(blob.number), blob.hash, str(blob.fileSize), str(blob.creationDate), str(blob.modify)])
+                    secound_table.add_row([str(blob.id),  blob.iD_File, blob.origin_name, blob.source_path, blob.store_destination])
+                print("-------------------------the first part of the blob table.----------------------------------------------------------\n")
+                print(table)
+                print("\n-------------------------the secound part of the blob table.---------------------------------------------------------\n")
+                print(secound_table)
+           
 
-            return [str(blob.id), str(blob.number),hash, name, str(blob.fileSize), creationDate, modify, id_file, origin_name, source_path,store_destination]
-
-
-    def _verbose_skipped_files_to_string(self, s_file:tuple, verbose_level:int) ->list[str]:
-        """Adjusts the individual skipped File variables to the verbose level and returns them as a string list.
+    def generate_sfiles_table(self, sfiles:tuple, verbose_level:int) ->None:
+             """Adjusts the blob table to the verbose level and prints the table.
         
             Args:
-                s_file: a tuple of skipped file variables that should be displayed
-                verbose_level: the level that should be displayed
-                
-            Returns:
-                string list"""
+                sfiles: a list of sfiles as tuple that should be displayed
+                verbose_level: the level that should be displayed"""
 
 
-        file_id= str(s_file[0])
-        jewel_id = str(s_file[1])
-        uuid = str(s_file[2])
-        occurance_Date = str(s_file[3])
-        hash = str(s_file[4])
-        reason = str(s_file[5])
-        add_info = str(s_file[6])
-        conn_jewel = str(s_file[7])
+             table = PrettyTable()
+             if verbose_level == 0:
+                table.field_names = ["File id","Jewel id", "UUID", "Occurance date"]
+                table.align["File id"] = "l"
+                for file in sfiles:
+                    table.add_row([str(file[0]), str(file[1]), file[2], str(file[3]).split(" ")[0]])
 
-        if verbose_level == 0:
-            if len(uuid) > 10: uuid = uuid[0:7] + "..."
-            occurance_Date = occurance_Date.split(" ")[0]
-            if len(hash) > 10: hash = hash[0:7] + "..."
-            if len(reason) >15: reason = reason[0:12] + "..."
-            if len(add_info) > 15: add_info = add_info[0:12] + "..."
-            if len(conn_jewel) > 10: conn_jewel = conn_jewel[0:7] + "..."
-    
-        if verbose_level == 1:
-            if len(uuid) > 15: uuid = uuid[0:12] + "..."
-            occurance_Date = occurance_Date.split(" ")[0]
-            if len(hash) > 15: hash = hash[0:12] + "..."
-            if len(reason) >20: reason = reason[0:17] + "..."
-            if len(add_info) > 20: add_info = add_info[0:17] + "..."
-            if len(conn_jewel) > 15: conn_jewel = conn_jewel[0:12] + "..."
-
-        return [file_id, jewel_id, uuid, occurance_Date, hash, reason, add_info, conn_jewel]
+             elif verbose_level == 1:
+                table.field_names = ["File id","Jewel id", "UUID", "Occurance date", "Reason", "Connected file to jewel"]
+                table.align["File id"] = "l"
+                for file in sfiles:
+                    table.add_row([str(file[0]), str(file[1]), file[2], str(file[3]).split(".")[0], file[5], str(file[7])])
+            
+             else:
+                table.field_names = ["File id","Jewel id", "UUID", "Occurance date", "Hash", "Reason", "Additional information", "Connected file to jewel"]
+                table.align["File id"] = "l"
+                for file in sfiles:
+                    table.add_row([str(file[0]), str(file[1]), file[2], str(file[3]), file[4], file[5], file[6], str(file[7])])
+            
+             print(table)
 
 
-    def _verbose_files_to_string(self, file:File, verbose_level:int)-> list[str]:
-        """Adjusts the individual File variables to the verbose level and returns them as a string list.
-        
-            Args:
-                file: a File object that should be displayed
-                verbose_level: the level that should be displayed
-                
-            Returns:
-                string list"""
-
-
-        birth = str(file.birth)
-        id = str(file.id)
-
-        if verbose_level == 0:
-            birth = birth.split(" ")[0]
-            if len(id) > 15: id = id[0:12] + "..."
-
-        elif verbose_level == 1:
-            birth = birth.split(".")[0]
-            if len(id) > 25: id = id[0:23] + "..."
-
-        return [id, str(len(file.blobs)) , birth]
-
-# These methods create tables of objects (all from the database or one via id) and output them to the console.
-# Tables of objects: Jewels, Files, Blobs and skipped Files.
 
     def show_all_jewels(self, verbose_level:int) ->None:
         """Prints all jewels in table form in the console
@@ -173,14 +158,7 @@ class ShowTables:
         jewels = self.daten.get_all_Jewels()
         
         if jewels is not None:
-            table = PrettyTable()
-            table.field_names = ["Jewel ID","Comment","Monitoring startdate","Source of the jewel", "Device name", "Fullbackup source"]
-
-            for jewel in jewels:
-                j_list = self._verbose_jewel_to_string(jewel, verbose_level)
-                table.add_row([j_list[0], j_list[1], j_list[2], j_list[3],  j_list[4], j_list[5]])
-
-            print(table)
+            self.generate_jewel_table(jewels, verbose_level)
 
         else: 
             print("\nNo jewels have been created by the user yet")
@@ -194,18 +172,10 @@ class ShowTables:
                 verbose_level: the level that should be displayed"""
 
 
-
         files = self.daten.get_all_Files()
 
         if files is not None:
-            table = PrettyTable()
-            table.field_names = ["File ID", "File versions", "File birth"]
-
-            for fi in files:
-                file = self._verbose_files_to_string(fi, verbose_level)
-                table.add_row([file[0], file[1], file[2]])
-
-            print(table)
+           self.generate_file_table(files, verbose_level)
         
         else: 
             print("\nNo files have been created by the user yet")
@@ -221,17 +191,7 @@ class ShowTables:
         blobs = self.daten.get_all_Blobs()
    
         if blobs is not None:
-            table = PrettyTable()
-
-            table.field_names = ["Blob ID", "File version", "Hash", "BackUp name", "File size in kB","Creationdate", "Modifydate", 
-             "File ID", "Origin name","Source path", "Store destination"]
-
-            for blob in blobs:
-                b_list = self._verbose_blob_to_string(blob, verbose_level)
-                table.add_row([b_list[0], b_list[1], b_list[2], b_list[3], b_list[4], b_list[5], b_list[6], b_list[7], b_list[8], b_list[9],
-                b_list[10]])
-
-            print(table)
+           self.generate_blobs_table(blobs, verbose_level)
 
         else: print("\nNo blobs have been created by the user yet")
 
@@ -247,20 +207,9 @@ class ShowTables:
         jewel = self.daten.get_Jewel_via_id(id)
     
         if jewel is not None:
-            table = PrettyTable()
-            table.field_names = ["Jewel ID", "Comment","Monitoring startdate","Source of the jewel", "Device name", "Fullbackup source"]
-            j_list = self._verbose_jewel_to_string(jewel, verbose_level)
-            table.add_row([j_list[0], j_list[1], j_list[2], j_list[3],  j_list[4], j_list[5]])
-            filetable = PrettyTable()
+            self.generate_jewel_table([jewel], verbose_level)
             files = self.daten.get_Files_via_jewel_id(id)
-            filetable.field_names = ["File ID","File versions","File birth"]
-       
-            for file in files:
-                f_list = self._verbose_files_to_string(file, verbose_level)
-                filetable.add_row([ f_list[0], f_list[1], f_list[2]])
-               
-            print(table)
-            print(filetable)
+            self.generate_file_table(files, verbose_level)
 
 
         else: print("\nThere is no jewel with the id " + str(id))
@@ -277,23 +226,11 @@ class ShowTables:
         file = self.daten.get_File_via_id(id)
 
         if file is not None:
-            table = PrettyTable()
-            table.field_names = ["File ID","File versions","File birth"]
-            f_list = self._verbose_files_to_string(file, verbose_level)
-            table.add_row([f_list[0], f_list[1], f_list[2]])
-            print(table)
-
-            blobtable = PrettyTable()
-            blobtable.field_names = ["Blob ID","File version","Hash","BackUp name","File size in kB","Creationdate","Modifydate","File ID","Origin name","Source path", "Store destination"]
-
-            for blob in file.blobs:
-                b_list = self._verbose_blob_to_string(blob, verbose_level)
-                blobtable.add_row([b_list[0], b_list[1], b_list[2], b_list[3], b_list[4], b_list[5], b_list[6], b_list[7], b_list[8], b_list[9],
-                b_list[10]])
-
-            print(blobtable)
+            self.generate_file_table([file], verbose_level)
+            self.generate_blobs_table(file.blobs, verbose_level)
 
         else: print("\nThere is no file with the id " + str(id))
+
 
     def show_blob_via_id (self,id:int, verbose_level:int) ->None:
         """Prints a blob in table form in the console
@@ -304,15 +241,8 @@ class ShowTables:
 
 
         blob = self.daten.get_Blob_via_id(id)
-
-        if blob is not None:
-            table =  PrettyTable()
-            table.field_names = ["Blob ID", "File version", "Hash", "BackUp name", "File size in kB","Creationdate", "Modifydate", 
-            "File ID", "Origin name","Source path", "Store destination"]
-            b_list = self._verbose_blob_to_string(blob, verbose_level)
-            table.add_row([b_list[0], b_list[1], b_list[2], b_list[3], b_list[4], b_list[5], b_list[6], b_list[7], b_list[8], b_list[9],
-                b_list[10]])
-            print(table)
+        if blob is not None: 
+            self.generate_blobs_table([blob], verbose_level)
         else:  
             print("\nThere is no blob with the id " + str(id))
 
@@ -327,14 +257,10 @@ class ShowTables:
         files = self.daten.get_all_skipped_files()
  
         if files is not None:
-            table =  PrettyTable()
-            table.field_names = ["File id", "Jewel id", "UUID", "Occurance date", "Hash", "Reason", "Additional information", "Connected file to jewel"]
-            for fi in files:
-                file = self._verbose_skipped_files_to_string(fi, verbose_level)
-                table.add_row([str(file[0]), str(file[1]),str(file[2]), str(file[3]), str(file[4]), str(file[5]), str(file[6]), str(file[7])])
-            print(table)
+            self.generate_sfiles_table(files, verbose_level)
         else:
             print("\nThere are no skipped files yet")
+
 
     def show_skipped_file_via_id(self,id:int, verbose_level:int) ->None:
         """Prints a skipped file in table form in the console
@@ -343,16 +269,11 @@ class ShowTables:
                 id: the id of the skipped file that should be displayed
                 verbose_level: the level that should be displayed"""
 
-
   
         fi = self.daten.get_skipped_file_via_id(id)
         
         if fi is not None:
-            table =  PrettyTable()
-            table.field_names = ["File id", "Jewel id", "UUID", "Occurance date", "Hash", "Reason", "Additional information", "Connected file to jewel"]
-            file = self._verbose_skipped_files_to_string(fi, verbose_level)
-            table.add_row([str(file[0]), str(file[1]),str(file[2]), str(file[3]), str(file[4]), str(file[5]), str(file[6]),str(file[7])])
-            print(table)
+            self.generate_sfiles_table([fi], verbose_level)
         else:  print("\nThere is no skipped file with the id " + str(id))
 
     

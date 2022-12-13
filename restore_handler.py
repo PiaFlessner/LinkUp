@@ -9,7 +9,7 @@ def restore_options(restore_id:str, date_input:str):
     return_list.append(restore_id)
     try:
         # User date input
-        print(date_input)
+        #print(date_input)
         if date_input == 'today':
             # needs to be converted into a string of the specific format
             date_var = datetime.date.today().strftime("%Y-%m-%d-%H-%M-%S")

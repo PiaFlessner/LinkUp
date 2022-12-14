@@ -31,8 +31,6 @@ class Backup:
 
         start_time = time.time()
 
-        self.check_packages(['rsync', 'openssl'])
-
         #Checks and deletes the first backup when it runned not through and start from scratch again. 
         if os.path.exists("db.log"):
            file = open("db.log", "r")
@@ -344,19 +342,3 @@ class Backup:
         subprocess_output.stdout.close()
         subprocess_output.wait()
         return return_value
-
-
-    def check_packages(self, required_packages: list):
-        subprocess_output = ''
-        failed = False
-        for package in required_packages:
-            try:
-                subprocess_output = subprocess.Popen(f'find . -name {package}', cwd='/usr', shell=True, stdout=subprocess.PIPE)
-                if f'/bin/{package}' not in self.wait_decode_subprocess(subprocess_output):
-                    print(f'Error: package "{package}" not found')
-                    failed = True
-                    exit()
-            except:
-                if not failed:
-                    print(f'Error: package "{package}" not found')
-                exit()

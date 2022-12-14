@@ -6,14 +6,36 @@ from datenbank import Datenbank
 from repair import Repair
 from show_tables import ShowTables
 from restore import Restore
-from datetime import datetime
 import info_handler as ih
 import platform
-import datetime
 import restore_handler
+from subprocess import PIPE, Popen
+
+
+def check_packages(required_packages: list):
+        error_found = False
+        for package in required_packages:
+            subprocess_output = ''
+            try:
+                subprocess_output = Popen(f'which {package}', shell=True, stdout=PIPE)
+            except:
+                pass
+            if f'{package}' not in subprocess_output.stdout.read().decode('UTF-8'):
+                error_found = True
+                print(f'Error: package "{package}" not found')
+        if error_found:
+            exit()
+
 
 # Hier startet das Programm
 if __name__ == "__main__":
+
+    package_list = [
+        'rsync',
+        'openssl'
+    ]
+
+    check_packages(package_list)
 
     # get Table Functions
     sT = ShowTables()

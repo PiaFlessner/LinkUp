@@ -348,11 +348,15 @@ class Backup:
 
     def check_packages(self, required_packages: list):
         subprocess_output = ''
+        failed = False
         for package in required_packages:
             try:
-                subprocess_output = subprocess.Popen(f'dpkg -s {package}', shell=True, stdout=subprocess.PIPE)
-                if 'Status: install ok installed' not in self.wait_decode_subprocess(subprocess_output):
-                    print(f'Error: package "{package}" not installed')
+                subprocess_output = subprocess.Popen(f'find . -name {package}', cwd='/usr', shell=True, stdout=subprocess.PIPE)
+                if f'/bin/{package}' not in self.wait_decode_subprocess(subprocess_output):
+                    print(f'Error: package "{package}" not found')
+                    failed = True
                     exit()
             except:
-                pass
+                if not failed:
+                    print(f'Error: package "{package}" not found')
+                exit()

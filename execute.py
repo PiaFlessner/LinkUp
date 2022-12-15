@@ -29,6 +29,7 @@ class Argument:
         Return:
         None
         """
+
         self.parser = argparse.ArgumentParser(description='Backup files or folders. Manage these files by showing, restoring or repairing them.')
         subparser = self.parser.add_subparsers(dest='command')
 
@@ -181,6 +182,7 @@ class Argument:
         Return:
         None
         """
+
         sT = ShowTables()
 
         # user chooses show jewel
@@ -259,7 +261,22 @@ class Argument:
             restore_object.restore_file(restore_handler.restore_options(self.args.id, self.args.datetime)[0], restore_handler.restore_options(self.args.id, self.args.datetime)[1])
             
         elif self.args.restoreJewel:
-            restore_object.restore_jewel(int(restore_handler.restore_options(self.args.id, self.args.datetime)[0]), restore_handler.restore_options(self.args.id, self.args.datetime)[1])
+            try:
+                arg_ID = int(self.args.id)
+                arg_datetime = self.args.datetime
+            except:
+                print('\nError: given ID isn\'t an integer.')
+                exit()
+            
+            try:
+                arg_1 = int(restore_handler.restore_options(arg_ID, arg_datetime)[0])
+                arg_2 = restore_handler.restore_options(arg_ID, arg_datetime)[1]
+            except:
+                # error print in function 'restore_options'
+                exit()
+
+            restore_object.restore_jewel(arg_1, arg_2)
+        
         else:
             print("Please enter appropriate flag (-F or -J) ")
 

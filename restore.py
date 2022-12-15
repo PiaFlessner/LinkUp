@@ -13,10 +13,43 @@ from pathlib import Path
 class Restore:
     config = info_handler.get_json_info()
 
-    def __init__(self, platform_node=platform.node()):
-        self.platform_node = platform_node
+    def __init__(self):
+        """
+        Summary:
+        Get the name of the current device.
+
+        Detailed description:
+        Name of the device is read and stored.
+        Other functions workw with this information
+
+        Parameter:
+        None
+
+        Return:
+        None
+        """
+
+        self.platform_node = platform.node()
+
 
     def restore_directory_structure(self, jewel):
+        """
+        Summary:
+        Restoring the directory structure.
+
+        Detailed description:
+        A jewel can contain multiple files and subdirectories.
+        This function restores the structure of all subdirectories.
+        It is needed, because files with the same name, but from different subdirectories,
+        would otherwise be overwritten.
+
+        Parameter:
+        jewel : resJewel
+
+        Return:
+        None
+        """
+
         # creates the path, where the restored file is going to be
         # relative_path --> String ;    contains the relative path, for this file,
         #                               which will be restored in restore_destination
@@ -66,6 +99,26 @@ class Restore:
 
 
     def restore_jewel(self, jewel_id: int,  date_time: datetime):
+        """
+        Summary:
+        Restoring a jewel.
+
+        Detailed description:
+        The directory structure is restored with the function 'restore_directory_structure'.
+        Extract all files of the jewel from the database.
+        Restore these files in their associated directories.
+        Print a feedback for the user containing jewel data and possible missing files.
+
+        Parameter:
+        jewel_id : int
+        └─ represents a jewel in the database
+        date_time : datetime
+        └─ specifies, which version of the jewel should be restored
+
+        Return:
+        None
+        """
+
         count = 0
         db_object = Datenbank()
         #date_time = date.fromisoformat(date_time)
@@ -123,6 +176,26 @@ class Restore:
 
 
     def restore_file(self, file_id: str, date_time: datetime):
+        """
+        Summary:
+        Restoring a single file.
+
+        Detailed description:
+        Extract the right file from the database.
+        The directory structure is restored with the function 'restore_directory_structure'.
+        Restore this file in the associated directory.
+        Print a feedback for the user containing file data or a possible failure.
+
+        Parameter:
+        jewel_id : str
+        └─ represents a file in the database (absolut path)
+        date_time : datetime
+        └─ specifies, which version of the jewel should be restored
+
+        Return:
+        None
+        """
+
         db_object = Datenbank()
         #date_time = date.fromisoformat(date_time)
         jewel = db_object.get_restore_File(date_time, file_id)
@@ -168,12 +241,30 @@ class Restore:
               f'└─ size of file:\t{file_size} {file_size_unit}')
 
 
-    def repair_file_if_necessary(self, res_file : resFile, verbosity :bool=False) -> None:
-        repair=Repair()
+    def repair_file_if_necessary(self, res_file : resFile, verbosity : bool=False) -> None:
+        """
+        Summary:
+        Repair broken files.
+
+        Detailed description:
+        If a broken file is detected, initialize the repair process.
+        The repair process is done with the function 'repair_file'.
+
+        Parameter:
+        res_file : resFile
+        └─ object containing necessary information to repair a file
+        verbosity : bool
+        └─ specifies, if feedback is printed
+
+        Return:
+        None
+        """
+
+        repair = Repair()
         if repair.check_if_file_is_broken(res_file):
             if(res_file.reed_solomon_path != 'None'):
                 repair.repair_file(res_file)
-                print("File "+res_file.backup_location+" was repaired")
+                print(f'File {res_file.backup_location} was repaired')
             else:
                 print("""- File is broken, but there is no redundancy information for this file so it can't be repaired.\nsourcepath= """+res_file.backup_location)
 

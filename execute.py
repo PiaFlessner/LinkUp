@@ -247,6 +247,7 @@ class Argument:
         The function checks, if a file or jewel sould be restored.
         A specific target is chosen by the corresponding ID.
         The restore process is performed in another function (restore_file or restore_jewel).
+        Error of jewel ID being a string, not an integer, is caught.
 
         Parameter:
         None

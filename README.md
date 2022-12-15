@@ -141,14 +141,33 @@ backupper restore -F|-J [id] [datetime]
 ```
 
 ## Show Section
+Jewels, files, blobs and skipped files can be displayed as tables with different verbose levels.
+The higher the verbose level, the more columns are displayed.
+
+### commands
+To show all objects use the matching flag without an id.
+To show a specific object use the matching flag with the id.
+
+-J for Jewels 
+-F for Files
+-B for Blobs 
+-sF skipped Files
+
+There are different verbose levels.
+    without a parameter displays the most important columns.
+-v  displays the columns with medium importance.
+-vv displays all columns.
 
 ```
-backupper show -F|-J|-B [id]
+backupper show -F|-J|-B|-sF [id] [-v|-vv]
 ```
-TODO
 
+## Reset Section
+Resets all the backups for the device on which the reset is performed.
 
-
+```
+backupper reset
+```
 
 ## Projekt importieren
 ### Section 1 - Personal Access Token generieren 

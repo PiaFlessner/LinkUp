@@ -12,19 +12,42 @@ import restore_handler
 from subprocess import PIPE, Popen
 
 
-def check_packages(required_packages: list):
-        error_found = False
-        for package in required_packages:
-            subprocess_output = ''
-            try:
-                subprocess_output = Popen(f'which {package}', shell=True, stdout=PIPE)
-            except:
-                pass
-            if f'{package}' not in subprocess_output.stdout.read().decode('UTF-8'):
-                error_found = True
-                print(f'Error: package "{package}" not found')
-        if error_found:
-            exit()
+def check_packages(required_packages: list[str]):
+    """
+    Summary:
+    Checking required packages.
+
+    Detailed description:
+    This function takes a list of strings, which contain the name of a required package, as the input.
+    For every element in this list, the function checks the availability of the package in the users operating system.
+    The method of checking is the execution of the shell command "which" with the package as the parameter.
+    The "which" command returns the path of the package or the message "x not found".
+    Based on the return, the function returns either True (everything available) or False (something is missing).
+    In addition, the user gets notified with an error message "Error: package x not found".
+
+    Parameter:
+    required_packages : list[str]
+    └─ Containing names of packages
+
+    Return:
+    boolean
+    └─ Is False, if a package is missing
+    """
+
+    complete = True
+
+    for package in required_packages:
+        subprocess_output = ''
+        try:
+            subprocess_output = Popen(f'which "{package}"', shell=True, stdout=PIPE)
+        except:
+            pass
+
+        if f'{package}' not in subprocess_output.stdout.read().decode('UTF-8'):
+            complete = False
+            print(f'Error: package "{package}" not found')
+    
+    return complete
 
 
 # Hier startet das Programm
@@ -35,7 +58,8 @@ if __name__ == "__main__":
         'openssl'
     ]
 
-    check_packages(package_list)
+    if not check_packages(package_list):
+        exit()
 
     # get Table Functions
     sT = ShowTables()

@@ -126,7 +126,6 @@ class Backup:
                                                fullbackup_store_destination_body) -> list[str | bool]:
         result = []
         if output_array == []:
-            print("result ist leer")
             exit #TODO Was macht das exit?
         index = 0
         for line in output_array:
@@ -253,8 +252,7 @@ class Backup:
         total_size = sum(f.stat().st_size for f in Path(self.destination).glob('**/*') if f.is_file() and f.name != 'datenbank.db')
 
         database_size = os.stat(f'{self.destination}/datenbank.db').st_size
-        print(self.destination)
-        print(database_size)
+      
 
         files_size_unit = 'bytes'
         excluded_size_unit = 'bytes'

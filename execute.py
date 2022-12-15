@@ -27,11 +27,11 @@ def check_packages(required_packages: list[str]):
 
     Parameter:
     required_packages : list[str]
-    └─ Containing names of packages
+    └─ Containing names of packages.
 
     Return:
-    boolean
-    └─ Is False, if a package is missing
+    complete : boolean
+    └─ Is False, if a package is missing. Otherwise True.
     """
 
     complete = True

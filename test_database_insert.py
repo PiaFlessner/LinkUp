@@ -14,12 +14,12 @@ def insert_for_test_database():
 
     table_name='destination'
     key=platform.node()
-    data2="/home/gruppe/Schreibtisch/backupLocation"
+    data2="~/Schreibtisch/backupLocation"
     write_json(table_name,key, data2)
 
     table_name='restore_destination'
     key=platform.node()
-    data3="/home/gruppe/Schreibtisch/Restore"
+    data3="~/Schreibtisch/Restore"
     write_json(table_name,key, data3)
 
     print("done with insert_into_config_database.py")

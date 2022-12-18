@@ -257,10 +257,9 @@ class TestDatabase(unittest.TestCase):
     @classmethod
     def tearDown(foobar):
         config = info_handler.get_json_info(device_name)
-        if path_exists("datenbank.db"):
-            os.remove("datenbank.db")
         shutil.rmtree(config["destination"][device_name])
         shutil.rmtree(config["restore_destination"][device_name])
+        
 
 
 def suite():

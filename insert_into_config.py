@@ -23,7 +23,7 @@ def insert_for_test_backup():
     data3 = "unitTestFiles/restoreLocation"
     write_json(table_name, key, data3)
 
-    print("done with insert_into_config.py")
+    # print("done with insert_into_config.py")
 
 
 def write_json(table_name, key, value, filename=json_file_name):

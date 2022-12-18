@@ -25,7 +25,7 @@ class Repair: # TODO try zfec shell
         self.destination=self.path_of_repair_information
         os.makedirs(self.destination, exist_ok=True)
         
-    def create_repair_data(self, blob:Blob, _overwrite: bool=False):
+    def create_repair_data(self, blob:Blob, _overwrite: bool=True):
         file_io = open(blob.store_destination, "rb")
         file_size = int(1024*blob.fileSize)  # TODO check for rounding errors
         subdirectory_name="/RS_"+str(blob.id)

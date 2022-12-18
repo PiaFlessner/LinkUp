@@ -22,7 +22,7 @@ def insert_for_test_database():
     data3="/home/gruppe/Schreibtisch/Restore"
     write_json(table_name,key, data3)
 
-    print("done with insert_into_config_database.py")
+    # print("done with test_database_insert.py")
 
 def write_json(table_name, key, value, filename='config.json'):
     with open(filename,'r+') as file:

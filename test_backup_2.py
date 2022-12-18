@@ -68,7 +68,8 @@ class TestBackup(unittest.TestCase):
 
     
     def test_a_fullbackup_jewel(self):
-      
+        print("1=",str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel")
+        print("2=",str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/backup_Location/fullBackup"f"{device_name}/jewel")
         try:
             self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel",
                                                     str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/backup_Location/fullBackup"f"{device_name}/jewel"))

@@ -53,7 +53,7 @@ class Argument:
         ################################################################################################################################
 
         # section 'reed_solomon'
-        reed_solomon = subparser.add_parser('rs', help="Get into Reed-Solomon section of program. E.g. --createall and --repairall.")
+        reed_solomon = subparser.add_parser('rs', help="Get into Reed-Solomon section of program. Try linkup rs -h")
         group_reed_solomon = reed_solomon.add_mutually_exclusive_group()
 
         # commands for section 'reed_solomon'
@@ -299,9 +299,6 @@ class Argument:
         None
         """
 
-        verbose_level = 0
-        if self.args.verbose == 1:
-            verbose_level = 1
         repair = Repair()
         daten = Datenbank()
         blobs=[]

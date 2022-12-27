@@ -16,11 +16,24 @@ from os import walk
     
 test_backup_2_insert.insert_for_test_backup_2()
 
-#device_name = platform.node()
+
 device_name = "testCases"
 
 def are_dir_trees_equal(dir1, dir2):
-    
+    """
+    For comparing, the content of two directories. If they are equal or not.
+
+
+    Detailed description:
+            The Function travers two directories and compare the names of the their files and folders, if they are equal or not. 
+            Furthermore, the content from their files will compare
+
+            Parameter:
+            two fullpath of directories
+
+            Return:
+            if they are equal, true or false
+    """
     dirs_cmp = dircmp(dir1, dir2) 
     
     if len(dirs_cmp.left_only) > 0 or len(dirs_cmp.right_only) > 0 or len(dirs_cmp.funny_files) > 0: # überprüfen, ob unterschiedliche Files oder Dirs vom Namen her
@@ -40,7 +53,18 @@ def are_dir_trees_equal(dir1, dir2):
     return True
 
 class TestBackup(unittest.TestCase):
-    
+    """
+        in this test the backup process is tested. 
+        the user is asked for the values number of folders, data, byte or giga byte and amount of memory.
+        The pipeline will be start with the -p flag. The programm starts the test with predefined values.
+        The user can start the programm as well with -p.
+        
+        Parameter:
+        none
+
+        Return:
+        Error, true, false..
+    """
     @classmethod
     def setUpClass(cls):
         global directory_count
@@ -48,8 +72,6 @@ class TestBackup(unittest.TestCase):
         global data_size
         global storage_unit
 
-        # os.makedirs("unitTestFiles/jewel",exist_ok=True)
-        # cls.daten = datenbank.Datenbank()
         cls.config = ih.get_json_info(device_name)
         cls.workingDirectory = str(pathlib.Path(__file__).parent.resolve())
         
@@ -58,7 +80,7 @@ class TestBackup(unittest.TestCase):
         for (index, element) in enumerate(jewel_list): 
             jewel_list[index] = cls.workingDirectory + element
            
-       
+       # call bash script to create test data
         with open("./test_Files_Backup/init.sh", 'rb') as file:
              script = file.read()
         subprocess.call(script, shell=True)  

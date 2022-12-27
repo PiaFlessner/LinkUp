@@ -15,7 +15,20 @@ import test_restore_insert
 device_name = platform.node()
 test_restore_insert.insert_for_test_restore()
 def are_dir_trees_equal(dir1, dir2):
-    
+    """
+    For comparing, the content of two directories. If they are equal or not.
+
+
+    Detailed description:
+            The Function travers two directories and compare the names of the their files and folders, if they are equal or not. 
+            Furthermore, the content from their files will compare
+
+            Parameter:
+            two fullpath of directories
+
+            Return:
+            if they are equal, true or false
+    """
     dirs_cmp = dircmp(dir1, dir2) 
     
     if len(dirs_cmp.left_only) > 0 or len(dirs_cmp.right_only) > 0 or len(dirs_cmp.funny_files) > 0: # überprüfen, ob unterschiedliche Files oder Dirs vom Namen her
@@ -35,15 +48,25 @@ def are_dir_trees_equal(dir1, dir2):
     return True
     
 class TestRestore(unittest.TestCase):
-   
+    """
+        in this test the restore process is tested. 
+        the user is asked for the values number of folders, data, byte or giga byte and amount of memory.
+        The pipeline will be start with the -p flag. The programm starts the test with predefined values.
+        The user can start the programm as well with -p.
+        
+        Parameter:
+        none
+
+        Return:
+        Error, true, false..
+    """
     @classmethod
     def setUpClass(cls):
         global directory_count
         global data_count
         global data_size
         global storage_unit
-        #os.makedirs("unitTestFiles/jewel",exist_ok=True)
-        #cls.daten = datenbank.Datenbank()
+
         cls.config = ih.get_json_info(device_name)
         cls.workingDirectory = str(pathlib.Path(__file__).parent.resolve())
         
@@ -155,6 +178,7 @@ class TestRestore(unittest.TestCase):
         # process = subprocess.Popen(
         #     ["python3", "execute.py", "backup"], stdout=subprocess.PIPE)  # stdout is just to get rid of the prints
         # process.wait()
+        # process.stdout.close()
         self.backup.initialize_backup(1)
         for i in range(3):
             process = subprocess.Popen(
@@ -171,7 +195,7 @@ class TestRestore(unittest.TestCase):
             self.assertTrue(False)
     def test_b_Restore_Jewel2(self):                    
         try:
-            self.assertFalse(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel2",
+            self.assertTrue(are_dir_trees_equal(str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/jewel2",
                                                 str(pathlib.Path(__file__).parent.resolve()) + '/' + "test_Files_Backup/restore_Location/jewel2"))
         except FileNotFoundError:
             print("Jewel2:")

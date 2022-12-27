@@ -10,7 +10,7 @@ for ((x=1;x<=$1;x++))
 do
     if [ ! -d $x ]; then    
         mkdir ./jewel2/data_And_Link_Dir/$x
-        mkdir ./jewel2/data_And_Link_Dir/datalink$x
+        # mkdir ./jewel2/data_And_Link_Dir/datalink$x
         for ((k=1;k<=$2;k++))
         do
             dd if=/dev/urandom bs=$3 count=1 of=./jewel2/data_And_Link_Dir/$x/$k.bin iflag=fullblock

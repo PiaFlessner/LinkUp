@@ -19,6 +19,11 @@
         ],
         "fedora": [
             "/home/ole/importantDocuments"
+        ],
+        "fatih": [
+            "/test_Files_Backup/jewel",
+            "/test_Files_Backup/jewel2",
+            "/test_Files_Backup/jewel3"
         ]
     },
     "blacklist": {
@@ -41,13 +46,15 @@
         "kali": "/home/kali/backupLocation",
         "mirco-ThinkPad-T495": "/home/mirco/backuptarget",
         "testCases": "test_Files_Backup/backup_Location",
-        "fedora": "/home/ole/backupLocation"
+        "fedora": "/home/ole/backupLocation",
+        "fatih": "test_Files_Backup/backup_Location"
     },
     "restore_destination": {
         "gruppe-VirtualBox": "/home/gruppe/Schreibtisch/Restore",
         "kali": "/home/kali/Restore",
         "mirco-ThinkPad-T495": "/home/mirco/Backuprestore",
         "testCases": "test_Files_Backup/restore_Location",
-        "fedora": "/home/ole/restoreDestination"
+        "fedora": "/home/ole/restoreDestination",
+        "fatih": "test_Files_Backup/restore_Location"
     }
 }

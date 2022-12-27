@@ -5,9 +5,9 @@ cd test_Files_Backup/
 mkdir jewel
 mkdir jewel2
 mkdir jewel3
-mkdir ./jewel/Bad_Names_Dir
-mkdir ./jewel/c++_Dir
-mkdir ./jewel2/JDK_Dir
+# mkdir ./jewel/Bad_Names_Dir
+# mkdir ./jewel/c++_Dir
+# mkdir ./jewel2/JDK_Dir
 
 touch ./jewel/test.txt
 touch ./jewel2/test1.txt
@@ -15,6 +15,14 @@ touch ./jewel3/test2.txt
 echo "test" >> ./jewel/test.txt
 echo "test" >> ./jewel2/test1.txt
 echo "test" >> ./jewel3/test2.txt
+
+#Create some files and directorys to test the Blacklist
+mkdir ./jewel3/folderToIgnore1
+mkdir ./jewel3/folderToIgnore2
+touch ./jewel3/fileToIgnore1.png
+touch ./jewel3/fileToIgnore2.jpg
+touch ./jewel3/fileToIgnore.txt
+# For testing some special files
 
 # cp -r ./special_Files/ jewel3
 #tar -xf Bad_Names.tar.gz -C ./jewel/Bad_Names_Dir

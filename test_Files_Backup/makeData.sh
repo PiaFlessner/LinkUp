@@ -12,7 +12,7 @@ do
         mkdir ./jewel/make_Data_Dir/$x
         for ((k=1;k<=$2;k++))
         do
-            dd if=/dev/random bs=$3 count=1 of=./jewel/make_Data_Dir/$x/$k.bin
+            dd if=/dev/urandom bs=$3 count=1 of=./jewel/make_Data_Dir/$x/$k.bin iflag=fullblock
         done
     else
         echo "directory $x already exists"

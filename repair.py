@@ -26,6 +26,14 @@ class Repair: # TODO try zfec shell
         os.makedirs(self.destination, exist_ok=True)
         
     def create_repair_data(self, blob:Blob, _overwrite: bool=True):
+        """creates redundancy (forward error correction) code in the Reed-Solomon folder next to the database.
+
+        Args:
+            blob (Blob): the blob for which redundancy will be created
+            _overwrite (bool, optional): whether to overwrite already existing redundancy. Has to be True, if you want to update redundancy for a changed file! Defaults to True.
+
+
+        """
         file_io = open(blob.store_destination, "rb")
         file_size = int(1024*blob.fileSize)  # TODO check for rounding errors
         subdirectory_name="/RS_"+str(blob.id)

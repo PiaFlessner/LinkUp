@@ -53,14 +53,13 @@ class Argument:
         ################################################################################################################################
 
         # section 'reed_solomon'
-        reed_solomon = subparser.add_parser('rs', help="Get into Reed-Solomon section of program. E.g. --createall and --repairall.")
+        reed_solomon = subparser.add_parser('rs', help="Get into Reed-Solomon section of program. Try linkup rs -h")
         group_reed_solomon = reed_solomon.add_mutually_exclusive_group()
 
         # commands for section 'reed_solomon'
-        group_reed_solomon.add_argument('-ca', '--createall', action='store_true', help='Create redundancy information for everything')
+        group_reed_solomon.add_argument('-ca', '--createall', action='store_true', help='Create redundancy information for all files')
         group_reed_solomon.add_argument('-c', '--createone', action='store_true', help='Create redundancy information for one file')
-        group_reed_solomon.add_argument('-ra', '--repairall', action='store_true', help='Repair all files with redundancy information')
-        group_reed_solomon.add_argument('-r', '--repairone', action='store_true', help='Repair one file with redundancy information')
+        # group_reed_solomon.add_argument('-db', '--createdatabase', action='store_true', help='Create redundancy information for the Database') # to be implemented
 
         # arguments for section 'reed_solomon'
         reed_solomon.add_argument('id', type=str, nargs='?')
@@ -300,9 +299,6 @@ class Argument:
         None
         """
 
-        verbose_level = 0
-        if self.args.verbose == 1:
-            verbose_level = 1
         repair = Repair()
         daten = Datenbank()
         blobs=[]

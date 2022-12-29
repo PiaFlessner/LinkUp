@@ -123,7 +123,30 @@ The backup will be stored in the backup path defined in the "destination" proper
 ```
 linkup backup
 ```
+## Reed-Solomon Section
 
+Reed-Solomon is needed to create Forward Error Correction Codes, which can later be used to repair bitrot in files.
+These FEC-files are used with linkup rs restore. See the Restore section for details
+
+### Commands
+
+See show section for how to find the blobid
+```
+linkup rs -h                    for a list of commands
+```
+```
+linkup rs -ca [OPTION]          to create FEC for all files
+```
+```
+linkup rs -c <blobid> [OPTION] to create FEC for one file
+```
+Options 
+```
+-v    increase verbosity
+```
+```
+-o    overwrite already created FEC
+```
 ## Restore Section
 
 Restore is needed to restore files or jewels. The files will be restored in the restore path defined in the config.json.

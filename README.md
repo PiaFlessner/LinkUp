@@ -3,9 +3,12 @@
 This program is able to backup whole directories as well as restore them and error check them.
 Also there are functions to display the database and the inherited files.
 
-# Installation
+# Minimum Requirements
+1. MacOS (v. 10) or Linux (tested on Ubuntu 22.04 and Fedora v. 37)
+2. Rsync v.3.2.7
+3. Python v 3.11.1
 
-For the install process a network connection is needed.
+# Install
 
 1. Ensure to put the whole archive, were you want it to be. For example in /opt/.
 2. Open the terminal in the project directory (IMPORTANT -> ignoring it, will cause errors in the future).
@@ -20,7 +23,7 @@ sudo ./install.sh
 
 Now the programm can be executed from everywhere. It can be called by:
 ```
-linkup [ærguments]
+linkup [arguments]
 ```
 
 ## Problems
@@ -29,7 +32,7 @@ If this is not caused, because the program is already installed, then you may ha
 This is done by renaming the symlink name (linkup) in the installation.sh to another name.
 CAUTION: this name will be the calling name. Renaming it, means, that all calling examples in the following are renamed to the choosen name.`
 
-# Deinstallation
+# Uninstall
 
 1. Open the terminal in the project directory (IMPORTANT -> ignoring it, will cause errors).
 2. Make sure, that the uninstall.sh is executable:
@@ -125,7 +128,7 @@ linkup backup
 
 Restore is needed to restore files or jewels. The files will be restored in the restore path defined in the config.json.
 
-### commands
+### Commands
 To restore a Jewel or a File just use the matching flag following by the id of the File or Jewel.
 -F for Files
 -J for Jewels
@@ -144,7 +147,7 @@ linkup restore -F|-J [id] [datetime]
 Jewels, files, blobs and skipped files can be displayed as tables with different verbose levels.
 The higher the verbose level, the more columns are displayed.
 
-### commands
+### Commands
 To show all objects use the matching flag without an id.
 To show a specific object use the matching flag with the id.
 
@@ -172,4 +175,5 @@ linkup reset
 #Further Problems
 To create a Backup of a jewel with a file, which can only be accessed with admin rights, LinkUp must be executed with admin rights.
 LinkUp cannot backup this file otherwise.
+
 

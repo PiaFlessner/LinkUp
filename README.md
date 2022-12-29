@@ -20,13 +20,13 @@ sudo ./install.sh
 
 Now the programm can be executed from everywhere. It can be called by:
 ```
-backupper [ærguments]
+linkup [ærguments]
 ```
 
 ## Problems
 1. Symlink could not be created (file is already existing)
 If this is not caused, because the program is already installed, then you may have to rename the program.
-This is done by renaming the symlink name (backupper) in the installation.sh to another name.
+This is done by renaming the symlink name (linkup) in the installation.sh to another name.
 CAUTION: this name will be the calling name. Renaming it, means, that all calling examples in the following are renamed to the choosen name.`
 
 # Deinstallation
@@ -118,7 +118,7 @@ Backup is needed to start the backup process. The backup process will backup all
 The backup will be stored in the backup path defined in the "destination" property in the config.json.
 
 ```
-backupper backup
+linkup backup
 ```
 
 ## Restore Section
@@ -137,7 +137,7 @@ The Datetime format is expected to be in ISO-Format (yyyy-mm-dd-MM-ss)
 If the user only provides the day, the program will restore the last trending backup of this day.
 
 ```
-backupper restore -F|-J [id] [datetime]
+linkup restore -F|-J [id] [datetime]
 ```
 
 ## Show Section
@@ -159,14 +159,14 @@ There are different verbose levels.
 -vv displays all columns.
 
 ```
-backupper show -F|-J|-B|-sF [id] [-v|-vv]
+linkup show -F|-J|-B|-sF [id] [-v|-vv]
 ```
 
 ## Reset Section
 Resets all the backups for the device on which the reset is performed.
 
 ```
-backupper reset
+linkup reset
 ```
 
 #Further Problems

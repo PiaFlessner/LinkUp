@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 rm -rf .venv
-sed -i '1d' $(pwd)/execute.py
-rm /usr/local/bin/backupper
+tail -n +2 $(pwd)/execute.py > $(pwd)/tmp.py && mv $(pwd)/tmp.py $(pwd)/execute.py
+rm /usr/local/bin/linkup

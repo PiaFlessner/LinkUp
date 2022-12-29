@@ -515,6 +515,16 @@ class Datenbank:
         return answer
 
     def get_Jewel_via_id(self, id:int)-> Jewel:
+        """Returns the Jewel with the given id 
+
+        Args:
+            id (int): the id of the Jewel
+
+        Returns:
+            Jewel: a Jewel
+        """
+
+
         jewel = None
         sqlite_insert_with_param = "SELECT * FROM Jewel WHERE ID= ? Limit 1"
         data = self.execute_db_command_fetchall(sqlite_insert_with_param, [id])
@@ -524,6 +534,16 @@ class Datenbank:
         return jewel
 
     def get_File_via_id(self, id:str)-> File:
+        """Returns the File with the given id 
+
+        Args:
+            id (str): the id of the File 
+
+        Returns:
+            File: a File
+        """
+
+
         file = None
         sqlite_insert_with_param = "SELECT * FROM File WHERE ID= ? Limit 1"
         data = self.execute_db_command_fetchall(sqlite_insert_with_param, [self._encode_base64(id)])
@@ -533,6 +553,15 @@ class Datenbank:
         return file
 
     def get_File_via_hash(self, hash:str)-> File:
+        """Returns the File with the given hash
+
+        Args:
+            hash : the hash of the File 
+
+        Returns:
+            File: a File
+        """
+
         file = None
         sqlite_insert_with_param = """SELECT DISTINCT File.ID, File.Birth 
                                       FROM File, Blob WHERE Blob.Hash = ? AND File.ID = Blob.ID_File Limit 1"""
@@ -545,6 +574,16 @@ class Datenbank:
 
 
     def get_all_Files(self)-> list[File]:
+        """Returns all Files which are in the database
+
+        Args:
+            None
+
+        Returns:
+            list[File]: a list of Files
+        """
+
+
         files = []
         command = "SELECT * FROM File"
         records = self.execute_db_command_fetchall(command)
@@ -557,6 +596,16 @@ class Datenbank:
         return files
 
     def get_Files_via_jewel_id(self, jewel_id:int)-> list[File]:
+        """Returns all Files that are belong to a Jewel
+
+        Args:
+            jewel_id (int): the id of a jewel
+
+        Returns:
+            list[File]: a list of Files
+        """
+
+
         files = []
         sqlite_insert_with_param = """SELECT DISTINCT File.ID, File.Birth
                                           FROM Jewel_File_Assignment, File WHERE Jewel_File_Assignment.ID_Jewel= ? AND Jewel_File_Assignment.ID_File = File.ID"""
@@ -570,6 +619,16 @@ class Datenbank:
         return files
 
     def get_all_Jewels(self)->list[Jewel]:
+        """Returns all Jewels which are in the database
+
+        Args:
+            None
+
+        Returns:
+            list[Jewel]: a list of Jewels
+        """
+
+
         records = self.execute_db_command_fetchall("SELECT * FROM Jewel")
         if len(records) > 0:
             jewels = [Jewel(row[0], self._decode_base64(row[1]), row[2], self._decode_base64(row[3]),
@@ -578,6 +637,16 @@ class Datenbank:
  
 
     def get_all_Blobs(self)-> list[Blob]:
+        """Returns all Blobs which are in the database
+
+        Args:
+            None
+
+        Returns:
+            list[Blobs]: a list of Blobs
+        """
+
+
         blobs = []
         records = self.execute_db_command_fetchall("SELECT * FROM Blob")
         if len(records)>0:
@@ -585,12 +654,30 @@ class Datenbank:
         return blobs
 
     def get_Blobs_via_file_id(self, file_id:str)-> list[Blob]:
+        """Returns all Blobs that are belong to a File
+
+        Args:
+            file_id (str): the id of a file
+
+        Returns:
+            list[Blobs]: a list of Blobs
+        """
+
         records = self.execute_db_command_fetchall("SELECT * FROM Blob WHERE ID_File= ?", [self._encode_base64(file_id)])
         blobs = self.create_Blob_List_from_db_input(records,0,1,2,3,4,5,6,7,8,9,10,11)
         return blobs
 
 
-    def get_Blob_via_id(self, id:str)-> Blob:
+    def get_Blob_via_id(self, id:int)-> Blob:
+        """Returns a Blob that has the given id
+
+        Args:
+            id (int): the id of a Blob
+
+        Returns:
+            Blob : a Blob
+        """
+
         blob = None
         row = self.execute_db_command_fetchall("SELECT * FROM Blob WHERE ID= ?", [id])
         if len(row) > 0:
@@ -632,6 +719,16 @@ class Datenbank:
 
 
     def get_skipped_file_via_id (self, id:str)-> list[str]:
+        """Returns a skipped File as list of strings has the given id
+
+        Args:
+            id (int): the id of a the skipped Files
+
+        Returns:
+            list[str] : a list of strings
+        """
+
+
         row = []
         row = self.execute_db_command_fetchall("SELECT * FROM Skipped_Files WHERE ID= ? Limit 1", [id])
         if len(row) > 0: row = (row[0], row[0][1], self._decode_base64(row[0][2]), row[0][3], row[0][4], row[0][5], row[0][6], self._decode_base64(row[0][7]))

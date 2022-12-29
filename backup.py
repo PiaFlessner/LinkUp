@@ -114,10 +114,7 @@ class Backup:
 
 
     def filter_non_existing_paths(self, paths) -> list[str]:
-        for jewel_path in paths:
-            if not (os.path.exists(jewel_path)):
-                paths.remove(jewel_path)
-        return paths
+        return [jewel_path for jewel_path in paths if os.path.exists(jewel_path)]
 
 
     def read_files_and_jewel_from_rsync_output(self, output_array, jewel_sources, store_destination_body,

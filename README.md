@@ -39,7 +39,7 @@ CAUTION: this name will be the calling name. Renaming it, means, that all callin
 ```
 chmod +x uninstall.sh
 ```
-4. Now execute the "uninstall.sh" with sudo rights:
+3. Now execute the "uninstall.sh" with sudo rights:
 ```
 sudo ./uninstall.sh
 ```

@@ -1,4 +1,4 @@
-# Projektgruppe
+# LinkUp
 
 This program is able to backup whole directories as well as restore them and error check them.
 Also there are functions to display the database and the inherited files.

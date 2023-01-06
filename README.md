@@ -5,7 +5,7 @@ Also there are functions to display the database and the inherited files.
 
 # Minimum Requirements
 1. MacOS (v. 10) or Linux (tested on Ubuntu 22.04 and Fedora v. 37)
-2. Rsync v.3.0.0
+2. Rsync v.3.2.7
 3. Python v 3.11.1
 
 # Install

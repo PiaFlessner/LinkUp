@@ -195,7 +195,7 @@ Resets all the backups for the device on which the reset is performed.
 linkup reset
 ```
 
-#Further Problems
+# Further Problems
 To create a Backup of a jewel with a file, which can only be accessed with admin rights, LinkUp must be executed with admin rights.
 LinkUp cannot backup this file otherwise.
 

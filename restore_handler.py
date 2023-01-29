@@ -49,7 +49,7 @@ def restore_options(restore_id:str, date_input:str):
             date_var = date_var.replace(hour=23, minute=59, second=59)
         else:
             print('\nError: No valid time format.\n'
-                  'Use: YYYY-mm-DD-HH-MM-SS, now, today, yesterday.')
+                  'Use: YYYY-MM-DD-hh-mm-ss, now, today, yesterday.')
             exit()
         return_list.append(date_var)
         

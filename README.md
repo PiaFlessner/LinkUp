@@ -159,7 +159,7 @@ To restore a Jewel or a File just use the matching flag following by the id of t
 The ID of Files are text based.
 The ID of Jewels are number based.
 
-The Datetime format is expected to be in ISO-Format (yyyy-mm-dd-MM-ss)
+The Datetime format is expected to be in ISO-Format (YYYY-MM-DD-hh-mm-ss)
 If the user only provides the day, the program will restore the last trending backup of this day.
 
 ```
